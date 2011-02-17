@@ -1,0 +1,7 @@
+<div>
+    <form id="modify_markup_form" action="{% url modify_markup markup.product.id markup.pricelist.name %}" method="post">
+        {{ form.as_p }}
+        {% if markup.pricelist.rounding %}<p style="font-size:80%">Il ricarico effettivo sar&agrave; maggiore perch&eacute; questo listino &egrave; arrotondato.</p>{% endif %}
+        <input id="modify_markup" type="submit" value="Cambia" />
+    </form>
+<div>

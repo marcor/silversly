@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product }}{% endblock %}
+
+{% block jquery %}
+
+        function removeDialogs() {
+            $(".dialog").remove();            
+        }
+        
+        function showMessage(content) {
+            $(".message_pane").html(content).show('fade', {}, 'fast', function() {
+                var pane = $(this);
+                setTimeout(function() {pane.hide("fade", {}, "slow")}, 500);
+            });
+        }
+        
+        $( "#tabset" ).tabs({'cache': true});
+        
+        $('#tabset').bind('tabsload', function(event, info){
+            if (info.index == 0) {
+                $("#id_name").trigger('focus');
+                $("#save_product").attr('disabled', true);
+            }
+            else if (info.index == 1) {
+                $("#supply_list", info.panel).load("{% url list_supplies product.id %}");                
+                $("#open_add_supply_dialog").button();                
+                $("#markup_list", info.panel).load("{% url list_markups product.id %}");
+            }
+            else {
+            }
+        });
+        
+    /*--- event bindings -------------*/
+        
+        $( "#header" ).bind('infoUpdated', 
+            function(event) {
+                $( "#header>h1" ).html($("#product_info [name=name]").get(0).value);
+            });
+        
+        $( "#product_info" ).live('submit', function() {
+            $.ajax({
+                "url": "{% url product_tab product.pk %}",
+                "type": "POST",
+                "data": $("#product_info").serialize(),
+                "complete": function(xhr, status) {
+                    $("#Dati_principali").html(xhr.responseText);
+                    if (status == "success") {
+                        $("#header").triggerHandler('infoUpdated');
+                        $("#save_product").attr('disabled', true);
+                        $("#id_name").trigger('focus');
+                        showMessage("<b>Modifiche salvate!</b>");
+                    };
+                }
+            });
+            return false;
+        });
+        
+        $( "select", "#product_info" ).live('keypress', function(event) {
+            if (event.which == 13) {
+                $("#product_info").trigger('submit');
+            }
+        });
+        
+        $( "#product_info" ).live('change', function() {
+            $("#save_product").attr('disabled', false);
+        });
+        
+        /*--- remove supply link --------*/
+        
+        $( ".remove_supply" ).live('click', function() {
+            var remove_anchor = $(this);
+            $.ajax({
+                "url": remove_anchor.attr("href"),
+                "type": "POST",
+                "success": function(response) {
+                    removeDialogs();
+                    $( "#tabset" ).tabs('load', 1);
+                }
+            });
+            return false;
+        });
+        
+        /*--- modify supply link --------*/
+        
+        $( ".open_modify_supply_dialog" ).live('click', function() {
+            var modify_anchor = $(this);
+            $( "#modify_supply_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load(modify_anchor.attr('href'))}
+            });
+            return false;
+        });
+        
+        /*--- modify supply dialog --------*/
+        
+        $( "#modify_supply" ).live('click', function() {
+            var form = $( "#modify_supply_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        removeDialogs();
+                        $( "#tabset" ).tabs('load', 1);                        
+                    } else {
+                        $("#modify_supply_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+        
+        /*--- add supply link --------*/
+        
+        $( "#open_add_supply_dialog" ).live('click', function() {
+            $( "#add_supply_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load("{% url add_supply product.id %}")}
+            });
+            return false;
+        });
+        
+        /*--- add supply dialog --------*/
+        
+        $( "#add_supply" ).live('click', function() {
+            $.ajax({
+                "url": "{% url add_supply product.pk %}",
+                "type": "POST",
+                "data": $("#add_supply_form").serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        removeDialogs();
+                        $( "#tabset" ).tabs('load', 1);                        
+                    } else {
+                        $("#add_supply_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+        
+        /*--- remove markup link --------*/
+        
+        $( ".remove_markup" ).live('click', function() {
+            var remove_anchor = $(this);
+            $.ajax({
+                "url": remove_anchor.attr("href"),
+                "type": "POST",
+                "success": function(response) {
+                    $("#markup_list").load("{% url list_markups product.id %}");                
+                }
+            });
+            return false;
+        });
+        
+        /*--- modify markup link --------*/
+        
+        $( ".open_modify_markup_dialog" ).live('click', function() {
+            var modify_anchor = $(this);
+            $( "#modify_markup_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load(modify_anchor.attr('href'))}
+            });
+            return false;
+        });
+        
+        /*--- modify markup dialog --------*/
+        
+        $( "#modify_markup" ).live('click', function() {
+            var form = $( "#modify_markup_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#markup_list").load("{% url list_markups product.id %}");                
+                        $("#modify_markup_dialog").dialog('close');
+                    } else {
+                        $("#modify_markup_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+ 
+        
+        
+{% endblock %}
+
+{% block header %}
+    <div id="breadcrumbs"> {{ product.category.breadcrumbs|safe }} </div>
+    <h1>{{ product.name }}</h1>
+{% endblock %}
+
+
+{% block content %}
+    
+    <div id="tabset">
+        {% with product.id as id %}
+        <ul>
+            <li><a href="{% url product_tab id %}" title="Dati principali">Dati principali</a></li>
+            <li><a href="{% url prices_tab id %}" title="Prezzi e fornitori">Prezzi e fornitori</a></li>
+            <li><a href="{% url history_tab id %}" title="Storico movimenti">Storico movimenti</a></li>
+        </ul>
+        {% endwith %}
+        <div class="message_pane">
+            <b>Area messaggi</b>
+        </div>
+    </div>
+    
+    <div id="pic">
+    </div>
+{% endblock %}

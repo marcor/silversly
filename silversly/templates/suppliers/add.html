@@ -1,0 +1,18 @@
+{% extends "suppliers/main.html" %}
+
+{% block title %}Aggiungi un fornitore{% endblock %}
+
+{% block header %}
+    <h1>Aggiungi un fornitore</h1>
+{% endblock %}
+
+{% block content %}
+    <form class="bigform" action="" method="post">
+        <div class="framed">
+            {{ form.as_p }}
+        </div>
+        <input type="submit" value="Aggiungi" />
+    </form>
+{% endblock %}
+
+        

@@ -1,0 +1,33 @@
+{% if pricelists %}
+<table>
+    <thead>
+        <tr>
+            <td>Listino</td>
+            <td>Ricarico</td>
+            <td>Prezzo netto</td>
+            <td>Prezzo ivato</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for pricelist in pricelists %}
+        <tr>
+            <td>{{ pricelist.name }}</td>
+            <td class="decimal{% if pricelist.customized %} highlight{% endif %}">{% if pricelist.rounding %}>{% endif %}{{ pricelist.markup.charge }}%</td>
+            <td class="decimal">{{ pricelist.price.net }}</td>
+            <td class="decimal">{{ pricelist.price.full }}</td>
+        {% if pricelist.customized %}
+            <td><a class="remove_markup" href="{% url remove_markup pricelist.markup.id %}" 
+                title="Usa il ricarico standard associato a questo listino ({{ pricelist.default_markup }}%)">Elimina</a>
+                    <a class="open_modify_markup_dialog" href="{% url modify_markup product.id pricelist.name %}">Modifica</a>
+            </td>
+        {% else %}
+            <td><a class="open_modify_markup_dialog" href="{% url modify_markup product.id pricelist.name %}">Modifica</a></td>
+        {% endif %}
+            
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p class="notice">Non esistono listini.</p> 
+{% endif %}

@@ -1,0 +1,14 @@
+{% comment %}
+<script type="text/javascript">
+    $(function() {
+        {% block jquery %}
+        {% endblock %}
+    });
+</script>
+{% endcomment %}
+
+<div>
+    {% block content %}
+    <p> This is the tab content </p>
+    {% endblock %}
+</div>

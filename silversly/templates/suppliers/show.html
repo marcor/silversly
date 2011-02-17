@@ -1,0 +1,60 @@
+{% extends "suppliers/main.html" %}
+
+{% block title %}{{ supplier }}{% endblock %}
+
+{% block jquery %}
+
+        function removeDialogs() {
+            $(".dialog").remove();            
+        }
+        
+        $( "#tabset" ).tabs({'cache': true});
+        
+        $('#tabset').bind('tabsload', function(event, info){
+        });
+        
+    /*--- event bindings -------------*/
+        
+        $( "#header" ).bind('infoUpdated', 
+            function(event) {
+                $( "#header>h1" ).html($("#supplier_info [name=name]").get(0).value);
+            });
+        
+        $( "#save_supplier" ).live('click', function() {
+            $.ajax({
+                "url": "{% url supplier_info_tab supplier.pk %}",
+                "type": "POST",
+                "data": $("#supplier_info").serialize(),
+                "complete": function(xhr, status) {
+                    $("#Dati_principali").html(xhr.responseText);
+                    if (status == "success") {
+                        $("#header").triggerHandler('infoUpdated');
+                        $( "#save_supplier" ).attr('disabled', true);
+                    };
+                }
+            });
+            return false;
+        });
+        
+        $( "form#supplier_info" ).live('change', function() {
+            $( "#save_supplier" ).attr('disabled', false);
+        });        
+        
+{% endblock %}
+
+{% block header %}
+    <h1>{{ supplier.name }}</h1>
+{% endblock %}
+
+
+{% block content %}
+    
+    <div id="tabset">
+        {% with supplier.id as id %}
+        <ul>
+            <li><a href="{% url supplier_info_tab id %}" title="Dati principali">Dati principali</a></li>
+            <li><a href="{% url supplier_history_tab id %}" title="Forniture">Forniture</a></li>
+        </ul>
+        {% endwith %}
+    </div>
+{% endblock %}

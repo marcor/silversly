@@ -1,0 +1,20 @@
+{% if supplies %}
+    <table>
+    <thead>
+        <tr>
+            <td>Fornitore</td>
+            <td>Prezzo</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for supply in supplies %}
+        <tr>
+            <td>{{ supply.supplier.name }}</td>
+            <td class="decimal">{{ supply.price }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+{% else %}
+    <p class="notice">Non hai specificato nessun fornitore per questo articolo.</p> 
+{% endif %}

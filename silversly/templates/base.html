@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it" lang="it">
+<head>
+    <link rel="stylesheet" href="/media/main.css" />
+    <title>{% block title %}Site title{% endblock %}</title>
+    <link type="text/css" href="/media/jquery/css/smoothness/jquery-ui-1.8.9.custom.css" rel="Stylesheet" />	
+    <script type="text/javascript" src="/media/jquery/js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="/media/jquery/js/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+        {% block jquery %}{% endblock %}
+        });
+    </script>
+</head>
+
+<body>
+
+    <div id="topbar">
+        <div id="logo">Silver Sly <span>v0.2</span></div>
+        <div id="navlinks">
+        <a href="{% url find_product %}">Articoli</a> |
+        <a href="#">Carrello</a> |
+        <a href="{% url find_supplier %}">Fornitori</a> |
+        <a href="{% url find_customer %}">Clienti</a> |
+        <a href="{% url list_categories %}">Categorie</a>
+        </div>
+    </div>
+    
+    <div id="sidebar">
+        {% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url find_product %}">Cerca</a>
+            </li>
+            <li>
+                <a href="{% url add_product %}">Aggiungi un articolo</a>
+            </li>
+            <li>
+                <a href="#">Carica una fornitura</a>
+            </li>
+        </ul>
+        {% endblock %}
+    </div>
+
+    <div id="main">
+        <div id="header">
+            {% block header %}{% endblock %}
+        </div>
+        <div id="actions">
+            {% block actions %}{% endblock %}
+        </div>
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+</body>
+</html>

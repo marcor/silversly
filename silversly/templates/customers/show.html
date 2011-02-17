@@ -1,0 +1,59 @@
+{% extends "customers/main.html" %}
+
+{% block title %}{{ customer }}{% endblock %}
+
+{% block jquery %}
+
+        function removeDialogs() {
+            $(".dialog").remove();            
+        }
+        
+        $( "#tabset" ).tabs({'cache': true});
+        
+        $('#tabset').bind('tabsload', function(event, info){
+        });
+        
+    /*--- event bindings -------------*/
+        
+        $( "#header" ).bind('infoUpdated', 
+            function(event) {
+                $( "#header>h1" ).html($("#customer_info [name=name]").get(0).value);
+            });
+        
+        $( "#save_customer" ).live('click', function() {
+            $.ajax({
+                "url": "{% url customer_info_tab customer.pk %}",
+                "type": "POST",
+                "data": $("#customer_info").serialize(),
+                "complete": function(xhr, status) {
+                    $("#Dati_principali").html(xhr.responseText);
+                    if (status == "success") {
+                        $("#header").triggerHandler('infoUpdated');
+                        $( "#save_customer" ).attr('disabled', true);
+                    };
+                }
+            });
+            return false;
+        });
+        
+        $( "form#customer_info" ).live('change', function() {
+            $( "#save_customer" ).attr('disabled', false);
+        });        
+        
+{% endblock %}
+
+{% block header %}
+    <h1>{{ customer.name }}</h1>
+{% endblock %}
+
+{% block content %}
+    
+    <div id="tabset">
+        {% with customer.id as id %}
+        <ul>
+            <li><a href="{% url customer_info_tab id %}" title="Dati principali">Dati principali</a></li>
+            <li><a href="{% url customer_history_tab id %}" title="Acquisti">Acquisti</a></li>
+        </ul>
+        {% endwith %}
+    </div>
+{% endblock %}

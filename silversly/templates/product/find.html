@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Cerca un articolo{% endblock %}
+
+{% block jquery %}
+
+        var chosenProduct;
+        
+        function removeDialogs() {
+            $(".dialog").remove();            
+        }
+        
+        function showInfo(product) {
+            chosenProduct = product;
+            var box = $("#infobox");
+            $(".suppliers").load("/articolo/" + product.pk + "/fornitori/readonly");
+            
+            $(".title", box).html(product.fields.name);
+            /*$(".code>span", box).html(product.fields.code);*/
+            if (product.fields.quantity < product.fields.min_quantity) {
+                $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit + " <span style=\"color:red\">(sottoscorta)</span>");
+            } else {
+                $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit);
+            }
+            $(".price>span", box).html(product.fields.base_price);
+            $( "#go" ).attr("href", "/articolo/" + product.pk);
+            $( "#sell" ).attr("href", "/carrello/aggiungi_articolo/" + product.pk);
+            
+            
+            box.show();
+        }
+        
+        function showNothing() {
+            $("#infobox").hide();
+            $("#message").show();            
+        }
+        
+        $("#products").trigger("focus");
+        $( "#go,#sell,#load" ).button();
+        
+        $( "#sell" ).live('click', function() {
+            var sell_button = $(this);
+            $( "#sell_product_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load(sell_button.attr('href'))}
+            });
+            return false;
+        });
+        
+        $( "#add_product_to_cart_form" ).live('submit', function() {
+            $.ajax({
+                "url": $(this).attr("action"),
+                "type": "POST",
+                "data": $(this).serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#sell_product_dialog").dialog('close');
+                    } else {
+                        $("#sell_product_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+        
+		$( "#products" ).autocomplete({
+			source: function(request, response) {
+                $.ajax({
+                    "url": "{% url ajax_find_product %}",
+                    "data": {'term': request.term},
+                    "dataType": "json",
+                    "success": function(results) {
+                        if (results.length > 0) { 
+                            if (results[0].perfect_match) {
+                                showInfo(results[0]);
+                            } else {
+                                response(results);
+                            }
+                        } else {
+                            response(results);
+                            showNothing();                            
+                        }
+                    }
+                });
+            },
+            minLength: 3,
+            search: function(event, ui) {
+                $("#message").hide();
+            },
+            focus: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                showInfo(ui.item);
+                return false;
+            },
+			select: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                if (ui.item) {
+                    showInfo(ui.item);
+                }
+                return false;
+			}
+		}).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
+                .appendTo( ul );
+        };
+{% endblock %}
+
+{% block header %}
+    <h1>Cerca un articolo</h1>
+{% endblock %}
+
+{% block content %}
+
+    <div class="search_field">
+        <input id="products" />
+        
+    </div>
+    
+    <div id="message" style="display:none">Nessun risultato</div>
+    
+    <div id="infobox" class="framed" style="display: none">
+        <div class="title"></div>
+        <!--<div class="code">Codice: <span></span></div>-->
+        <div class="quantity">Disponibilit&agrave;: <span></span></div>
+        <div class="price">Prezzo base: <span>0</span>&euro;</div>
+        <div class="suppliers">
+        </div>
+        <br/>
+        
+        <a id="go" href="#">Scheda</a>
+        <a id="sell" href="#">Vendi</a>
+        <a id="load" href="#">Carica</a>
+    </div>
+    
+    <div id="sell_product_dialog" title="Vendi questo prodotto" class="dialog"></div>
+    
+{% endblock %}

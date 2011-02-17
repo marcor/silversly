@@ -1,0 +1,13 @@
+{% extends "category/main.html" %}
+
+{% block title %}{{ category }}{% endblock %}
+
+{% block header %}
+    <div id="breadcrumbs">{{ category.parent.breadcrumbs|safe }}</div>
+    <h1>{{ category.name }}</h1>
+{% endblock %}
+
+{% block content %}
+    {% endblock %}
+
+        

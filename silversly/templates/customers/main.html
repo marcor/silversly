@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url find_customer %}">Cerca</a>
+            </li>
+            <li>
+                <a href="{% url add_customer %}">Aggiungi un cliente</a>
+            </li>
+        </ul>
+{% endblock %}

@@ -1,0 +1,247 @@
+/* Silver Sly - main css */
+
+body {
+	margin: 0;
+	color: #222;
+	font-size: 14px;
+	font-family: Verdana, Arial, sans-serif;
+}
+
+h1 {
+	font-weight: normal;
+	color: #666;
+	font-size: 1.8em;
+}
+
+h2 {
+	font-weight: normal;
+	color: #777;
+	font-size: 1.3em;
+	margin: 1em 1em 5px;
+}
+
+hr {
+	margin: 1.5em 0;
+	border-bottom: 1px solid #eee;
+	border-top: 1px solid #ccc;
+}
+
+.searchcode {
+	font-size: .8em;
+	font-style: oblique;
+}
+
+table {
+	/*border: 1px solid #ccc;*/
+	border-spacing: 1;
+	border-collapse: collapse;
+	font-size: 0.9em;
+	margin: 15px 0 10px;
+}
+
+thead tr {
+	background-color: #eee; 
+}
+
+td {
+	padding: 2px 5px;
+	border: 1px solid #ccc;
+}
+
+tr.totals {
+	font-style: oblique;
+}
+
+td.highlight {
+	background-color: #fee;
+}
+
+	
+ul, ol {
+	list-style: none;
+	padding-left: 6px;
+}
+
+#message, .errorlist {
+	border: 1px solid #e99;
+	font-size: .8em;
+	padding: 3px;
+	background-color: #ffc;
+}
+
+#message {
+	display: inline;
+}
+
+form {
+	font-size: 17px;
+}
+
+.bigform p {
+	height: 1em;
+	padding: 8px 5px;
+	margin: 5px 0;
+}
+
+.bigform label {
+	display: block;
+	float: left;
+	text-align: right;
+	width: 12em;
+	padding-right: 6px;
+	padding-top: 2px;
+}
+
+.bigform p input, .bigform select {
+	font-size: 17px;
+}
+
+p input, p select {
+	-moz-border-radius: 4px;
+	border: 1px solid #ccc;
+	height: 1.5em;
+	font-family: Verdana, Arial, sans-serif;
+	color: #333;
+}
+
+.bigform input[type="submit"] {
+	margin: 5px 1em; 
+}
+
+#sidebar {
+	width: 150px;
+	position: absolute;
+	top: 260px;
+	border: 1px solid #ccc;
+	border-left: none;
+	-moz-border-radius: 4px;
+	background-color: #fafafa;
+}
+
+#topbar {
+	border-bottom: 1px solid #ccc;
+	height: 54px;
+	position: relative;
+	background-color: #fafafa;
+}
+
+#navlinks {
+	position: absolute;
+	left: 1em;
+	bottom: 2px;
+}
+
+#logo {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 1.6em;
+	color: #aaa;
+	font-style: oblique;
+	position: absolute;
+	right: 1em;
+	top: 0px;
+	border: 1px solid #ccc;
+	border-top: 0;
+	height: 45px;
+	background-color: #fffefe;
+	opacity: .6;
+	padding: 22px 15px 0;
+}
+
+#logo span {
+	font-size: .5em;
+}
+
+#header  {
+	padding-top: 20px;
+	position: relative;
+	padding-left: 6px;
+}
+
+#breadcrumbs {
+	position: absolute;
+	color: #ccc;
+	font-size: .9em;
+}
+
+#breadcrumbs a {
+	padding-left: 2px;
+}
+
+a {
+	text-decoration: none;
+	color: #966;
+}
+
+a:hover {
+	color: #caa;
+	text-decoration: underline;
+}
+
+#content {
+	position:relative;
+}
+
+#infobox {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 400px;	
+}
+
+#infobox .title {
+	font-size: 1.2em;
+	padding-bottom: 5px;
+	margin-bottom: 5px;
+	border-bottom: 1px solid #ccc;
+}
+
+input#products {
+	border: 1px solid #ccc;
+	-moz-border-radius: 4px;
+	font-size: 1.5em;
+	color: #666;
+	width: 220px;
+	margin-left: 5px;
+}
+
+#main {
+	margin: 10px 20px 10px 170px;
+	position: relative;
+}
+
+#tabset {
+	margin-right: 300px;
+	background-image: none;
+	background-color: #fcfcfc;
+}
+
+#categories, .framed {
+	border: 1px solid #ccc;
+	-moz-border-radius: 4px;
+	background-color: #fcfcfc;
+	margin: 0 300px 10px 0;
+	padding: 1em;
+}
+
+.actionbar {
+	border: 1px solid #aaa;
+	-moz-border-radius: 6px;
+	padding: 2px;
+	background-color: #fee;
+	margin: 1em 0 .5em;
+}
+
+.decimal {
+	text-align: right;
+}
+
+#pic {
+	width: 250px;
+	height: 250px;
+	border: 1px solid #ccc;
+	background-color: #fee;
+	position: absolute;
+	right: 10px;
+	top: 30px;
+}
+

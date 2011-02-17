@@ -1,0 +1,17 @@
+{% extends "category/main.html" %}
+
+{% block title %}Categorie principali{% endblock %}
+
+{% block header %}
+    <h1>Categorie principali</h1>
+{% endblock %}
+
+{% block content %}
+    <ul id="categories">
+    {% for category in children %}
+        <li><a href="{{ category.get_absolute_url }}">{{ category }}</a></li>
+    {% endfor %}
+    </ul>
+{% endblock %}
+
+        

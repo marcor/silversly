@@ -1,0 +1,48 @@
+{% extends "category/main.html" %}
+
+{% block title %}{{ category }}{% endblock %}
+
+{% block header %}
+    <div id="breadcrumbs">{{ category.parent.breadcrumbs|safe }}</div>
+    <h1>{{ category.name }}</h1>
+{% endblock %}
+
+{% block content %}
+    <h2>Sottocategorie:</h2>
+    <ul id="categories">
+    {% for category in children %}
+        <li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+    {% empty %}
+        <li>Nessuna categoria sotto di questa.</li>
+    {% endfor %}
+    </ul>
+    
+    <h2>Prodotti:</h2>
+    {% if products %}
+    <table>
+    <thead>
+        <tr>
+            <td>Nome</td>
+            <td>Codice</td>
+            <td>Quantit&agrave;</td>
+            <td>Prezzo base</td>
+        </tr>
+        </thead>
+        <tbody>
+    {% for product in products %}
+        <tr>
+            <td><a href="{% url show_product product.id %}">{{ product.name }}</a></td>
+            <td>{{ product.code}}</td>
+            <td class="decimal{% if product.quantity < product.min_quantity %} highlight{% endif %}">{{ product.quantity}}</td>
+            <td class="decimal">{{ product.base_price}}</td>
+            
+        </tr>
+    {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p class="framed">Nessun articolo in questa categoria.</a>
+    {% endif %}
+    
+    
+{% endblock %}

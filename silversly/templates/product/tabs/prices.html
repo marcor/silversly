@@ -1,0 +1,16 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %}
+    <div id="supply_list"></div>
+    {% if can_add_supply %}
+    <a id="open_add_supply_dialog" href="{% url add_supply product.id %}">Aggiungi fornitore</a> 
+    {% endif %}
+    
+    <div id="add_supply_dialog" title="Aggiungi un fornitore" class="dialog"></div>
+    <div id="modify_supply_dialog" title="Cambia il prezzo di acquisto" class="dialog"></div>
+    
+    <div id="markup_list"></div>
+    <div id="modify_markup_dialog" title="Personalizza un listino" class="dialog"></div>
+    
+{% endblock %}
+    

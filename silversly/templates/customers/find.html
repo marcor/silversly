@@ -1,0 +1,43 @@
+{% extends "customers/main.html" %}
+
+{% block title %}Cerca un cliente{% endblock %}
+
+{% block jquery %}
+        $( "#go" ).button().hide();
+		$( "#customers" ).autocomplete({
+			source: "{% url find_customer %}",
+            minLength: 2,
+            search: function(event, ui) {
+                $( "#go" ).hide();
+            },
+            focus: function( event, ui ) {
+                $( "#customers" ).val( ui.item.fields.name );
+                return false;
+            },
+			select: function( event, ui ) {
+                $( "#customers" ).val( ui.item.fields.name );
+				if (ui.item) {
+                    $( "#go" ).attr("href", "/customer/" + ui.item.pk).show();
+                }
+                return false;
+			}
+		}).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "   </a>" )
+                .appendTo( ul );
+        };
+{% endblock %}
+
+{% block header %}
+    <h1>Cerca un cliente</h1>
+{% endblock %}
+
+{% block content %}
+
+    <div class="search_field">
+        <input id="customers" />
+        <a id="go" href="">Vai</a>
+    </div>
+    
+{% endblock %}

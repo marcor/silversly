@@ -1,0 +1,43 @@
+{% extends "suppliers/main.html" %}
+
+{% block title %}Cerca un fornitore{% endblock %}
+
+{% block jquery %}
+        $( "#go" ).button().hide();
+		$( "#suppliers" ).autocomplete({
+			source: "{% url find_supplier %}",
+            minLength: 2,
+            search: function(event, ui) {
+                $( "#go" ).hide();
+            },
+            focus: function( event, ui ) {
+                $( "#suppliers" ).val( ui.item.fields.name );
+                return false;
+            },
+			select: function( event, ui ) {
+                $( "#suppliers" ).val( ui.item.fields.name );
+				if (ui.item) {
+                    $( "#go" ).attr("href", "/fornitore/" + ui.item.pk).show();
+                }
+                return false;
+			}
+		}).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "   </a>" )
+                .appendTo( ul );
+        };
+{% endblock %}
+
+{% block header %}
+    <h1>Cerca un fornitore</h1>
+{% endblock %}
+
+{% block content %}
+
+    <div class="search_field">
+        <input id="suppliers" />
+        <a id="go" href="">Vai</a>
+    </div>
+    
+{% endblock %}

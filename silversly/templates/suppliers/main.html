@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url find_supplier %}">Cerca</a>
+            </li>
+            <li>
+                <a href="{% url add_supplier %}">Aggiungi un fornitore</a>
+            </li>
+        </ul>
+{% endblock %}
