@@ -18,11 +18,11 @@
         $( "#tabset" ).tabs({'cache': true});
         
         $('#tabset').bind('tabsload', function(event, info){
-            if (info.index == 0) {
+            if (info.index == 1) {
                 $("#id_name").trigger('focus');
                 $("#save_product").attr('disabled', true);
             }
-            else if (info.index == 1) {
+            else if (info.index == 0) {
                 $("#supply_list", info.panel).load("{% url list_supplies product.id %}");                
                 $("#open_add_supply_dialog").button();                
                 $("#markup_list", info.panel).load("{% url list_markups product.id %}");
@@ -207,8 +207,8 @@
     <div id="tabset">
         {% with product.id as id %}
         <ul>
-            <li><a href="{% url product_tab id %}" title="Dati principali">Dati principali</a></li>
             <li><a href="{% url prices_tab id %}" title="Prezzi e fornitori">Prezzi e fornitori</a></li>
+	    <li><a href="{% url product_tab id %}" title="Dati principali">Dati principali</a></li>
             <li><a href="{% url history_tab id %}" title="Storico movimenti">Storico movimenti</a></li>
         </ul>
         {% endwith %}
