@@ -207,53 +207,53 @@ def modify_supply(request, supply_id):
         response.status_code = 400
     return response
 
-def list_markups(request, product_id):
-    markups = list(Markup.objects.filter(product = product_id))
+def list_prices(request, product_id):
+    prices = list(Price.objects.filter(product = product_id))
     product = Product.objects.get(pk=product_id)
     #vanilla_pricelists = Pricelist.objects.exclude(name__in = [markup.pricelist.name for markup in markups])
         
     pricelists = Pricelist.objects.all()
     for pricelist in pricelists:
-        for markup in markups:
-            if markup.pricelist == pricelist:
-                pricelist.markup = markup
-                markups.remove(markup)
+        for price in prices:
+            if price.pricelist == pricelist:
+                pricelist.price = price
+                prices.remove(price)
                 pricelist.customized = True
                 break
         else:
-            markup = Markup(product=product, pricelist=pricelist, charge=pricelist.default_markup)
+            price = Price(product=product, pricelist=pricelist, value=0, markup=pricelist.default_markup)
             # this does not save anything to the db!
-            pricelist.markup = markup
-        pricelist.price = pricelist.markup.calculate_price()
+            pricelist.price = price
+        pricelist.calculated_price = pricelist.price.calculate_price()
         
     return render_to_response('markup/list.html', {'pricelists': pricelists, 'product': product})
 
-def modify_markup(request, product_id, pricelist_id):
+def modify_price(request, product_id, pricelist_id):
     try:
-        markup = Markup.objects.get(product__id = product_id, pricelist__name = pricelist_id)
-    except Markup.DoesNotExist:
+        priceprice = Price.objects.get(product__id = product_id, pricelist__name = pricelist_id)
+    except Price.DoesNotExist:
         product = Product.objects.get(pk=product_id)
         pricelist = Pricelist.objects.get(pk=pricelist_id)
-        markup = Markup(product = product, pricelist = pricelist)
+        price = Price(product = product, pricelist = pricelist)
     bad_request = False
     if request.method == "POST":
-        form = ModifyMarkupForm(request.POST, instance = markup)
+        form = ModifyPriceForm(request.POST, instance = price)
         if form.is_valid():
             form.save()
         else:
             bad_request = True
     else:
-        form = ModifyMarkupForm(instance = markup)
-    response = render_to_response('product/dialogs/modify_markup.html', {'form':  form, 'markup': markup})
+        form = ModifyPriceForm(instance = price)
+    response = render_to_response('product/dialogs/modify_markup.html', {'form':  form, 'price': price})
     if bad_request: 
         response.status_code = 400
     return response   
         
         
-def remove_markup(request, markup_id):
+def reset_price(request, price_id):
     if request.is_ajax():
-        markup = get_object_or_404(Markup, pk=markup_id)
-        markup.delete()
+        price = get_object_or_404(Price, pk=price_id)
+        price.delete()
         return HttpResponse(status=200)
     return HttpResponse(status=400)
 

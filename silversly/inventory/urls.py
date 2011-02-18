@@ -11,9 +11,9 @@ urlpatterns = patterns('inventory.views',
     url(r'articolo/(\d+)/fornitori/$', 'list_supplies', name='list_supplies'),
     url(r'articolo/(\d+)/fornitori/readonly/', 'list_supplies', name='list_supplies_readonly', kwargs={'simple': True}),
     
-    url(r'articolo/(\d+)/listini/', 'list_markups', name='list_markups'),
-    url(r'articolo/(\d+)/listino/(.+)/modifica', 'modify_markup', name='modify_markup'),
-    url(r'ricarico/(\d+)/rimuovi/', 'remove_markup', name='remove_markup'),
+    url(r'articolo/(\d+)/listini/', 'list_prices', name='list_prices'),
+    url(r'articolo/(\d+)/listino/(.+)/modifica', 'modify_price', name='modify_price'),
+    url(r'prezzo/(\d+)/rimuovi/', 'reset_price', name='reset_price'),
     
     url(r'articolo/carica', 'load_products', name='load_products'),
     
