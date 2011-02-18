@@ -30,10 +30,10 @@ class MainAddressForm(ModelForm):
     class Meta: 
         model = Address
 
-class ModifyMarkupForm(ModelForm):
+class ModifyPriceForm(ModelForm):
     class Meta:
-        model = Markup
-        fields = ("charge",)
+        model = Price
+        fields = ("method", "value", "markup")
 
 class ChildCategoryForm(ModelForm):
     class Meta:
