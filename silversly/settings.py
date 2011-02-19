@@ -1,6 +1,7 @@
 import sys, os
 
-sys.path.append(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(PROJECT_DIR)
 
 # Django settings for posi project.
 
@@ -16,7 +17,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'posi.db',                      # Or path to database file if using sqlite3.
+        'NAME': os.path.join(PROJECT_DIR, 'posi.db'),                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -49,8 +50,8 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-#MEDIA_ROOT = 'c:/www/public/media/'
-MEDIA_ROOT = '/home/marcor/projects/python/.virtualenvs/test/silversly/media/'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, "media")
+# '/home/marcor/projects/python/.virtualenvs/test/silversly/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -88,7 +89,8 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     #"C:/Python27/Lib/site-packages/django/contrib/admin/templates/admin",
     #"c:/www/django/silversly/templates",
-    "/home/marcor/projects/python/.virtualenvs/test/silversly/templates",
+    #"/home/marcor/projects/python/.virtualenvs/test/silversly/templates",
+    os.path.join(PROJECT_DIR, "templates"),
 )
 
 INSTALLED_APPS = (
