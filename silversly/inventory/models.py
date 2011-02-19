@@ -101,8 +101,7 @@ class Pricelist(models.Model):
     name = models.CharField(_("Nome"), max_length = 25, primary_key = True)
     default_method = models.CharField(_("Tipo di prezzo"), max_length = 2, choices = VARIABLE_PRICE_MAKING_METHODS)
     default_markup = models.PositiveSmallIntegerField(_("Percentuale ricarico di default"))
-    rounding = models.BooleanField(_("Arrotonda i prezzi ivati"), default = False)
-    
+
     def __unicode__(self):
         return self.name
 
@@ -122,8 +121,7 @@ class Product(models.Model):
 
     suppliers = models.ManyToManyField(Supplier, verbose_name = _("Fornitori"), through = 'Supply', null = True)
     base_price = models.DecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 3, default = 0)
-    prices = models.ManyToManyField(Pricelist, related_name="products2", verbose_name = _("Listini"), through = 'Price', null = True)
-    markups = models.ManyToManyField(Pricelist, verbose_name = _("Listini vecchi"), through = 'Markup', null = True)
+    prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'Price', null = True)
 
     def __unicode__(self):
         return self.name
@@ -195,54 +193,7 @@ class Invoice(models.Model):
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 50)
     bank = models.OneToOneField('Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
     costs = models.DecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0) 
-    
-class Markup(models.Model):
-    charge = models.PositiveSmallIntegerField(_("Percentuale ricarico"))
-    pricelist = models.ForeignKey(Pricelist, verbose_name = _("Listino"))
-    product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-
-    def __unicode__(self):
-        return "%s (listino: %s, ricarico: %s%%)" % (self.product, self.pricelist, self.charge)
-    
-    def calculate_price(self, taxes=20):
-        print "calculating price"
-        fine_precision = Decimal('.001')
         
-        estimated_net_price = self.product.base_price * Decimal(str(100 + self.charge)) / 100
-        print "charge: " + str(self.charge)
-        full_price = (estimated_net_price * Decimal(str(100 + taxes)) / 100)
-        print "normal full_price: " + str(full_price)
-        
-        if self.pricelist.rounding == True:
-            if full_price <= .25:
-                module = Decimal('.01')
-            elif full_price <= 1:
-                module = Decimal('.05')
-            elif full_price < 10:
-                module = Decimal('.2')
-            elif full_price < 100:
-                module = Decimal('.5')
-            else:
-                module = Decimal('1')
-            print "module: " + str(module)
-            corrected_price = full_price  + module / 2 # this guarantees that the price gets always rounded up
-            print "c: " + str(corrected_price)
-            #corrected_price = full_price
-            full_price = corrected_price - corrected_price.remainder_near(module)
-            print "result: " + str(full_price)
-        
-        precision = fine_precision
-        
-        full_price = full_price.quantize(fine_precision)            
-        taxes = (full_price /  6).quantize(fine_precision)
-        net_price = full_price - taxes
-        return {'net': net_price, 'full': full_price, 'tax': taxes}
-        
-    class Meta:
-        verbose_name = _("Margine vendita")
-        verbose_name_plural = _("Margini vendita")
-        unique_together = ('pricelist', 'product')
-    
 class Price(models.Model):
     method = models.CharField(_("Tipo di prezzo"), max_length = 2, choices = PRICE_MAKING_METHODS)
     value = models.DecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2, null = True) 
