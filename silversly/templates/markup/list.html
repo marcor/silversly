@@ -19,10 +19,10 @@
             <p class="fullprice">{{ pricelist.calculated_price.full }}&euro;</p>
             <div class="actions">
             {% if pricelist.customized %}
-            <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}">Modifica</a> |
-            <a class="reset_price" id="reset_price" href="{% url reset_price pricelist.price.id %}" title="Usa i valori standard di questo listino">Resetta</a>
+            <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}" title="Modifica il listino"><img src="/media/img/edit.png"/></a>
+            <a class="reset_price" id="reset_price" href="{% url reset_price pricelist.price.id %}" title="Usa i valori standard di questo listino"><img src="/media/img/edit-undo.png"/></a>
             {% else %}
-            <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}">Personalizza</a>
+            <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}" title="Modifica il listino"><img src="/media/img/edit.png"/></a>
             {% endif %}
             </div>
             

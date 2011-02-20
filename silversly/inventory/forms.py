@@ -1,10 +1,14 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, Form, BooleanField
+from decimal import Decimal
 from models import *
 
 class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = ("name", "code", "category", "unit", "quantity", "min_quantity")
+
+class ConfirmForm(Form):
+    okay = BooleanField(required=True, initial=False)
 
 class SupplyForm(ModelForm):
     class Meta:

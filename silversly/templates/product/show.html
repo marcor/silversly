@@ -191,6 +191,21 @@
             });
             return false;
         });
+        
+        /*--- delete product dialog --------*/
+        
+        $( "#delete_product" ).live('click', function() {
+            var delete_anchor = $(this);
+            $( "#delete_product_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load(delete_anchor.attr('href'))}
+            });
+            return false;
+        });
+        
+        
  
         
         
@@ -198,7 +213,7 @@
 
 {% block header %}
     <div id="breadcrumbs"> {{ product.category.breadcrumbs|safe }} </div>
-    <h1>{{ product.name }}</h1>
+    <h1>{{ product.name }}<!--<a id="delete_product" href="{% url delete_product product.id %}" title="Elimina questo articolo dal magazzino"><img src="/media/img/delete.png"/></a>--></h1>
 {% endblock %}
 
 
@@ -219,4 +234,7 @@
     
     <div id="pic">
     </div>
+    
+    <div id="delete_product_dialog" title="Elimina un articolo" class="dialog"></div>
+    
 {% endblock %}

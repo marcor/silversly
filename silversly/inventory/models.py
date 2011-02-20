@@ -206,7 +206,7 @@ class Price(models.Model):
     
     def calculate_price(self, taxes=20, default_precision=Decimal(".01")):
         if self.method == "==":
-            full_price = self.value
+            full_price = self.value.quantize(default_precision)
         elif self.method == "%=":
             full_price = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
         else:

@@ -22,6 +22,8 @@ urlpatterns = patterns('inventory.views',
     
     
     url(r'articolo/aggiungi/', 'add_product', name='add_product'),
+    url(r'articolo/(\d+)/elimina/', 'delete_product', name='delete_product'),
+    
     
     url(r'articolo/cerca/$', 'find_product', name='find_product'),
     url(r'articolo/cerca/ajax/', 'ajax_find_product', name='ajax_find_product'),

@@ -30,7 +30,7 @@
     </script>
     <form id="modify_markup_form" action="{% url modify_price price.product.id price.pricelist.name %}" method="post">
         {{ form.as_p }}
-        <p id="rounding_warning" style="font-size:80%">Il ricarico effettivo sar&agrave; maggiore perch&eacute; questo listino &egrave; arrotondato.</p>
+        <p id="rounding_warning" style="font-size:80%">Il ricarico effettivo sar&agrave; maggiore a causa dell'arrotondamento.</p>
         <input id="modify_markup" type="submit" value="Cambia" />
     </form>
 <div>

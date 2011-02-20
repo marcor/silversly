@@ -35,6 +35,19 @@ def add_product(request):
         form = ProductForm()
     return render_to_response('product/%sadd.html' % (request.is_ajax() and 'ajax_' or ''), {'form': form})
 
+def delete_product(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    if request.is_ajax():
+        if request.method == "POST":
+            form = ConfirmForm(request.POST)
+            if form.is_valid():
+                pass
+        else:
+            form = ConfirmForm()
+        return render_to_response("product/dialogs/delete.html", {'form': form, 'product': product})
+    else:
+        return redirect(show_product, product_id)
+
 def load_products(request):
     pass
     
