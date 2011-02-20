@@ -11,8 +11,10 @@
         $( "#tabset" ).tabs({'cache': true});
         
         $('#tabset').bind('tabsload', function(event, info){
+            $("#id_name").trigger('focus');
         });
         
+                
     /*--- event bindings -------------*/
         
         $( "#header" ).bind('infoUpdated', 

@@ -7,6 +7,11 @@
 {% endblock %}
 
 {% block content %}
+    <script type="text/javascript">
+        $(function() {
+            $("#id_name").trigger('focus');
+        });
+    </script>
     <form class="bigform" action="" method="post">
         <div class="framed">
             {{ form.as_p }}

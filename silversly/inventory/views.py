@@ -221,20 +221,25 @@ def list_prices(request, product_id):
                 pricelist.customized = True
                 break
         else:
-            price = Price(product=product, pricelist=pricelist, value=0, markup=pricelist.default_markup)
+            price = Price(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
             # this does not save anything to the db!
             pricelist.price = price
         pricelist.calculated_price = pricelist.price.calculate_price()
-        
+        if pricelist.price.method == '==':    
+            pricelist.desc = "Prezzo fisso"
+        elif pricelist.price.method == '%~':
+            pricelist.desc = "Prezzo base + %d%% (arrotondato)" % pricelist.price.markup 
+        else:
+            pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
     return render_to_response('markup/list.html', {'pricelists': pricelists, 'product': product})
 
 def modify_price(request, product_id, pricelist_id):
     try:
-        priceprice = Price.objects.get(product__id = product_id, pricelist__name = pricelist_id)
+        price = Price.objects.get(product__id = product_id, pricelist__name = pricelist_id)
     except Price.DoesNotExist:
         product = Product.objects.get(pk=product_id)
         pricelist = Pricelist.objects.get(pk=pricelist_id)
-        price = Price(product = product, pricelist = pricelist)
+        price = Price(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, value=0)
     bad_request = False
     if request.method == "POST":
         form = ModifyPriceForm(request.POST, instance = price)

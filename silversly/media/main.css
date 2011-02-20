@@ -20,6 +20,15 @@ h2 {
 	margin: 1em 1em 5px;
 }
 
+h3 {
+	color: #666;
+	/*border: 1px solid #ddd;*/
+	border-bottom: 2px solid #ddd;
+	padding: 3px 10px;
+	font-style: oblique;
+	/*background-color: #fff;*/
+}
+
 hr {
 	margin: 1.5em 0;
 	border-bottom: 1px solid #eee;
@@ -184,15 +193,97 @@ a:hover {
 #infobox {
 	position: absolute;
 	top: 0px;
-	right: 0px;
-	width: 400px;	
+	right: -70px;
+	width: 470px;
+	font-size: 1.2em; 
 }
 
 #infobox .title {
-	font-size: 1.2em;
-	padding-bottom: 5px;
-	margin-bottom: 5px;
-	border-bottom: 1px solid #ccc;
+	font-size: 1.1em;
+	/*padding-bottom: 5px;
+	border-bottom: 1px solid #ccc;*/
+	margin-bottom: 10px;
+	padding: 1em;
+	border: 1px solid #ccc;
+	background-color: #fff;
+}
+
+#infobox table {
+		width: 70%;
+}
+
+#infobox div {
+	padding-left: 1em;
+}
+
+.pricelist_box {
+	border: 1px solid #ccc;
+	float: left;
+	width: 300px;
+	margin: 10px;
+	position: relative;
+	padding: 45px 20px 10px;
+	color: #666;
+}
+
+.pricelist_box p {
+	margin: 0;
+}
+
+.pricelist_box div div {
+	float: left;
+	width: 50px;
+	/*text-align: right;*/
+	color: #666;
+}
+
+.pricelist_box .netprice, .pricelist_box .taxes {
+	width: 43%;
+	text-align: right;
+}
+
+.pricelist_name {
+	position: absolute;
+	width: 300px;
+	top: 0;
+	left: 0;
+	height: 25px;
+	border-bottom: 1px solid #ddd;
+	font-size: 1.3em;
+	font-weight: 500;
+	background-color: #eef;
+	padding: 6px 20px 6px;
+	color: #666;
+	font-style: oblique;
+}
+
+.pricelist_box .fullprice {
+	font-size: 1.8em;
+	border-top: 1px solid #ccc;
+	padding-top: 5px;
+	margin-top: 8px;
+	padding-left: 1em;
+	/*float: left;*/
+}
+
+.pricelist_desc {
+	font-size: 0.8em;
+	font-style: oblique;
+	text-align: right;
+	float: right;
+	color: #f66;
+	width: 50%;
+}
+
+.pricelist_box .actions {
+	text-align: right;
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+}
+
+.clearfix {
+	clear: both;
 }
 
 input#products {
@@ -223,12 +314,25 @@ input#products {
 	padding: 1em;
 }
 
+.message_pane {
+	display: none;
+	position: absolute;
+	bottom: 50px;
+	right: 240px;
+	width: 100px;
+	height: 60px;
+	border: 1px solid #ccc;
+	-moz-border-radius: 4px;
+	background-color: #cfc;
+	padding: 1em;
+
+}
 .actionbar {
-	border: 1px solid #aaa;
+	/*border: 1px solid #aaa;
 	-moz-border-radius: 6px;
 	padding: 2px;
-	background-color: #fee;
-	margin: 1em 0 .5em;
+	background-color: #fee;*/
+	margin: 1em 0 0;
 }
 
 .decimal {

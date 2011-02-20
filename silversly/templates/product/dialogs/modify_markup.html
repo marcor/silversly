@@ -1,7 +1,36 @@
 <div>
-    <form id="modify_markup_form" action="{% url modify_markup markup.product.id markup.pricelist.name %}" method="post">
+    <script type="text/javascript">
+        function toggleControls(method) {
+            if (method.value == '') {
+                $("#id_value").hide().attr("disabled", true).prev("label").hide();
+                $("#id_markup").hide().attr("disabled", true).prev("label").hide();
+            }
+            
+            else if (method.value == '==') {
+                $("#id_value").attr("disabled", false).show().trigger('focus').prev("label").show();
+                $("#id_markup").hide().attr("disabled", true).prev("label").hide();
+            }
+            else {
+                $("#id_markup").attr("disabled", false).show().trigger('focus').prev("label").show();
+                $("#id_value").hide().attr("disabled", true).prev("label").hide();
+            }
+            if (method.value == '%~') {
+                $("#rounding_warning").show();
+            }
+            else {
+                $("#rounding_warning").hide();
+            }            
+        };
+        
+        $(function() {
+            method = $("#id_method");
+            toggleControls(method.get(0));
+            method.live('change', function() { toggleControls(this) });
+        });
+    </script>
+    <form id="modify_markup_form" action="{% url modify_price price.product.id price.pricelist.name %}" method="post">
         {{ form.as_p }}
-        {% if markup.pricelist.rounding %}<p style="font-size:80%">Il ricarico effettivo sar&agrave; maggiore perch&eacute; questo listino &egrave; arrotondato.</p>{% endif %}
+        <p id="rounding_warning" style="font-size:80%">Il ricarico effettivo sar&agrave; maggiore perch&eacute; questo listino &egrave; arrotondato.</p>
         <input id="modify_markup" type="submit" value="Cambia" />
     </form>
 <div>

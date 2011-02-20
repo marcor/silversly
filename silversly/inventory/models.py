@@ -9,7 +9,7 @@ import datetime
 PRICE_MAKING_METHODS = (
     (u'==', _(u"Fisso")),
     (u'%=', _(u"% ricarico")),
-    (u'%~', _(u"% ricarico con arrotondamento"))
+    (u'%~', _(u"% ricarico con arrotond."))
 )
 
 VARIABLE_PRICE_MAKING_METHODS = (
@@ -208,23 +208,22 @@ class Price(models.Model):
         if self.method == "==":
             full_price = self.value
         elif self.method == "%=":
-            full_price = (self.product.base_price * Decimal(str(100 + self.markup)) / 100).quantize(default_precision)
+            full_price = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
         else:
             estimated_net_price = self.product.base_price * Decimal(str(100 + self.markup)) / 100
             full_price = (estimated_net_price * Decimal(str(100 + taxes)) / 100)
-            if self.pricelist.rounding == True:
-                if full_price <= .25:
-                    module = Decimal('.01')
-                elif full_price <= 1:
-                    module = Decimal('.05')
-                elif full_price < 10:
-                    module = Decimal('.2')
-                elif full_price < 100:
-                    module = Decimal('.5')
-                else:
-                    module = Decimal('1')
-                corrected_price = full_price  + module / 2 # this guarantees that the price gets always rounded up
-                full_price = (corrected_price - corrected_price.remainder_near(module)).quantize(default_precision)
+            if full_price <= .25:
+                module = Decimal('.01')
+            elif full_price <= 1:
+                module = Decimal('.05')
+            elif full_price < 10:
+                module = Decimal('.2')
+            elif full_price < 100:
+                module = Decimal('.5')
+            else:
+                module = Decimal('1')
+            corrected_price = full_price  + module / 2 # this guarantees that the price gets always rounded up
+            full_price = (corrected_price - corrected_price.remainder_near(module)).quantize(default_precision)
         
         taxes = (full_price /  6).quantize(default_precision)
         net_price = full_price - taxes

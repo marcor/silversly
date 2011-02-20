@@ -31,6 +31,23 @@ class MainAddressForm(ModelForm):
         model = Address
 
 class ModifyPriceForm(ModelForm):
+    
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        method = cleaned_data.get("method")
+        if not method:
+            if self._errors.has_key("markup"):
+                del(self._errors["markup"])
+            if self._errors.has_key("value"):
+                del(self._errors["value"])
+        elif method == '==':
+            if self._errors.has_key("markup"):
+                del(self._errors["markup"])
+        else:
+            if self._errors.has_key("value"):
+                del(self._errors["value"])
+        return cleaned_data
+            
     class Meta:
         model = Price
         fields = ("method", "value", "markup")

@@ -1,4 +1,9 @@
 <div>
+    <script type="text/javascript">
+        $(function() {
+            $("#id_supplier").trigger('focus');
+        });
+    </script>
     <form id="add_supply_form" action="" method="post">
         {{ form.as_p }}
         <input id="add_supply" type="submit" value="Aggiungi" />

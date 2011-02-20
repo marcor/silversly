@@ -145,9 +145,9 @@
             return false;
         });
         
-        /*--- remove markup link --------*/
+        /*--- reset price link --------*/
         
-        $( ".remove_markup" ).live('click', function() {
+        $( ".reset_price" ).live('click', function() {
             var remove_anchor = $(this);
             $.ajax({
                 "url": remove_anchor.attr("href"),
@@ -159,7 +159,7 @@
             return false;
         });
         
-        /*--- modify markup link --------*/
+        /*--- modify price link --------*/
         
         $( ".open_modify_markup_dialog" ).live('click', function() {
             var modify_anchor = $(this);
@@ -172,7 +172,7 @@
             return false;
         });
         
-        /*--- modify markup dialog --------*/
+        /*--- modify price dialog --------*/
         
         $( "#modify_markup" ).live('click', function() {
             var form = $( "#modify_markup_form" );

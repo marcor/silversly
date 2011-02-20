@@ -1,33 +1,39 @@
 {% if pricelists %}
-<table>
-    <thead>
-        <tr>
-            <td>Listino</td>
-            <td>Ricarico</td>
-            <td>Prezzo netto</td>
-            <td>Prezzo ivato</td>
-        </tr>
-    </thead>
-    <tbody>
+    <div id="pricelists">
     {% for pricelist in pricelists %}
-        <tr>
-            <td>{{ pricelist.name }}</td>
-            <td class="decimal{% if pricelist.customized %} highlight{% endif %}">{% if pricelist.rounding %}>{% endif %}{{ pricelist.markup.charge }}%</td>
-            <td class="decimal">{{ pricelist.price.net }}</td>
-            <td class="decimal">{{ pricelist.price.full }}</td>
-        {% if pricelist.customized %}
-            <td><a class="remove_markup" href="{% url remove_markup pricelist.markup.id %}" 
-                title="Usa il ricarico standard associato a questo listino ({{ pricelist.default_markup }}%)">Elimina</a>
-                    <a class="open_modify_markup_dialog" href="{% url modify_markup product.id pricelist.name %}">Modifica</a>
-            </td>
-        {% else %}
-            <td><a class="open_modify_markup_dialog" href="{% url modify_markup product.id pricelist.name %}">Modifica</a></td>
-        {% endif %}
+        <div class="pricelist_box">
+            <div class="pricelist_name">
+                {{ pricelist.name }}
+            </div>
+            <p class="pricelist_desc">
+                {{ pricelist.desc }}
+            </p>
+            <div class="netprice">
+                <div>netto:</div> 
+                {{ pricelist.calculated_price.net }}&euro;
+            </div>
+            <div class="taxes">
+                <div>iva:</div> 
+                {{ pricelist.calculated_price.tax }}&euro;
+            </div>
+            <p class="fullprice">{{ pricelist.calculated_price.full }}&euro;</p>
+            <div class="actions">
+            {% if pricelist.customized %}
+            <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}">Modifica</a> |
+            <a class="reset_price" id="reset_price" href="{% url reset_price pricelist.price.id %}" title="Usa i valori standard di questo listino">Resetta</a>
+            {% else %}
+            <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}">Personalizza</a>
+            {% endif %}
+            </div>
             
-        </tr>
+            
+            
+        </div>
+            
     {% endfor %}
-    </tbody>
-</table>
+    <div class="clearfix"></div>
+    </div>
+    
 {% else %}
     <p class="notice">Non esistono listini.</p> 
 {% endif %}

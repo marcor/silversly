@@ -1,4 +1,9 @@
 <div>
+    <script type="text/javascript">
+        $(function() {
+            $("#id_price").trigger('focus');
+        });
+    </script>
     <form id="modify_supply_form" action="{% url modify_supply supply.id %}" method="post">
         {{ form.as_p }}
         <input id="modify_supply" type="submit" value="Cambia" />
