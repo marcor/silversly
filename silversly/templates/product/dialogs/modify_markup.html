@@ -1,12 +1,12 @@
 <div>
     <script type="text/javascript">
         function toggleControls(method) {
-            if (method.value == '') {
+            if (method == '') {
                 $("#id_value").hide().attr("disabled", true).prev("label").hide();
                 $("#id_markup").hide().attr("disabled", true).prev("label").hide();
             }
             
-            else if (method.value == '==') {
+            else if (method == '==') {
                 $("#id_value").attr("disabled", false).show().trigger('focus').prev("label").show();
                 $("#id_markup").hide().attr("disabled", true).prev("label").hide();
             }
@@ -14,7 +14,7 @@
                 $("#id_markup").attr("disabled", false).show().trigger('focus').prev("label").show();
                 $("#id_value").hide().attr("disabled", true).prev("label").hide();
             }
-            if (method.value == '%~') {
+            if (method == '%~') {
                 $("#rounding_warning").show();
             }
             else {
@@ -23,9 +23,10 @@
         };
         
         $(function() {
-            method = $("#id_method");
-            toggleControls(method.get(0));
-            method.live('change', function() { toggleControls(this) });
+            var radio =  $('[name="method"]');
+            var method = $('[name="method"]:checked');           
+            toggleControls(method);
+            radio.live('change', function() { toggleControls($(this).val()) });
         });
     </script>
     <form id="modify_markup_form" action="{% url modify_price price.product.id price.pricelist.name %}" method="post">

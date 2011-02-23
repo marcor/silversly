@@ -1,7 +1,26 @@
 <div>
-    <form id="delete_product_form" action="" method="post">
-        {{ form.as_p }}
-        <input id="confirm_delete" type="submit" value="Okay" />
-        <input id="cancel_delete" type="submit" value="Annulla" />
-    </form>
+    <script type="text/javascript">
+    $(function() {
+        $( "#confirm_delete" ).live('click', function() {
+            $.ajax({
+                "url": "{% url delete_product product.id %}",
+                "type": "POST",
+                "data": {'confirm': true},
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        location.href = "{% url find_product %}";
+                    };
+                }
+            });
+            return false;
+        });
+	$( "#cancel_delete" ).live('click', function() {
+	    $("#delete_product_dialog").dialog('close');
+	    return false;
+        });
+    });
+    </script>
+    <p>L'articolo <b>{{product.name}}</b> sar&agrave; cancellato.</p><p>Sei sicura?</p>
+    <a id="confirm_delete" href="#" title="S&igrave;, cancella"><img src="/media/img/okay.png" /></a>
+    <a id="cancel_delete" href="#" title="No, ho cambiato idea" style="float:right"><img src="/media/img/cancel.png" /></a>
 <div>

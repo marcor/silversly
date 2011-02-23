@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Form, BooleanField
+from django.forms import ModelForm, Form, BooleanField, ChoiceField, RadioSelect
 from decimal import Decimal
 from models import *
 
@@ -6,9 +6,6 @@ class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = ("name", "code", "category", "unit", "quantity", "min_quantity")
-
-class ConfirmForm(Form):
-    okay = BooleanField(required=True, initial=False)
 
 class SupplyForm(ModelForm):
     class Meta:
@@ -35,6 +32,7 @@ class MainAddressForm(ModelForm):
         model = Address
 
 class ModifyPriceForm(ModelForm):
+    method = ChoiceField(required=True, label="Tipo di prezzo", choices=PRICE_MAKING_METHODS, initial="==", widget=RadioSelect)
     
     def clean(self):
         cleaned_data = self.cleaned_data

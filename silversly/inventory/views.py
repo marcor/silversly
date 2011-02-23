@@ -38,13 +38,11 @@ def add_product(request):
 def delete_product(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     if request.is_ajax():
-        if request.method == "POST":
-            form = ConfirmForm(request.POST)
-            if form.is_valid():
-                pass
+        if request.method == "POST" and request.POST["confirm"]:
+            product.delete()
+            return HttpResponse(status=200)
         else:
-            form = ConfirmForm()
-        return render_to_response("product/dialogs/delete.html", {'form': form, 'product': product})
+            return render_to_response("product/dialogs/delete.html", {'product': product})
     else:
         return redirect(show_product, product_id)
 

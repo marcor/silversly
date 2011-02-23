@@ -75,7 +75,7 @@
                 "type": "POST",
                 "success": function(response) {
                     removeDialogs();
-                    $( "#tabset" ).tabs('load', 1);
+                    $( "#tabset" ).tabs('load', 0);
                 }
             });
             return false;
@@ -105,7 +105,7 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         removeDialogs();
-                        $( "#tabset" ).tabs('load', 1);                        
+                        $( "#tabset" ).tabs('load', 0);                        
                     } else {
                         $("#modify_supply_dialog").html(xhr.responseText);                    
                     };
@@ -136,7 +136,7 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         removeDialogs();
-                        $( "#tabset" ).tabs('load', 1);                        
+                        $( "#tabset" ).tabs('load', 0);                        
                     } else {
                         $("#add_supply_dialog").html(xhr.responseText);                    
                     };
@@ -191,9 +191,7 @@
             });
             return false;
         });
-        
-        /*--- delete product dialog --------*/
-        
+
         $( "#delete_product" ).live('click', function() {
             var delete_anchor = $(this);
             $( "#delete_product_dialog" ).dialog({
@@ -204,16 +202,14 @@
             });
             return false;
         });
-        
-        
- 
+    
         
         
 {% endblock %}
 
 {% block header %}
     <div id="breadcrumbs"> {{ product.category.breadcrumbs|safe }} </div>
-    <h1>{{ product.name }}<!--<a id="delete_product" href="{% url delete_product product.id %}" title="Elimina questo articolo dal magazzino"><img src="/media/img/delete.png"/></a>--></h1>
+    <h1>{{ product.name }}<a id="delete_product" href="{% url delete_product product.id %}" title="Elimina questo articolo dal magazzino"><img src="/media/img/delete.png"/></a></h1>
 {% endblock %}
 
 
