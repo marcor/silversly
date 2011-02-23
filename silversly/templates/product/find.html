@@ -22,7 +22,15 @@
             } else {
                 $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit);
             }
-            $(".price>span", box).html(product.fields.base_price);
+	    $.ajax({
+                "url": "/articolo/" + product.pk + "/prezzi_listino/Pubblico/ajax/",
+                "type": "GET",
+		"dataType": "json",
+                "success": function(data) {
+                    $(".price>span", box).html(data.full);
+                }
+            });
+            
             $( "#go" ).attr("href", "/articolo/" + product.pk);
             $( "#sell" ).attr("href", "/carrello/aggiungi_articolo/" + product.pk);
             
@@ -126,7 +134,7 @@
         <div class="title"></div>
         <!--<div class="code">Codice: <span></span></div>-->
         <div class="quantity">Disponibilit&agrave;: <span></span></div>
-        <div class="price">Prezzo base: <span>0</span>&euro;</div>
+        <div class="price">Prezzo al pubblico: <span>0</span>&euro;</div>
         <div class="suppliers">
         </div>
         <br/>

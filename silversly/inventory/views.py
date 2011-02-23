@@ -328,7 +328,7 @@ def customer_history_tab(request, customer_id):
 def ajax_find_product(request):
     if request.is_ajax():
         term = unquote(request.GET["term"])
-        matches = Product.objects.filter(Q(name__icontains = term) | Q(code__icontains = term))
+        matches = Product.objects.filter(Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term))
         json_serializer = serializers.get_serializer("json")()
         json_serializer.serialize(matches, ensure_ascii=False)
         data = json_serializer.serialize(matches, fields = ("name", "code", "quantity", "min_quantity", "unit", "base_price"))
@@ -336,6 +336,20 @@ def ajax_find_product(request):
             data = '[{"perfect_match": true, ' + data[2:]
         return HttpResponse(data, 'application/javascript')
     return HttpResponse(status=400)
+    
+def ajax_get_prices(request, product_id, pricelist):
+	if request.is_ajax():
+		pricelist = Pricelist.objects.get(name=pricelist)
+		try:
+			price = Price.objects.get(product = product_id, pricelist = pricelist)
+		except:
+			price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
+		prices = price.calculate_price()
+		data = simplejson.dumps({'net': str(prices["net"]), 'full': str(prices["full"]), 'tax': str(prices["tax"])})
+		return HttpResponse(data, 'application/javascript')
+	return HttpResponse(status=400)
+		
+	
 
 #--- sort this
 
