@@ -35,6 +35,12 @@ class Category(models.Model):
     def get_absolute_url(self):
         return "/categoria/%i/" % self.id
 
+    def total_products(self):
+        total = Product.objects.filter(category=self).count()
+        for child in Category.objects.filter(parent=self):
+            total += child.total_products()
+        return total
+        
     class Meta:
         ordering = ['name']
         verbose_name = _("Categoria")
