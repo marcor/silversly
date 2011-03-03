@@ -4,7 +4,7 @@
 
 {% block header %}
     <div id="breadcrumbs">{{ category.parent.breadcrumbs|safe }}</div>
-    <h1>{{ category.name }} ({{ category.total_products }})</h1>
+    <h1>{{ category.name }} <span>({{ category.total_products }})</span></h1>
 {% endblock %}
 
 {% block content %}

@@ -148,6 +148,7 @@ class Product(models.Model):
     class Meta:
         verbose_name = _("Articolo")
         verbose_name_plural = _("Articoli")
+        ordering = [name, code]
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
