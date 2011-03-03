@@ -202,7 +202,10 @@ class Price(models.Model):
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
 
     def __unicode__(self):
-        return "%s (listino: %s)" % (self.product, self.pricelist)
+        if self.method == '==':
+            return unicode(self.value)
+        else:
+            return "+%s%%" % self.markup
     
     def calculate_price(self, taxes=20, default_precision=Decimal(".01")):
         if self.method == "==":

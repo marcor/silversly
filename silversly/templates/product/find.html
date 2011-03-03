@@ -17,7 +17,7 @@
             
             $(".title", box).html(product.fields.name);
             /*$(".code>span", box).html(product.fields.code);*/
-            if (product.fields.quantity < product.fields.min_quantity) {
+            if (parseFloat(product.fields.quantity) < parseFloat(product.fields.min_quantity)) {
                 $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit + " <span style=\"color:red\">(sottoscorta)</span>");
             } else {
                 $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit);

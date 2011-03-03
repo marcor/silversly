@@ -33,7 +33,7 @@
         <tr>
             <td><a href="{% url show_product product.id %}">{{ product.name }}</a></td>
             <td>{{ product.code}}</td>
-            <td class="decimal{% if product.quantity < product.min_quantity %} highlight{% endif %}">{{ product.quantity}}</td>
+            <td class="decimal{% if product.quantity < product.min_quantity %} warning{% endif %}">{{ product.quantity}}</td>
             <td class="decimal">{{ product.base_price}}</td>
             
         </tr>

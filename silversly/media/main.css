@@ -69,6 +69,10 @@ td.highlight {
 	background-color: #fee;
 }
 
+td.warning {
+	background-color: red;
+}
+
 	
 ul, ol {
 	list-style: none;
