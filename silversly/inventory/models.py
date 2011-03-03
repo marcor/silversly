@@ -110,7 +110,7 @@ class Pricelist(models.Model):
         verbose_name_plural = _("Listini")
 
 class Product(models.Model):
-    code = models.CharField(_("Codice"), max_length = 13, unique = True)
+    code = models.CharField(_("Codice"), max_length = 13)
     name = models.CharField(_("Nome"), max_length = 60, unique = True)
 
     quantity = models.DecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
