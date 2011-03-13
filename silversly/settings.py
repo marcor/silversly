@@ -3,8 +3,6 @@ import sys, os
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_DIR)
 
-# Django settings for posi project.
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
