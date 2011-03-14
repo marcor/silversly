@@ -21,7 +21,7 @@ urlpatterns = patterns('inventory.views',
     url(r'fornitura/(\d+)/elimina', 'remove_supply', name='remove_supply'),
     
     url(r'rifornimento/nuovo', 'new_batch_load', name='new_batch_load'),
-    url(r'rifornimento/(\d+)', 'show_batch_load', name='show_batch_load'),
+    url(r'rifornimento/(\d+)$', 'show_batch_load', name='show_batch_load'),
     url(r'rifornimento/(\d+)/aggiungi_articolo', 'add_product_to_batch', name='add_product_to_batch'),
     url(r'rifornimento/(\d+)/rimuovi_articolo/(\d+)', 'remove_product_from_batch', name='remove_product_from_batch'),
     

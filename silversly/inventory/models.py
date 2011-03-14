@@ -70,6 +70,7 @@ class Supplier(models.Model):
         return self.name
 
     class Meta:
+        ordering = ["name"]
         verbose_name = _("Fornitore")
         verbose_name_plural = _("Fornitori")
 
@@ -154,7 +155,7 @@ class IncomingProduct(models.Model):
     actual_product = models.ForeignKey('Product', null=True, blank=True)
     batch = models.ForeignKey('BatchLoad')
     
-    quantity = models.DecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
+    quantity = models.DecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3, default = 0)
     
     new_supplier_code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
     new_supplier_price = models.DecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
@@ -208,9 +209,10 @@ class NewPrice(models.Model):
         unique_together = ('pricelist', 'product')
     
 class BatchLoad(models.Model):
-    supplier = models.ForeignKey(Supplier, verbose_name = _("Fornitore"), related_name="product_batch")
+    supplier = models.ForeignKey(Supplier, verbose_name = _("Fornitore"), related_name="product_batch", null=True)
     document_ref = models.CharField(_(u"Fattura n°"), max_length=5, blank=True) 
     date = models.DateField(auto_now = True)
+    loaded = models.BooleanField(default = False)
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')

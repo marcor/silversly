@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Aggiungi un articolo{% endblock %}
+
+{% block header %}
+    <h1>Aggiungi una fornitura</h1>
+{% endblock %}
+
+{% block jquery %}
+
+        var supplier_id;
+        $("#id_supplier").trigger("focus");
+        check_supplier(); 
+        
+        function check_supplier() { 
+            supplier_id = $("#id_supplier").val();
+            if (supplier_id != "") {
+	    $("#products").show().trigger("focus");
+            }
+            else {
+	    $("#products").hide();
+            };
+        };
+	
+        $("#id_supplier").change(function() {
+            check_supplier();    
+        });
+        
+        $("#baseform").change(function() {
+            $.post("{% url show_batch_load batch.pk %}",
+                  $("#baseform").serialize()
+	   );
+            return false;
+        });
+	
+        $("#baseform").submit(function () { return false; });
+
+        function showNothing() {
+            $("#message").show();            
+        }
+
+        function addProductToList(pk) {
+            $.get("{% url add_product_to_batch batch.pk %}",
+                    {'product_pk': pk},
+                    function(resultForm) {
+                        $("#add_product_dialog").dialog({
+                           'draggable': false,
+                           'resizable': false,
+                           'modal': true,
+                           'open': function() { $(this).html(resultForm); }
+                        })
+		}
+            );
+            return false;
+        }
+        
+        $("#suppliers").trigger("focus");
+        $( "#add,#save" ).button();
+        
+        $( "#add" ).live('click', function() {
+            var sell_button = $(this);
+            $( "#sell_product_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load(sell_button.attr('href'))}
+            });
+            return false;
+        });
+        
+        $( "#products" ).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    "url": "{% url ajax_find_product %}",
+                    "data": {'term': request.term, 'supplier':supplier_id},
+                    "dataType": "json",
+                    "success": function(results) {
+                        if (results.length > 0) { 
+                            response(results);
+                        } else {
+                            response(results);
+                            showNothing();                            
+                        }
+                    }
+                });
+            },
+            minLength: 3,
+            search: function(event, ui) {
+                $("#message").hide();
+            },
+            focus: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                return false;
+            },
+            select: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                if (ui.item) {
+                    addProductToList(ui.item.pk);
+                }
+                return false;
+	}
+		}).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
+                .appendTo( ul );
+        };
+	
+	
+	$( "#add_product" ).live('click', function() {
+            var form = $( "#add_product_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $( "#add_product_dialog" ).dialog("close");
+                                                
+                    } else {
+                        $("#add_product_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+{% endblock %}
+
+{% block content %}
+
+    <form id="baseform" action="" method="post">
+	{{ base_form.as_p }}
+    </form>
+    
+    <div class="search_field">
+        <input id="products" />
+    </div>
+    
+    <div id="message" style="display:none">Nessun risultato</div>
+    
+    
+    <div class="framed" id="product_list">sdfds</div>
+    
+    <div id="add_product_dialog" title="Carica un prodotto" class="dialog"></div>
+    
+{% endblock %}
+
+        

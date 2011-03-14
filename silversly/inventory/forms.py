@@ -7,6 +7,11 @@ class ProductForm(ModelForm):
         model = Product
         fields = ("name", "code", "category", "unit", "quantity", "min_quantity")
 
+class IncomingProductForm(ModelForm):
+    class Meta:
+        model = IncomingProduct
+        fields = ("quantity", "new_supplier_code", "new_supplier_price")
+
 class SupplyForm(ModelForm):
     class Meta:
         model = Supply
@@ -21,6 +26,11 @@ class ModifySupplyForm(ModelForm):
 class SupplierForm(ModelForm):
     class Meta:
         model = Supplier
+
+class BatchSupplierForm(ModelForm):
+	class Meta:
+		model = BatchLoad
+		fields = ("supplier", "document_ref")
 
 class CustomerForm(ModelForm):
     class Meta:

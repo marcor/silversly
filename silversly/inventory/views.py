@@ -137,13 +137,60 @@ def add_customer(request):
 #
 
 def new_batch_load(request):
-	pass
+	open_batches = BatchLoad.objects.filter(loaded=False)
+	if open_batches.count():
+		batch = open_batches[0]
+	else:
+		batch = BatchLoad()
+		batch.save()
+	return redirect(show_batch_load, batch.pk)
+		
 
 def show_batch_load(request, batch_id):
+	if request.method == "GET":
+		batch = BatchLoad.objects.get(pk=batch_id)
+		supplier_form = BatchSupplierForm(instance=batch)
+		products = IncomingProduct.objects.filter(batch=batch)
+		return render_to_response('batch_load/show.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
+		
+	if request.is_ajax() and request.method == "POST":
+		batch = BatchLoad.objects.get(pk=batch_id)
+		supplier_form = BatchSupplierForm(request.POST, instance = batch)
+		if supplier_form.is_valid():
+			supplier_form.save()
+			return HttpResponse(status=200)
+	return HttpResponse(status=400)
+	
+	
+def save_batch_basic_info(request, batch_id):
 	pass
 
 def add_product_to_batch(request, batch_id):
-	pass
+	bad_request = False
+	batch = BatchLoad.objects.get(pk=batch_id)
+	try:
+		product = Product.objects.get(pk=request.GET["product_pk"])
+	except:
+		product = Product.objects.get(pk=request.POST["product_pk"])
+	supply = Supply.objects.get(supplier=batch.supplier, product=product)
+	try:
+		editable_product = IncomingProduct.objects.get(actual_product=product, batch=batch)
+	except:
+		editable_product = IncomingProduct(actual_product=product, batch=batch, 
+		     new_supplier_code=supply.code,
+		     new_supplier_price=supply.price)
+	if request.method == "POST":
+		form = IncomingProductForm(request.POST, instance=editable_product)
+		if form.is_valid():
+			form.save()
+		else:
+			bad_request = True	
+	else:
+		form = IncomingProductForm(instance=editable_product)
+	response = render_to_response('batch_load/dialogs/add_product.html',  {'form': form, 'batch': batch, 'product':  product})
+	if bad_request: 
+		response.status_code = 400
+	return response
 
 def remove_product_from_batch(request, batch_id, product_id):
 	pass
@@ -344,7 +391,14 @@ def customer_history_tab(request, customer_id):
 def ajax_find_product(request):
     if request.is_ajax():
         term = unquote(request.GET["term"])
-        matches = Product.objects.filter(Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term))
+        query =  Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term)
+        #if request.GET, "supplier"):
+        try:
+               matches = Product.objects.filter(query, suppliers__id = request.GET["supplier"])
+        except:
+            matches = Product.objects.filter(query)
+        
+        #matches = Product.objects.filter(Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term))
         json_serializer = serializers.get_serializer("json")()
         json_serializer.serialize(matches, ensure_ascii=False)
         data = json_serializer.serialize(matches, fields = ("name", "code", "quantity", "min_quantity", "unit", "base_price"))
