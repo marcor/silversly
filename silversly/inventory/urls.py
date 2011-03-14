@@ -20,11 +20,14 @@ urlpatterns = patterns('inventory.views',
     url(r'fornitura/(\d+)/modifica', 'modify_supply', name='modify_supply'),
     url(r'fornitura/(\d+)/elimina', 'remove_supply', name='remove_supply'),
     
+    url(r'rifornimento/nuovo', 'new_batch_load', name='new_batch_load'),
+    url(r'rifornimento/(\d+)', 'show_batch_load', name='show_batch_load'),
+    url(r'rifornimento/(\d+)/aggiungi_articolo', 'add_product_to_batch', name='add_product_to_batch'),
+    url(r'rifornimento/(\d+)/rimuovi_articolo/(\d+)', 'remove_product_from_batch', name='remove_product_from_batch'),
     
     url(r'articolo/aggiungi/', 'add_product', name='add_product'),
     url(r'articolo/(\d+)/elimina/', 'delete_product', name='delete_product'),
-    
-    
+        
     url(r'articolo/cerca/$', 'find_product', name='find_product'),
     url(r'articolo/cerca/ajax/', 'ajax_find_product', name='ajax_find_product'),
     url(r'articolo/(\d+)/prezzi_listino/(.+)/ajax/', 'ajax_get_prices', name='ajax_get_prices'),

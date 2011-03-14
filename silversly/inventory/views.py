@@ -133,6 +133,22 @@ def add_customer(request):
     return render_to_response('customers/%sadd.html' % (request.is_ajax() and 'ajax_' or ''), {'form': form})
 
 #
+# RIFORNIMENTI
+#
+
+def new_batch_load(request):
+	pass
+
+def show_batch_load(request, batch_id):
+	pass
+
+def add_product_to_batch(request, batch_id):
+	pass
+
+def remove_product_from_batch(request, batch_id, product_id):
+	pass
+
+#
 # VENDITE
 #
 
