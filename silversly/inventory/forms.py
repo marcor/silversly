@@ -30,7 +30,7 @@ class SupplierForm(ModelForm):
 class BatchSupplierForm(ModelForm):
 	class Meta:
 		model = BatchLoad
-		fields = ("supplier", "document_ref")
+		fields = ("document_ref", "supplier")
 
 class CustomerForm(ModelForm):
     class Meta:

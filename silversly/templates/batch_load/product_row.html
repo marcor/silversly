@@ -1,0 +1,11 @@
+<tr id="p{{ item.id }}">
+	<td>{{ item.new_supplier_code}}</td>
+	<td>{{ item.actual_product.name}}</td>
+	<td class="decimal">{{ item.quantity}}</td>
+	<td class="decimal">{{ item.new_supplier_price}}</td>
+	<td class="actions">
+		<a class="edit_product" href="{% url add_product_to_batch batch.id %}?product_pk={{ item.actual_product.id}}" title="Modifica"><img src="/media/img/edit.png"/></a>
+		<a class="delete_product" href="{% url remove_product_from_batch batch.id item.id %}" title="Togli questo articolo"><img src="/media/img/cancel.png"/></a>
+          </td>  
+</tr>
+	

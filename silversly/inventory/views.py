@@ -162,8 +162,21 @@ def show_batch_load(request, batch_id):
 	return HttpResponse(status=400)
 	
 	
-def save_batch_basic_info(request, batch_id):
-	pass
+def save_batch_load(request, batch_id):
+	batch = BatchLoad.objects.get(pk=batch_id)
+	products = IncomingProduct.objects.filter(batch=batch)
+	for item in products:
+		dest = item.actual_product
+		supply = Supply.objects.get(supplier = batch.supplier, product = dest)
+		dest.quantity += item.quantity
+		supply.price = item.new_supplier_price
+		supply.code = item.new_supplier_code
+		supply.save()
+		dest.save()		
+	
+	batch.loaded = True
+	batch.save()
+	return redirect(new_batch_load)
 
 def add_product_to_batch(request, batch_id):
 	bad_request = False
@@ -183,6 +196,7 @@ def add_product_to_batch(request, batch_id):
 		form = IncomingProductForm(request.POST, instance=editable_product)
 		if form.is_valid():
 			form.save()
+			return render_to_response('batch_load/product_row.html',  {'batch': batch, 'item':  editable_product})
 		else:
 			bad_request = True	
 	else:
@@ -192,8 +206,12 @@ def add_product_to_batch(request, batch_id):
 		response.status_code = 400
 	return response
 
-def remove_product_from_batch(request, batch_id, product_id):
-	pass
+def remove_product_from_batch(request, batch_id, iproduct_id):
+	try:
+		IncomingProduct.objects.get(pk = iproduct_id).delete()
+		return redirect(show_batch_load, batch_id)
+	except:
+		return HttpResponse(status=400)
 
 #
 # VENDITE

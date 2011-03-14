@@ -9,8 +9,14 @@
 {% block jquery %}
 
         var supplier_id;
-        $("#id_supplier").trigger("focus");
+        $("#save").button();	
         check_supplier(); 
+        {% if products %}
+	$("#id_supplier").attr("disabled", true);
+	$("#products").trigger("focus");
+        {% else %}
+          $("#id_supplier").trigger("focus");
+        {% endif %}	
         
         function check_supplier() { 
             supplier_id = $("#id_supplier").val();
@@ -25,6 +31,20 @@
         $("#id_supplier").change(function() {
             check_supplier();    
         });
+	
+        function updateList(productRow) {
+            var pid = $(productRow).attr("id");
+	   var existing =  $("tr#" + pid);
+	   if (existing.length > 0) 
+		{ existing.replaceWith(productRow) }
+	   else { 
+	          $("#product_list>tbody").append(productRow);
+		$("#id_supplier").attr("disabled", true);
+		$("#product_list").show();
+		$("#save").show();
+	   }; 
+	   
+        };
         
         $("#baseform").change(function() {
             $.post("{% url show_batch_load batch.pk %}",
@@ -53,6 +73,21 @@
             );
             return false;
         }
+	
+        $("a.edit_product").live('click', function() {
+	$.get($(this).attr("href"),
+                    {},
+                    function(resultForm) {
+                        $("#add_product_dialog").dialog({
+                           'draggable': false,
+                           'resizable': false,
+                           'modal': true,
+                           'open': function() { $(this).html(resultForm); }
+                        })
+		}
+            );
+            return false;
+	});
         
         $("#suppliers").trigger("focus");
         $( "#add,#save" ).button();
@@ -107,6 +142,7 @@
         };
 	
 	
+	
 	$( "#add_product" ).live('click', function() {
             var form = $( "#add_product_form" );
             $.ajax({
@@ -116,7 +152,7 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         $( "#add_product_dialog" ).dialog("close");
-                                                
+		     updateList(xhr.responseText);                                                
                     } else {
                         $("#add_product_dialog").html(xhr.responseText);                    
                     };
@@ -132,14 +168,33 @@
 	{{ base_form.as_p }}
     </form>
     
+    <div class="framed">
+    
     <div class="search_field">
         <input id="products" />
     </div>
     
     <div id="message" style="display:none">Nessun risultato</div>
     
+    <table id="product_list" {% if not products %}style="display:none"{% endif %}>
+	<thead>
+		<tr>
+			<td>Cod. fornitore</td>
+			<td>Nome</td>
+			<td>Quantit&agrave;</td>
+			<td>Prezzo</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for item in products %}
+			{% include  "batch_load/product_row.html" %}
+		{% endfor %}
+	</tbody>
+    </table>
+    </div>
     
-    <div class="framed" id="product_list">sdfds</div>
+    <a id="save" href="{% url save_batch_load batch.id %}" {% if not products %}style="display: none"{% endif %}>Carica tutto</a>
+        
     
     <div id="add_product_dialog" title="Carica un prodotto" class="dialog"></div>
     
