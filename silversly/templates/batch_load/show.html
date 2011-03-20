@@ -60,6 +60,20 @@
             $("#message").show();            
         }
 
+	function editPricesAndAdd(pk) {
+		 $.get("{% url edit_prices pk %}",
+                    function(resultForm) {
+                        $("#prices_dialog").dialog({
+                           'draggable': false,
+                           'resizable': false,
+                           'modal': true,
+                           'open': function() { $(this).html(resultForm); }
+                        })
+		}
+            );
+            return false;
+	}
+	
         function addProductToList(pk) {
             $.get("{% url add_product_to_batch batch.pk %}",
                     {'product_pk': pk},
