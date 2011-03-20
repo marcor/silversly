@@ -173,7 +173,10 @@ def save_batch_load(request, batch_id):
     products = IncomingProduct.objects.filter(batch=batch)
     for item in products:
         dest = item.actual_product
-        supply = Supply.objects.get(supplier = batch.supplier, product = dest)
+        try:
+            supply = Supply.objects.get(supplier = batch.supplier, product = dest)
+        except:
+            supply = Supply(supplier = batch.supplier, product = dest)
         dest.quantity += item.quantity
         supply.price = item.new_supplier_price
         supply.code = item.new_supplier_code
