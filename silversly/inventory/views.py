@@ -22,18 +22,24 @@ def show_product(request, id):
     return render_to_response('product/show.html', {'product': product})
 
 def add_product(request):
+    status = 200
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
             new_product = form.save()
-            
             if request.is_ajax():
-                return HttpResponse(status=200)
-            else:
-                return redirect(show_product, new_product.id)
+                return HttpResponse(str(new_product.id), status=200,  mimetype="text/plain")
+            return redirect(show_product, new_product.id)
+        else:
+            status = 400
     else:
         form = ProductForm()
-    return render_to_response('product/%sadd.html' % (request.is_ajax() and 'ajax_' or ''), {'form': form})
+    if request.is_ajax():
+        response  = render_to_response('product/ajax_add.html', {'form': form})
+        response.status_code = status
+        return response
+    else:
+        return render_to_response('product/add.html', {'form': form})
 
 def delete_product(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
@@ -137,81 +143,102 @@ def add_customer(request):
 #
 
 def new_batch_load(request):
-	open_batches = BatchLoad.objects.filter(loaded=False)
-	if open_batches.count():
-		batch = open_batches[0]
-	else:
-		batch = BatchLoad()
-		batch.save()
-	return redirect(show_batch_load, batch.pk)
-		
+    open_batches = BatchLoad.objects.filter(loaded=False)
+    if open_batches.count():
+        batch = open_batches[0]
+    else:
+        batch = BatchLoad()
+        batch.save()
+    return redirect(show_batch_load, batch.pk)
+        
 
 def show_batch_load(request, batch_id):
-	if request.method == "GET":
-		batch = BatchLoad.objects.get(pk=batch_id)
-		supplier_form = BatchSupplierForm(instance=batch)
-		products = IncomingProduct.objects.filter(batch=batch)
-		return render_to_response('batch_load/show.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
-		
-	if request.is_ajax() and request.method == "POST":
-		batch = BatchLoad.objects.get(pk=batch_id)
-		supplier_form = BatchSupplierForm(request.POST, instance = batch)
-		if supplier_form.is_valid():
-			supplier_form.save()
-			return HttpResponse(status=200)
-	return HttpResponse(status=400)
-	
-	
+    if request.method == "GET":
+        batch = BatchLoad.objects.get(pk=batch_id)
+        supplier_form = BatchSupplierForm(instance=batch)
+        products = IncomingProduct.objects.filter(batch=batch)
+        return render_to_response('batch_load/show.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
+        
+    if request.is_ajax() and request.method == "POST":
+        batch = BatchLoad.objects.get(pk=batch_id)
+        supplier_form = BatchSupplierForm(request.POST, instance = batch)
+        if supplier_form.is_valid():
+            supplier_form.save()
+            return HttpResponse(status=200)
+    return HttpResponse(status=400)
+    
+    
 def save_batch_load(request, batch_id):
-	batch = BatchLoad.objects.get(pk=batch_id)
-	products = IncomingProduct.objects.filter(batch=batch)
-	for item in products:
-		dest = item.actual_product
-		supply = Supply.objects.get(supplier = batch.supplier, product = dest)
-		dest.quantity += item.quantity
-		supply.price = item.new_supplier_price
-		supply.code = item.new_supplier_code
-		supply.save()
-		dest.save()		
-	
-	batch.loaded = True
-	batch.save()
-	return redirect(new_batch_load)
+    batch = BatchLoad.objects.get(pk=batch_id)
+    products = IncomingProduct.objects.filter(batch=batch)
+    for item in products:
+        dest = item.actual_product
+        supply = Supply.objects.get(supplier = batch.supplier, product = dest)
+        dest.quantity += item.quantity
+        supply.price = item.new_supplier_price
+        supply.code = item.new_supplier_code
+        supply.save()
+        dest.save()		
+    
+    batch.loaded = True
+    batch.save()
+    return redirect(new_batch_load)
 
 def add_product_to_batch(request, batch_id):
-	bad_request = False
-	batch = BatchLoad.objects.get(pk=batch_id)
-	try:
-		product = Product.objects.get(pk=request.GET["product_pk"])
-	except:
-		product = Product.objects.get(pk=request.POST["product_pk"])
-	supply = Supply.objects.get(supplier=batch.supplier, product=product)
-	try:
-		editable_product = IncomingProduct.objects.get(actual_product=product, batch=batch)
-	except:
-		editable_product = IncomingProduct(actual_product=product, batch=batch, 
-		     new_supplier_code=supply.code,
-		     new_supplier_price=supply.price)
-	if request.method == "POST":
-		form = IncomingProductForm(request.POST, instance=editable_product)
-		if form.is_valid():
-			form.save()
-			return render_to_response('batch_load/product_row.html',  {'batch': batch, 'item':  editable_product})
-		else:
-			bad_request = True	
-	else:
-		form = IncomingProductForm(instance=editable_product)
-	response = render_to_response('batch_load/dialogs/add_product.html',  {'form': form, 'batch': batch, 'product':  product})
-	if bad_request: 
-		response.status_code = 400
-	return response
+    bad_request = False
+    batch = BatchLoad.objects.get(pk=batch_id)
+    try:
+        product = Product.objects.get(pk=request.GET["product_pk"])
+    except:
+        product = Product.objects.get(pk=request.POST["product_pk"])
+    
+    try:
+        supply = Supply.objects.get(supplier=batch.supplier, product=product)
+        newsupplier = False
+    except:
+        supply = Supply(product=product, supplier=batch.supplier)
+        newsupplier = True
+    try:	
+        editable_product = IncomingProduct.objects.get(actual_product=product, batch=batch)
+    except:
+        editable_product = IncomingProduct(actual_product=product, batch=batch, 
+             new_supplier_code=supply.code,
+             new_supplier_price=supply.price)
+    if request.method == "POST":
+        form = IncomingProductForm(request.POST, instance=editable_product)
+        if form.is_valid():
+            form.save()
+            return render_to_response('batch_load/product_row.html',  {'batch': batch, 'item':  editable_product})
+        else:
+            bad_request = True	
+    else:
+        form = IncomingProductForm(instance=editable_product)
+    response = render_to_response('batch_load/dialogs/add_product.html',  {'form': form, 'batch': batch, 'product':  product, 'newsupplier': newsupplier})
+    if bad_request: 
+        response.status_code = 400
+    return response
 
 def remove_product_from_batch(request, batch_id, iproduct_id):
-	try:
-		IncomingProduct.objects.get(pk = iproduct_id).delete()
-		return redirect(show_batch_load, batch_id)
-	except:
-		return HttpResponse(status=400)
+    try:
+        IncomingProduct.objects.get(pk = iproduct_id).delete()
+        return redirect(show_batch_load, batch_id)
+    except:
+        return HttpResponse(status=400)
+        
+def create_product_dialog(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            new_product = form.save()
+            return HttpResponse(status=200)
+        else:
+            status = 400
+    else:
+        form = ProductForm()
+        status = 200
+    response = render_to_response('product/dialogs/add.html', {'form': form})
+    response.status_code = status
+    return response
 
 #
 # VENDITE
@@ -406,18 +433,29 @@ def customer_history_tab(request, customer_id):
 
 #---- autocomplete for string fields
 
+def get_name_query(term):
+    words = term.split(" ")
+    if len(words) > 1:
+        words = filter(lambda x: None or x.strip(), words)
+    word_query = Q()
+    for word in words:
+        word_query &= Q(name__istartswith = word) | Q(name__icontains = " " + word)
+    return word_query
+
+def get_code_query(term):
+    return Q(code__icontains = term)
+    
 def ajax_find_product(request):
     if request.is_ajax():
         term = unquote(request.GET["term"])
-        words = term.split(" ")
-        if len(words) > 1:
-            words = filter(lambda x: None or x.strip(), words)
-        code_query = Q(code__icontains = term)
-        word_query = Q()
-        for word in words:
-            word_query &= Q(name__istartswith = word) | Q(name__icontains = " " + word)
-        matches = Product.objects.filter(code_query | word_query)
+        word_query = get_name_query(term)
+        code_query = get_code_query(term)
         
+        if "supplier" in request.GET:
+            matches = Product.objects.filter(word_query | code_query, suppliers__id = request.GET["supplier"])
+        else:
+           matches = Product.objects.filter(word_query | code_query)
+
         #matches = Product.objects.filter(Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term))
         json_serializer = serializers.get_serializer("json")()
         json_serializer.serialize(matches, ensure_ascii=False)
@@ -429,13 +467,11 @@ def ajax_find_product(request):
 
 def ajax_find_product2(request):
     if request.is_ajax():
-        term = unquote(request.GET["term"])
-        query =  Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term)
-        #if request.GET, "supplier"):
-        try:
-               matches = Product.objects.filter(query, suppliers__id = request.GET["supplier"])
-        except:
-            matches = Product.objects.filter(query)
+        
+        term = unquote(request.GET["term"])        
+        
+        word_query = get_name_query(term)
+        code_query = get_code_query(term)       
         
         #matches = Product.objects.filter(Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term))
         json_serializer = serializers.get_serializer("json")()
@@ -448,18 +484,18 @@ def ajax_find_product2(request):
 
 
 def ajax_get_prices(request, product_id, pricelist):
-	if request.is_ajax():
-		pricelist = Pricelist.objects.get(name=pricelist)
-		try:
-			price = Price.objects.get(product = product_id, pricelist = pricelist)
-		except:
-			price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
-		prices = price.calculate_price()
-		data = simplejson.dumps({'net': str(prices["net"]), 'full': str(prices["full"]), 'tax': str(prices["tax"])})
-		return HttpResponse(data, 'application/javascript')
-	return HttpResponse(status=400)
-		
-	
+    if request.is_ajax():
+        pricelist = Pricelist.objects.get(name=pricelist)
+        try:
+            price = Price.objects.get(product = product_id, pricelist = pricelist)
+        except:
+            price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
+        prices = price.calculate_price()
+        data = simplejson.dumps({'net': str(prices["net"]), 'full': str(prices["full"]), 'tax': str(prices["tax"])})
+        return HttpResponse(data, 'application/javascript')
+    return HttpResponse(status=400)
+        
+    
 
 #--- sort this
 

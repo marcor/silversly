@@ -4,6 +4,9 @@
             $("#id_quantity").trigger('focus');
         });
     </script>
+    {% if newsupplier %}
+    <p><i>{{ batch.supplier }}</i> sar&agrave; aggiunto all'elenco dei fornitori di questo prodotto.</p>
+    {% endif %}
     <form id="add_product_form" action="{% url add_product_to_batch batch.pk %}" method="post">
         {{ form.as_p }}
 	<input type="hidden" name="product_pk" value="{{ product.pk  }}"/>

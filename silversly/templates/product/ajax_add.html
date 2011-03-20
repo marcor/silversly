@@ -1,10 +1,16 @@
-{% extends "ajax_dialog.html" %}
-
-{% block title %}Aggiungi un articolo{% endblock %}
-
+<div>
+    <script type="text/javascript">
+	$(function() {
+             $("#id_name").trigger("focus");
+	      $(".errorlist+p>input").css("background-color", "#fef").css("border-color", "red").slice(0,1).trigger("focus");
+        });
+    </script>
+   
 {% block content %}
-    <form action="" method="post">
+    <form id="new_product_form" action="" method="post">
         {{ form.as_p }}
-    <input type="submit" value="Salva" />
+        <input id="save_new_product" type="submit" value="Aggiungi" />
     </form>
 {% endblock %}
+</div>
+        

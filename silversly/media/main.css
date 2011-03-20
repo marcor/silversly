@@ -358,3 +358,7 @@ input#products {
 	top: 30px;
 }
 
+#new_product {
+	float: right
+}
+
