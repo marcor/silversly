@@ -4,9 +4,10 @@
 <head>
     <link rel="stylesheet" href="/media/main.css" />
     <title>{% block title %}Site title{% endblock %}</title>
-    <link type="text/css" href="/media/jquery/css/smoothness/jquery-ui-1.8.9.custom.css" rel="Stylesheet" />	
-    <script type="text/javascript" src="/media/jquery/js/jquery-1.4.4.min.js"></script>
-    <script type="text/javascript" src="/media/jquery/js/jquery-ui-1.8.9.custom.min.js"></script>
+    <link type="text/css" href="/media/css/smoothness/jquery-ui-1.8.11.custom.css" rel="Stylesheet" />	
+    <script type="text/javascript" src="/media/js/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery-ui-1.8.11.custom.min.js"></script>
+    {% block head %} {% endblock %}
     <script type="text/javascript">
         $(function() {
 		$("#navlinks img").css("opacity", "0.2");

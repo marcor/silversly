@@ -2,12 +2,44 @@
 
 {% block title %}{{ category }}{% endblock %}
 
+{% block head %}
+<link type="text/css" href="/media/css/data_tables.css" rel="Stylesheet" />	
+<script type="text/javascript" language="javascript" src="/media/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="/media/js/dataTables.numericComma.js"></script>
+{% endblock %}
+
+{% block jquery %}
+	{{ block.super }}
+	$("table").dataTable({
+		"aaSorting": [[ 0, "asc" ]],
+		"bJQueryUI": true,
+		"oLanguage": {
+			/*"sLengthMenu": "Mostra _MENU_ articoli per volta",*/
+			"sZeroRecords": "Nessun articolo trovato",
+			"sInfo": "_TOTAL_ articoli",
+			"sInfoEmpty": "0 articoli",
+			"sInfoFiltered": "su _MAX_",
+			"sSearch": "Cerca:" 
+		},
+		"bSortClasses": false,
+		"sScrollY": "380px",
+		"bPaginate": false,
+		"aoColumns": [
+				null,
+				null,
+				null,
+				{ "sType": "numeric-comma" }
+			]
+		});
+{% endblock %}
+
 {% block header %}
     <div id="breadcrumbs">{{ category.parent.breadcrumbs|safe }}</div>
-    <h1>{{ category.name }} ({{ category.total_products }})</h1>
+    <h1>{{ category.name }} {# ({{ category.total_products }}) #}</h1>
 {% endblock %}
 
 {% block content %}
+    {% comment %}
     <h2>Sottocategorie:</h2>
     <ul id="categories">
     {% for category in children %}
@@ -16,16 +48,18 @@
         <li>Nessuna categoria sotto di questa.</li>
     {% endfor %}
     </ul>
+    {% endcomment %}
     
-    <h2>Prodotti:</h2>
+    <!--<h2>Prodotti:</h2>-->
     {% if products %}
+    <!--<div class="framed">-->
     <table>
     <thead>
         <tr>
-            <td>Nome</td>
-            <td>Codice</td>
-            <td>Quantit&agrave;</td>
-            <td>Prezzo base</td>
+            <th>Nome</th>
+            <th>Codice</th>
+            <th>Quantit&agrave;</th>
+            <th>Prezzo base</th>
         </tr>
         </thead>
         <tbody>
@@ -40,6 +74,7 @@
     {% endfor %}
         </tbody>
         </table>
+    <!--</div>-->
     {% else %}
         <p class="framed">Nessun articolo in questa categoria.</a>
     {% endif %}
