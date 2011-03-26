@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
+{% block jquery %}
+	$("#navlinks a[title='Categorie'] img").css("opacity", "1").addClass("current");
+ {% endblock %}
+
 {% block sidebar %}
         <ul>
             <li>
-                <a href="{% url add_category %}">Aggiungi categoria</a>
+                <a href="{% url add_category %}" title="Aggiungi una categoria">
+			<img src="/media/img/add.png" />
+		</a>
             </li>
         </ul>
 {% endblock %}

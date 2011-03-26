@@ -1,0 +1,16 @@
+<div>
+    <script type="text/javascript">
+	$(function() {
+             $("#id_name").trigger("focus");
+	      $(".errorlist+p>input").css("background-color", "#fef").css("border-color", "red").slice(0,1).trigger("focus");
+        });
+    </script>
+   
+{% block content %}
+    <form id="new_product_form" class="bigform" action="" method="post">
+        {{ form.as_p }}
+        <input id="save_new_product" type="submit" value="Aggiungi" />
+    </form>
+{% endblock %}
+</div>
+        

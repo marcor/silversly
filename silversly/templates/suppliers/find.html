@@ -3,6 +3,7 @@
 {% block title %}Cerca un fornitore{% endblock %}
 
 {% block jquery %}
+	{{ block.super }}
         $( "#go" ).button().hide();
 		$( "#suppliers" ).autocomplete({
 			source: "{% url find_supplier %}",

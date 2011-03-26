@@ -3,7 +3,7 @@
 {% block title %}{{ customer }}{% endblock %}
 
 {% block jquery %}
-
+	{{ block.super }}
         function removeDialogs() {
             $(".dialog").remove();            
         }

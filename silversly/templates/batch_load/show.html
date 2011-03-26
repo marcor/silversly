@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "product/main.html" %}
 
 {% block title %}Aggiungi una fornitura{% endblock %}
 
@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block jquery %}
-
+	{{block.super}}
         var supplier_id;
         
         check_supplier(); 

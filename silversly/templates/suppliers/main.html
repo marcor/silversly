@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 
+{% block jquery %}
+	$("#navlinks a[title='Fornitori'] img").css("opacity", "1").addClass("current");
+ {% endblock %}
+ 
 {% block sidebar %}
         <ul>
             <li>
-                <a href="{% url find_supplier %}">Cerca</a>
+                <a href="{% url find_supplier %}" title="Cerca un fornitore">
+			<img src="/media/img/search.png" />
+		</a>
             </li>
-            <li>
-                <a href="{% url add_supplier %}">Aggiungi un fornitore</a>
+           <li>
+                <a href="{% url add_supplier %}" title="Aggiungi un fornitore">
+			<img src="/media/img/add.png" />
+		</a>
             </li>
         </ul>
 {% endblock %}

@@ -9,8 +9,16 @@
     <script type="text/javascript" src="/media/jquery/js/jquery-ui-1.8.9.custom.min.js"></script>
     <script type="text/javascript">
         $(function() {
-
+		$("#navlinks img").css("opacity", "0.2");
         {% block jquery %}{% endblock %}
+		$("#navlinks img").not("[class]").hover(
+			function() {
+				$(this).css("opacity", "1").addClass("current");
+			},
+			function() {
+				$(this).css("opacity", "0.3").removeClass("current");
+			});			
+			
         });
     </script>
 </head>
@@ -20,11 +28,11 @@
     <div id="topbar">
         <div id="logo">Silver Sly <span>v0.2</span></div>
         <div id="navlinks">
-        <a href="{% url find_product %}">Articoli</a> |
-        <a href="#">Carrello</a> |
-        <a href="{% url find_supplier %}">Fornitori</a> |
-        <a href="{% url find_customer %}">Clienti</a> |
-        <a href="{% url list_categories %}">Categorie</a>
+        <a href="{% url find_product %}" title="Articoli"><img src="/media/img/products.png" /></a>
+        <a href="#" title="Carrello"><img src="/media/img/cart.png" /></a>
+        <a href="{% url find_supplier %}" title="Fornitori"><img src="/media/img/suppliers.png" /></a>
+        <a href="{% url find_customer %}" title="Clienti"><img src="/media/img/customers.png" /></a>
+        <a href="{% url list_categories %}" title="Categorie"><img src="/media/img/categories.png" /></a>
         </div>
     </div>
     

@@ -1,9 +1,10 @@
-{% extends "base.html" %}
+{% extends "product/main.html" %}
 
 {% block title %}Cerca un articolo{% endblock %}
 
 {% block jquery %}
-
+	{{ block.super }}
+	
         var chosenProduct;
         
         function removeDialogs() {

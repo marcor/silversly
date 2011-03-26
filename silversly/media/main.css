@@ -141,26 +141,30 @@ p input, p select {
 	
 
 #sidebar img {
-	padding-right: 22px;
+	padding-right: 20px;
 	padding-top: 2px;
 	padding-left: 10px;
-	border: 1px solid #fafafa;
+	border: 1px solid transparent;
 	border-left: none; 
 	border-right: none;
-	margin-left: 0;	
+	margin-left: 0;
 }
 
 #sidebar img:hover {
 	background-color: #fafafa;
 	border: 1px solid #ccc;
 	border-right-width: 5px;
+	/*border-bottom-width: 2px;*/
 	border-left: none;
-	background-color: #ffd;
+	background-color: #fff;
+	position: relative;
+	/*padding-left: 15px;
+	left: 5px;*/
 }
 
 #topbar {
 	border-bottom: 1px solid #ccc;
-	height: 54px;
+	height: 55px;
 	position: relative;
 	background-color: #fafafa;
 }
@@ -168,8 +172,28 @@ p input, p select {
 #navlinks {
 	position: absolute;
 	left: 1em;
-	bottom: 2px;
+	bottom: 0px;
 }
+
+#navlinks img {
+	padding-top: 2px;
+	padding-right: 3px;
+	padding-left: 3px;
+	border-left: 1px solid transparent;
+	border-right: 1px solid transparent;
+}
+
+#navlinks img.current {
+	position: relative;
+	top: 13px;
+	padding-bottom: 7px;
+	padding-top: 6px;
+	border: 1px solid #ccc;
+	border-bottom-width: 3px;
+	border-top: none;
+	background-color: #fff;
+}
+
 
 #logo {
 	font-family: Verdana, Arial, sans-serif;

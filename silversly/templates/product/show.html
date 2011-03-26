@@ -1,9 +1,10 @@
-{% extends "base.html" %}
+{% extends "product/main.html" %}
 
 {% block title %}{{ product }}{% endblock %}
 
 {% block jquery %}
-
+	{{ block.super }}
+	
         function removeDialogs() {
             $(".dialog").remove();            
         }

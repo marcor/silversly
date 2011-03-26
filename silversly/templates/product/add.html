@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "product/main.html" %}
 
 {% block title %}Aggiungi un articolo{% endblock %}
 
@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block jquery %}
+	{{ block.super }}
     $("#id_name").trigger("focus");
     $(".errorlist+p>input").css("background-color", "#fef").css("border-color", "red").slice(0,1).trigger("focus");
     

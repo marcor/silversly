@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+ {% block jquery %}
+	$("#navlinks a[title='Articoli'] img").css("opacity", "1").addClass("current");
+ {% endblock %}
+
+{% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url find_product %}" title="Cerca un articolo">
+			<img src="/media/img/search.png" />
+		</a>
+            </li>
+            <li>
+                <a href="{% url add_product %}" title="Aggiungi un articolo">
+			<img src="/media/img/add.png" />
+		</a>
+            </li>
+            <li>
+                <a href="{% url new_batch_load %}" title="Carica una fornitura">
+			<img src="/media/img/add_many.png" />
+		</a>
+            </li>
+        </ul>
+{% endblock %}

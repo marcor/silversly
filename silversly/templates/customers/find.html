@@ -3,6 +3,7 @@
 {% block title %}Cerca un cliente{% endblock %}
 
 {% block jquery %}
+	{{ block.super }}
         $( "#go" ).button().hide();
 		$( "#customers" ).autocomplete({
 			source: "{% url find_customer %}",
