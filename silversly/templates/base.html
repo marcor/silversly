@@ -9,6 +9,7 @@
     <script type="text/javascript" src="/media/jquery/js/jquery-ui-1.8.9.custom.min.js"></script>
     <script type="text/javascript">
         $(function() {
+
         {% block jquery %}{% endblock %}
         });
     </script>
@@ -31,13 +32,19 @@
         {% block sidebar %}
         <ul>
             <li>
-                <a href="{% url find_product %}">Cerca</a>
+                <a href="{% url find_product %}" title="Cerca un articolo">
+			<img src="/media/img/search.png" />
+		</a>
             </li>
             <li>
-                <a href="{% url add_product %}">Aggiungi un articolo</a>
+                <a href="{% url add_product %}" title="Aggiungi un articolo">
+			<img src="/media/img/add.png" />
+		</a>
             </li>
             <li>
-                <a href="{% url new_batch_load %}">Carica una fornitura</a>
+                <a href="{% url new_batch_load %}" title="Carica una fornitura">
+			<img src="/media/img/add_many.png" />
+		</a>
             </li>
         </ul>
         {% endblock %}

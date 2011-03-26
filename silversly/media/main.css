@@ -126,13 +126,36 @@ p input, p select {
 }
 
 #sidebar {
-	width: 150px;
+	width: 80px;
 	position: absolute;
-	top: 260px;
+	top: 200px;
 	border: 1px solid #ccc;
 	border-left: none;
 	-moz-border-radius: 4px;
 	background-color: #fafafa;
+}
+
+#sidebar ul {
+	padding-left: 0;
+}
+	
+
+#sidebar img {
+	padding-right: 22px;
+	padding-top: 2px;
+	padding-left: 10px;
+	border: 1px solid #fafafa;
+	border-left: none; 
+	border-right: none;
+	margin-left: 0;	
+}
+
+#sidebar img:hover {
+	background-color: #fafafa;
+	border: 1px solid #ccc;
+	border-right-width: 5px;
+	border-left: none;
+	background-color: #ffd;
 }
 
 #topbar {
