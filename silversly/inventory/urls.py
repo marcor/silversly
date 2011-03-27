@@ -12,8 +12,11 @@ urlpatterns = patterns('inventory.views',
     url(r'articolo/(\d+)/fornitori/readonly/', 'list_supplies', name='list_supplies_readonly', kwargs={'simple': True}),
     
     url(r'articolo/(\d+)/listini/', 'list_prices', name='list_prices'),
+    url(r'articolo_temp/listini/', 'list_temp_prices', name='list_temp_prices'),
     url(r'articolo/(\d+)/listino/(.+)/modifica', 'modify_price', name='modify_price'),
     url(r'prezzo/(\d+)/rimuovi/', 'reset_price', name='reset_price'),
+    url(r'articolo_temp/(\d+)/listino/(.+)/modifica', 'modify_temp_price', name='modify_temp_price'),
+    url(r'prezzo_temp/(\d+)/rimuovi/', 'reset_temp_price', name='reset_temp_price'),
     
     url(r'articolo/carica', 'load_products', name='load_products'),
     

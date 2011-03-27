@@ -1,0 +1,39 @@
+<div>
+    <script type="text/javascript">
+        function toggleControls(method) {
+            if (method == '') {
+                $("#id_value").hide().attr("disabled", true).prev("label").hide();
+                $("#id_markup").hide().attr("disabled", true).prev("label").hide();
+            }
+            
+            else if (method == '==') {
+                
+                $("#id_value").attr("disabled", false).show().trigger('focus').prev("label").show();
+                $("#id_markup").hide().attr("disabled", true).prev("label").hide();
+            }
+            else {
+                $("#id_markup").attr("disabled", false).show().trigger('focus').prev("label").show();
+                $("#id_value").hide().attr("disabled", true).prev("label").hide();
+            }
+            if (method == '%~') {
+                $("#rounding_warning").show();
+            }
+            else {
+                $("#rounding_warning").hide();
+            }            
+        };
+        
+        $(function() {
+            var radio =  $('[name="method"]');
+            var method = $('[name="method"]:checked');           
+            toggleControls(method.val());
+            radio.live('change', function() { toggleControls($(this).val()) });
+        });
+    </script>
+    <form id="modify_markup_form" action="{% url modify_temp_price price.product.id price.pricelist.name %}" method="post">
+        {{ form.as_p }}
+        <p id="rounding_warning" style="font-size:80%">Il ricarico effettivo sar&agrave; maggiore a causa dell'arrotondamento.</p>
+        <input id="modify_markup" type="submit" value="Cambia" />
+	<input id="current_product_pk" type="hidden" value="{{price.product.id}}" />
+    </form>
+<div>

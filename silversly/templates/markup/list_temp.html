@@ -1,0 +1,39 @@
+{% if pricelists %}
+    <div id="pricelists">
+    {% for pricelist in pricelists %}
+        <div class="pricelist_box">
+            <div class="pricelist_name">
+                {{ pricelist.name }}
+            </div>
+            <p class="pricelist_desc">
+                {{ pricelist.desc }}
+            </p>
+            <div class="netprice">
+                <div>netto:</div> 
+                {{ pricelist.calculated_price.net }}&euro;
+            </div>
+            <div class="taxes">
+                <div>iva:</div> 
+                {{ pricelist.calculated_price.tax }}&euro;
+            </div>
+            <p class="fullprice">{{ pricelist.calculated_price.full }}&euro;</p>
+            <div class="actions">
+            {% if pricelist.customized %}
+            <a class="open_modify_markup_dialog" href="{% url modify_temp_price product.id pricelist.name %}" title="Modifica il listino"><img src="/media/img/edit.png"/></a>
+            <a class="reset_price" id="reset_price" href="{% url reset_temp_price pricelist.price.id %}" title="Usa i valori standard di questo listino"><img src="/media/img/edit-undo.png"/></a>
+            {% else %}
+            <a class="open_modify_markup_dialog" href="{% url modify_temp_price product.id pricelist.name %}" title="Modifica il listino"><img src="/media/img/edit.png"/></a>
+            {% endif %}
+            </div>
+            
+            
+            
+        </div>
+            
+    {% endfor %}
+    <div class="clearfix"></div>
+    </div>
+    
+{% else %}
+    <p class="notice">Non esistono listini.</p> 
+{% endif %}

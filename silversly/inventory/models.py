@@ -65,6 +65,9 @@ class Supplier(models.Model):
     phone = models.CharField(_("Telefono"), max_length=15, default=None, blank=True)
     fax = models.CharField(_("Fax"), max_length=15, default=None, blank=True)
     email = models.CharField(_("E-mail"), max_length=30, default=None, blank=True)
+    
+    def clean(self):
+        self.name = self.name.strip().capitalize()
 
     def __unicode__(self):
         return self.name
@@ -136,6 +139,9 @@ class Product(models.Model):
     def add(self, quantity):
         self.quantity += quantity
 
+    def clean(self):
+        self.name = self.name.strip()
+
     def update_base_price(self):        
         supplies = Supply.objects.filter(product = self)
         if (supplies.count() > 0):
@@ -155,12 +161,21 @@ class IncomingProduct(models.Model):
     actual_product = models.ForeignKey('Product', null=True, blank=True)
     batch = models.ForeignKey('BatchLoad')
     
-    quantity = models.DecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3, default = 0)
+    quantity = models.DecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3)
     
     new_supplier_code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
     new_supplier_price = models.DecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
 
+    new_base_price = models.DecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 3, default = 0)
     new_prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'NewPrice', null = True)
+
+    def clean(self):
+        supplies = Supply.objects.filter(product = self.actual_product).exclude(supplier = self.batch.supplier)
+        self.new_supplier_price = self.new_supplier_price or 0
+        if supplies:
+            self.new_base_price = sum([supply.price for supply in supplies], self.new_supplier_price) / (len(supplies) + 1)
+        else:
+            self.new_base_price = self.new_supplier_price
 
     class Meta:
         unique_together = ['batch', 'actual_product']
@@ -182,9 +197,9 @@ class NewPrice(models.Model):
         if self.method == "==":
             full_price = self.value.quantize(default_precision)
         elif self.method == "%=":
-            full_price = (self.product.actual_product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
+            full_price = (self.product.new_base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
         else:
-            estimated_net_price = self.product.actual_product.base_price * Decimal(str(100 + self.markup)) / 100
+            estimated_net_price = self.product.new_base_price * Decimal(str(100 + self.markup)) / 100
             full_price = (estimated_net_price * Decimal(str(100 + taxes)) / 100)
             if full_price <= .25:
                 module = Decimal('.01')

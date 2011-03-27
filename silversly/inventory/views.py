@@ -177,6 +177,17 @@ def save_batch_load(request, batch_id):
             supply = Supply.objects.get(supplier = batch.supplier, product = dest)
         except:
             supply = Supply(supplier = batch.supplier, product = dest)
+        new_prices = NewPrice.objects.filter(product = item)
+        for new_price in new_prices:
+            try:
+                price = Price.objects.get(pricelist = new_price.pricelist, product = dest)
+            except:
+                price = Price(pricelist = new_price.pricelist, product = dest)
+            price.method = new_price.method
+            price.value = new_price.value
+            price.markup = new_price.markup
+            price.save()
+
         dest.quantity += item.quantity
         supply.price = item.new_supplier_price
         supply.code = item.new_supplier_code
@@ -207,10 +218,20 @@ def add_product_to_batch(request, batch_id):
         editable_product = IncomingProduct(actual_product=product, batch=batch, 
              new_supplier_code=supply.code,
              new_supplier_price=supply.price)
+        
     if request.method == "POST":
         form = IncomingProductForm(request.POST, instance=editable_product)
         if form.is_valid():
-            form.save()
+            if editable_product.pk:
+                form.save()
+            else:
+                form.save() 
+                actual_prices = Price.objects.filter(product = editable_product.actual_product)
+                print actual_prices
+                for price in actual_prices:
+                    newprice = NewPrice(method = price.method, value = price.value, markup = price.markup, product = editable_product, pricelist = price.pricelist)
+                    newprice.save()
+                               
             return render_to_response('batch_load/product_row.html',  {'batch': batch, 'item':  editable_product})
         else:
             bad_request = True	
@@ -354,6 +375,33 @@ def list_prices(request, product_id):
         else:
             pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
     return render_to_response('markup/list.html', {'pricelists': pricelists, 'product': product})
+    
+def list_temp_prices(request):
+    product_id = request.GET["product_pk"]
+    prices = list(NewPrice.objects.filter(product = product_id))
+    product = IncomingProduct.objects.get(pk=product_id)
+    #vanilla_pricelists = Pricelist.objects.exclude(name__in = [markup.pricelist.name for markup in markups])
+        
+    pricelists = Pricelist.objects.all()
+    for pricelist in pricelists:
+        for price in prices:
+            if price.pricelist == pricelist:
+                pricelist.price = price
+                prices.remove(price)
+                pricelist.customized = True
+                break
+        else:
+            price = NewPrice(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
+            # this does not save anything to the db!
+            pricelist.price = price
+        pricelist.calculated_price = pricelist.price.calculate_price()
+        if pricelist.price.method == '==':    
+            pricelist.desc = "Prezzo fisso"
+        elif pricelist.price.method == '%~':
+            pricelist.desc = "Prezzo base + %d%% (arrotondato)" % pricelist.price.markup 
+        else:
+            pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
+    return render_to_response('markup/list_temp.html', {'pricelists': pricelists, 'product': product})
 
 def modify_price(request, product_id, pricelist_id):
     try:
@@ -383,8 +431,35 @@ def reset_price(request, price_id):
         price.delete()
         return HttpResponse(status=200)
     return HttpResponse(status=400)
-
+    
+def modify_temp_price(request, product_id, pricelist_id):
+    try:
+        price = NewPrice.objects.get(product__id = product_id, pricelist__name = pricelist_id)
+    except NewPrice.DoesNotExist:
+        product = IncomingProduct.objects.get(pk=product_id)
+        pricelist = Pricelist.objects.get(pk=pricelist_id)
+        price = NewPrice(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, value=0)
+    bad_request = False
+    if request.method == "POST":
+        form = ModifyPriceForm(request.POST, instance = price)
+        if form.is_valid():
+            form.save()
+        else:
+            bad_request = True
+    else:
+        form = ModifyPriceForm(instance = price)
+    response = render_to_response('product/dialogs/modify_markup_temp.html', {'form':  form, 'price': price})
+    if bad_request: 
+        response.status_code = 400
+    return response   
         
+        
+def reset_temp_price(request, price_id):
+    if request.is_ajax():
+        price = get_object_or_404(NewPrice, pk=price_id)
+        price.delete()
+        return HttpResponse(status=200)
+    return HttpResponse(status=400)        
 
 def history_tab(request, product_id):
     product = get_object_or_404(Product, pk=id)

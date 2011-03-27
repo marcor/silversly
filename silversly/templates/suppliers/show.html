@@ -7,6 +7,11 @@
         function removeDialogs() {
             $(".dialog").remove();            
         }
+	
+	String.prototype.capitalize = function() {
+		return this.charAt(0).toUpperCase() + this.slice(1);
+	}
+
         
         $( "#tabset" ).tabs({'cache': true});
         
@@ -19,7 +24,9 @@
         
         $( "#header" ).bind('infoUpdated', 
             function(event) {
-                $( "#header>h1" ).html($("#supplier_info [name=name]").get(0).value);
+                var name_field = $("#supplier_info [name=name]")
+		name_field.val(name_field.val().trim().capitalize());
+                $( "#header>h1" ).html(name_field.val());
             });
         
         $( "#save_supplier" ).live('click', function() {

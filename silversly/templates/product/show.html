@@ -36,7 +36,9 @@
         
         $( "#header" ).bind('infoUpdated', 
             function(event) {
-                $( "#header>h1" ).html($("#product_info [name=name]").get(0).value);
+		var name_field = $("#product_info [name=name]")
+		name_field.val(name_field.val().trim());
+                $( "#header>h1" ).html(name_field.val());
             });
         
         $( "#product_info" ).live('submit', function() {
