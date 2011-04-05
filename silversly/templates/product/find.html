@@ -24,7 +24,7 @@
             }
             $("#message").hide();
             var box = $("#infobox");
-            $(".suppliers").load("/articolo/" + product.pk + "/fornitori/readonly");
+            $(".suppliers").load("/articolo/" + product.pk + "/fornitori/readonly/");
             
             $(".title", box).html(product.fields.name);
             /*$(".code>span", box).html(product.fields.code);*/
@@ -38,7 +38,7 @@
                 "type": "GET",
                 "dataType": "json",
                 "success": function(data) {
-                    $(".price>span", box).html(data.full);
+                    $(".price>span", box).html(data.gross);
                 }
             });
             

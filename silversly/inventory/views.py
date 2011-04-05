@@ -184,7 +184,7 @@ def save_batch_load(request, batch_id):
             except:
                 price = Price(pricelist = new_price.pricelist, product = dest)
             price.method = new_price.method
-            price.value = new_price.value
+            price.gross = new_price.value
             price.markup = new_price.markup
             price.save()
 
@@ -229,7 +229,7 @@ def add_product_to_batch(request, batch_id):
                 actual_prices = Price.objects.filter(product = editable_product.actual_product)
                 print actual_prices
                 for price in actual_prices:
-                    newprice = NewPrice(method = price.method, value = price.value, markup = price.markup, product = editable_product, pricelist = price.pricelist)
+                    newprice = NewPrice(method = price.method, value = price.gross, markup = price.markup, product = editable_product, pricelist = price.pricelist)
                     newprice.save()
                                
             return render_to_response('batch_load/product_row.html',  {'batch': batch, 'item':  editable_product})
@@ -300,12 +300,13 @@ def prices_tab(request, product_id):
     return render_to_response('product/tabs/prices.html', {'product': product, 
             'can_add_supply': product.suppliers.count() < Supplier.objects.count()})
 
-def list_supplies(request, product_id, simple=False):
+def list_supplies(request, product_id):
     supplies = Supply.objects.filter(product__id = product_id)
-    if simple:
-        return render_to_response('supply/list_simple.html', {'supplies': supplies})
-    else:
-        return render_to_response('supply/list.html', {'supplies': supplies, 'product': Product.objects.get(pk=product_id)})
+    return render_to_response('supply/list.html', {'supplies': supplies, 'product': Product.objects.get(pk=product_id)})
+    
+def list_supplies_readonly(request, product_id):
+    supplies = Supply.objects.filter(product__id = product_id)
+    return render_to_response('supply/list_simple.html', {'supplies': supplies})
     
 def add_supply(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
@@ -366,14 +367,15 @@ def list_prices(request, product_id):
         else:
             price = Price(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
             # this does not save anything to the db!
+            price.update()
             pricelist.price = price
-        pricelist.calculated_price = pricelist.price.calculate_price()
         if pricelist.price.method == '==':    
             pricelist.desc = "Prezzo fisso"
         elif pricelist.price.method == '%~':
             pricelist.desc = "Prezzo base + %d%% (arrotondato)" % pricelist.price.markup 
         else:
-            pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
+            pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup
+        price.tax = price.gross - price.net
     return render_to_response('markup/list.html', {'pricelists': pricelists, 'product': product})
     
 def list_temp_prices(request):
@@ -409,7 +411,7 @@ def modify_price(request, product_id, pricelist_id):
     except Price.DoesNotExist:
         product = Product.objects.get(pk=product_id)
         pricelist = Pricelist.objects.get(pk=pricelist_id)
-        price = Price(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, value=0)
+        price = Price(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, gross = 0)
     bad_request = False
     if request.method == "POST":
         form = ModifyPriceForm(request.POST, instance = price)
@@ -568,8 +570,8 @@ def ajax_get_prices(request, product_id, pricelist):
             price = Price.objects.get(product = product_id, pricelist = pricelist)
         except:
             price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
-        prices = price.calculate_price()
-        data = simplejson.dumps({'net': str(prices["net"]), 'full': str(prices["full"]), 'tax': str(prices["tax"])})
+            price.update()
+        data = simplejson.dumps({'net': str(price.net), 'gross': str(price.gross), 'tax': str(price.gross - price.net)})
         return HttpResponse(data, 'application/javascript')
     return HttpResponse(status=400)
         

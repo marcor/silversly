@@ -282,7 +282,8 @@ class Invoice(models.Model):
         
 class Price(models.Model):
     method = models.CharField(_("Tipo di prezzo"), max_length = 2, choices = PRICE_MAKING_METHODS)
-    value = models.DecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2, null = True) 
+    gross = models.DecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2)
+    net = models.DecimalField(_("Prezzo netto"), max_digits = 7, decimal_places = 2, null = True)     
     markup = models.PositiveSmallIntegerField(_("Percentuale ricarico"), null = True)
     pricelist = models.ForeignKey(Pricelist, verbose_name = _("Listino"))
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
@@ -293,31 +294,31 @@ class Price(models.Model):
         else:
             return "+%s%%" % self.markup
     
-    def calculate_price(self, taxes=20, default_precision=Decimal(".01")):
-        if self.method == "==":
-            full_price = self.value.quantize(default_precision)
-        elif self.method == "%=":
-            full_price = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
+    def update(self, taxes=20, default_precision=Decimal(".01")):
+        if self.method == "%=":
+            self.gross = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
         else:
-            estimated_net_price = self.product.base_price * Decimal(str(100 + self.markup)) / 100
-            full_price = (estimated_net_price * Decimal(str(100 + taxes)) / 100)
-            if full_price <= .25:
+            estimated_net = self.product.base_price * Decimal(str(100 + self.markup)) / 100
+            gross = (estimated_net * Decimal(str(100 + taxes)) / 100)
+            if gross <= .25:
                 module = Decimal('.01')
-            elif full_price <= 1:
+            elif gross <= 1:
                 module = Decimal('.05')
-            elif full_price < 10:
+            elif gross < 10:
                 module = Decimal('.2')
-            elif full_price < 100:
+            elif gross < 100:
                 module = Decimal('.5')
             else:
                 module = Decimal('1')
-            corrected_price = full_price  + module / 2 # this guarantees that the price gets always rounded up
-            full_price = (corrected_price - corrected_price.remainder_near(module)).quantize(default_precision)
+            corrected_price = gross  + module / 2 # this guarantees that the price gets always rounded up
+            self.gross = (corrected_price - corrected_price.remainder_near(module)).quantize(default_precision)
         
-        taxes = (full_price /  6).quantize(default_precision)
-        net_price = full_price - taxes
-        return {'net': net_price, 'full': full_price, 'tax': taxes}
-        
+        self.net = (self.gross / 6 * 5).quantize(default_precision)
+    
+    def save(self, *args, **kwargs):
+        self.update()       
+        super(Price, self).save(*args, **kwargs)            
+            
     class Meta:
         verbose_name = _("Prezzo di vendita")
         verbose_name_plural = _("Prezzi di vendita")

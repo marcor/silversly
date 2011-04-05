@@ -9,7 +9,7 @@ urlpatterns = patterns('inventory.views',
     
     url(r'articolo/(\d+)/fornitore/aggiungi', 'add_supply', name='add_supply'),
     url(r'articolo/(\d+)/fornitori/$', 'list_supplies', name='list_supplies'),
-    url(r'articolo/(\d+)/fornitori/readonly/', 'list_supplies', name='list_supplies_readonly', kwargs={'simple': True}),
+    url(r'articolo/(\d+)/fornitori/readonly/', 'list_supplies_readonly', name='list_supplies_readonly'),
     
     url(r'articolo/(\d+)/listini/', 'list_prices', name='list_prices'),
     url(r'articolo_temp/listini/', 'list_temp_prices', name='list_temp_prices'),

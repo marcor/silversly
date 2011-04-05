@@ -10,13 +10,13 @@
             </p>
             <div class="netprice">
                 <div>netto:</div> 
-                {{ pricelist.calculated_price.net }}&euro;
+                {{ pricelist.price.net }}&euro;
             </div>
             <div class="taxes">
                 <div>iva:</div> 
-                {{ pricelist.calculated_price.tax }}&euro;
+                {{ pricelist.price.tax }}&euro;
             </div>
-            <p class="fullprice">{{ pricelist.calculated_price.full }}&euro;</p>
+            <p class="fullprice">{{ pricelist.price.gross }}&euro;</p>
             <div class="actions">
             {% if pricelist.customized %}
             <a class="open_modify_markup_dialog" href="{% url modify_price product.id pricelist.name %}" title="Modifica il listino"><img src="/media/img/edit.png"/></a>

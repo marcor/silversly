@@ -50,19 +50,19 @@ class ModifyPriceForm(ModelForm):
         if not method:
             if self._errors.has_key("markup"):
                 del(self._errors["markup"])
-            if self._errors.has_key("value"):
-                del(self._errors["value"])
+            if self._errors.has_key("gross"):
+                del(self._errors["gross"])
         elif method == '==':
             if self._errors.has_key("markup"):
                 del(self._errors["markup"])
         else:
-            if self._errors.has_key("value"):
-                del(self._errors["value"])
+            if self._errors.has_key("gross"):
+                del(self._errors["gross"])
         return cleaned_data
             
     class Meta:
         model = Price
-        fields = ("method", "value", "markup")
+        fields = ("method", "gross", "markup")
 
 class ChildCategoryForm(ModelForm):
     class Meta:
