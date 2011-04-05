@@ -101,7 +101,8 @@
             },
             focus: function( event, ui ) {
                 /*$( "#products" ).val( ui.item.fields.name );*/
-                showInfo(ui.item);
+                if (event.keyCode !== undefined)
+                    showInfo(ui.item);
                 return false;
             },
 			select: function( event, ui ) {
@@ -117,6 +118,16 @@
                 .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
                 .appendTo( ul );
         };
+        
+        $(".ui-menu-item").live("contextmenu", function(event) {
+            if (event.which == 3) {
+                var item = $(this).data("item.autocomplete");
+                showInfo(item);
+            }
+                /*alert($("#products").autocomplete("widget").menu("widget"));*/
+            return false;
+        });
+            
 {% endblock %}
 
 {% block header %}
