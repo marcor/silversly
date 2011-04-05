@@ -2,6 +2,10 @@
 
 {% block title %}Cerca un articolo{% endblock %}
 
+{% block head %} 
+    <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
+{% endblock %}
+
 {% block jquery %}
 	{{ block.super }}
 	
@@ -11,8 +15,14 @@
             $(".dialog").remove();            
         }
         
-        function showInfo(product) {
+        $("#main").bind("showResult", function(e, product) {
             chosenProduct = product;
+            if (!product) {
+                $("#infobox").hide();
+                $("#message").show();
+                return;
+            }
+            $("#message").hide();
             var box = $("#infobox");
             $(".suppliers").load("/articolo/" + product.pk + "/fornitori/readonly");
             
@@ -23,10 +33,10 @@
             } else {
                 $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit);
             }
-	    $.ajax({
+            $.ajax({
                 "url": "/articolo/" + product.pk + "/prezzi_listino/Pubblico/ajax/",
                 "type": "GET",
-		"dataType": "json",
+                "dataType": "json",
                 "success": function(data) {
                     $(".price>span", box).html(data.full);
                 }
@@ -35,14 +45,8 @@
             $( "#go" ).attr("href", "/articolo/" + product.pk);
             $( "#sell" ).attr("href", "/carrello/aggiungi_articolo/" + product.pk);
             
-            
             box.show();
-        }
-        
-        function showNothing() {
-            $("#infobox").hide();
-            $("#message").show();            
-        }
+        });
         
         $("#products").trigger("focus");
         $( "#go,#sell,#load" ).button();
@@ -74,59 +78,8 @@
             return false;
         });
         
-		$( "#products" ).autocomplete({
-			source: function(request, response) {
-                $.ajax({
-                    "url": "{% url ajax_find_product %}",
-                    "data": {'term': request.term},
-                    "dataType": "json",
-                    "success": function(results) {
-                        if (results.length > 0) { 
-                            if (results[0].perfect_match) {
-                                showInfo(results[0]);
-                                response([])
-                            } else {
-                                response(results);
-                            }
-                        } else {
-                            response(results);
-                            showNothing();                            
-                        }
-                    }
-                });
-            },
-            minLength: 3,
-            search: function(event, ui) {
-                $("#message").hide();
-            },
-            focus: function( event, ui ) {
-                /*$( "#products" ).val( ui.item.fields.name );*/
-                if (event.keyCode !== undefined)
-                    showInfo(ui.item);
-                return false;
-            },
-			select: function( event, ui ) {
-                /*$( "#products" ).val( ui.item.fields.name );*/
-                if (ui.item) {
-                    showInfo(ui.item);
-                }
-                return false;
-			}
-		}).data( "autocomplete" )._renderItem = function( ul, item ) {
-            return $( "<li></li>" )
-                .data( "item.autocomplete", item )
-                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
-                .appendTo( ul );
-        };
+		$("#products").autocomplete({source_url: "{% url ajax_find_product %}"});
         
-        $(".ui-menu-item").live("contextmenu", function(event) {
-            if (event.which == 3) {
-                var item = $(this).data("item.autocomplete");
-                showInfo(item);
-            }
-                /*alert($("#products").autocomplete("widget").menu("widget"));*/
-            return false;
-        });
             
 {% endblock %}
 
