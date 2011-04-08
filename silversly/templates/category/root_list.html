@@ -9,7 +9,7 @@
 {% block content %}
     <ul id="categories">
     {% for category in children %}
-        <li><a href="{{ category.get_absolute_url }}">{{ category }} ({{ category.total_products }})</a></li>
+        <li><a href="{% url list_by_category category.id %}">{{ category }} ({{ category.total_products }})</a></li>
     {% endfor %}
     </ul>
 {% endblock %}

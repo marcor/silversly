@@ -22,24 +22,10 @@ class ModifySupplyForm(ModelForm):
         model = Supply
         fields = ("price", "code")
 
-
-class SupplierForm(ModelForm):
-    class Meta:
-        model = Supplier
-
 class BatchSupplierForm(ModelForm):
 	class Meta:
 		model = BatchLoad
 		fields = ("document_ref", "supplier")
-
-class CustomerForm(ModelForm):
-    class Meta:
-        model = Customer
-        fields = ("name", "code", "phone", "email", "payment_method", "bank", "costs")
-
-class MainAddressForm(ModelForm):
-    class Meta: 
-        model = Address
 
 class ModifyPriceForm(ModelForm):
     method = ChoiceField(required=True, label="Tipo di prezzo", choices=PRICE_MAKING_METHODS, initial="==", widget=RadioSelect)

@@ -10,42 +10,39 @@
 	{{ block.super }}
 	
         var chosenProduct;
+        var cache = {};
         
         $("#main").bind("showResult", function(e, product) {
             chosenProduct = product;
+            var box = $("#infobox").hide();
             if (!product) {
                 $("#infobox").hide();
                 $("#message").show();
                 return;
             }
             $("#message").hide();
-            var box = $("#infobox");
-            $(".suppliers").load("/articolo/" + product.pk + "/fornitori/readonly/");
             
-            $(".title", box).html(product.fields.name);
-            /*$(".code>span", box).html(product.fields.code);*/
-            if (parseFloat(product.fields.quantity) < parseFloat(product.fields.min_quantity)) {
-                $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit + " <span style=\"color:red\">(sottoscorta)</span>");
-            } else {
-                $(".quantity>span", box).html(product.fields.quantity + " " + product.fields.unit);
-            }
-            $.ajax({
-                "url": "/articolo/" + product.pk + "/prezzi_listino/Pubblico/ajax/",
-                "type": "GET",
-                "dataType": "json",
-                "success": function(data) {
-                    $(".price>span", box).html(data.gross);
-                }
-            });
+            if (product.pk in cache) {
+                box.html(cache[product.pk]).show();
+                $(".button", box).button();
+            }  
+            else {
+                $.get("{% url show_infobox %}", 
+                    {'id': product.pk}, 
+                    function(data) { 
+                        cache[product.pk] = data; 
+                        box.html(data).show();
+                        $(".button", box).button();
+                    }
+                );
+            };
             
-            $( "#go" ).attr("href", "/articolo/" + product.pk);
-            $( "#sell" ).attr("href", "/carrello/aggiungi_articolo/" + product.pk);
+            $( "#go" ).attr("href", "/articoli/" + product.pk);
+            $( "#sell" ).attr("href", "/articoli/carrello/aggiungi_articolo/" + product.pk);
             
-            box.show();
         });
         
         $("#products").trigger("focus");
-        $( "#go,#sell,#load" ).button();
         
         $( "#sell" ).live('click', function() {
             var sell_button = $(this);
@@ -93,17 +90,6 @@
     <div id="message" style="display:none">Nessun risultato</div>
     
     <div id="infobox" class="framed" style="display: none">
-        <div class="title"></div>
-        <!--<div class="code">Codice: <span></span></div>-->
-        <div class="quantity">Disponibilit&agrave;: <span></span></div>
-        <div class="price">Prezzo al pubblico: <span>0</span>&euro;</div>
-        <div class="suppliers">
-        </div>
-        <br/>
-        
-        <a id="go" href="#">Scheda</a>
-        <a id="sell" href="#">Vendi</a>
-        <a id="load" href="#">Carica</a>
     </div>
     
     <div id="sell_product_dialog" title="Vendi questo prodotto" class="dialog"></div>

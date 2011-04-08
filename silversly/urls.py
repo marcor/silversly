@@ -12,7 +12,8 @@ urlpatterns = patterns('',
     (r'^media/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': settings.MEDIA_ROOT}),
     url(r'^$', 'inventory.views.find_product'),
-    (r'', include('inventory.urls')),
-    
+    url(r'^articoli/', include('inventory.urls')),
+    url(r'^anagrafica/', include('people.urls')),
+    #(r'', include('inventory.urls')),    
 )
 

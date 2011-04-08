@@ -15,10 +15,10 @@ class Migration(SchemaMigration):
 
         # Adding field 'Price.net'
         db.add_column('inventory_price', 'net', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=7, decimal_places=2), keep_default=False)
-	
+    
         for price in Price.objects.all():
             #price.net = (price.gross / 6 * 5).quantize(Decimal(".01"))	
-	    price.save()
+            price.save()
 
 
     def backwards(self, orm):

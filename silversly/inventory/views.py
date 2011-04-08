@@ -2,6 +2,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from models import *
 from forms import *
+from people.models import Supplier
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
 from django.core import serializers
@@ -20,6 +21,20 @@ def find_product(request):
 def show_product(request, id):
     product = get_object_or_404(Product, pk=id)
     return render_to_response('product/show.html', {'product': product})
+
+def show_infobox(request):
+    product = get_object_or_404(Product, pk=request.GET["id"])
+    pricelist_name = "Pubblico"
+    try:
+        price = Price.objects.get(product = product, pricelist__name = pricelist_name)
+    except:
+        pricelist = Pricelist.objects.get(name = pricelist_name)
+        price = Price(product = product, 
+            pricelist = pricelist,
+            method = pricelist.default_method, 
+            markup = pricelist.default_markup)
+    supplies = Supply.objects.filter(product = product)
+    return render_to_response('product/snippets/infobox.html', {'product': product, 'price': price, 'supplies': supplies})
 
 def add_product(request):
     status = 200
@@ -54,7 +69,12 @@ def delete_product(request, product_id):
 
 def load_products(request):
     pass
-    
+
+
+#
+# CATEGORIE
+#
+
 def list_by_category(request, id):
     category = get_object_or_404(Category, pk=id)
     child_categories = Category.objects.filter(parent = category)
@@ -85,58 +105,61 @@ def add_category(request, parent_id=None, formclass=None):
         template = 'category/add.html'
     return render_to_response(template, {'form': form})
 
-
 #
-#   FORNITORI
+# FORNITURE (SUPPLIER+PRODUCT)
 #
 
-def find_supplier(request):
+def list_supplies(request, product_id):
+    supplies = Supply.objects.filter(product__id = product_id)
+    return render_to_response('supply/list.html', {'supplies': supplies, 'product': Product.objects.get(pk=product_id)})
+    
+def list_supplies_readonly(request, product_id):
+    supplies = Supply.objects.filter(product__id = product_id)
+    return render_to_response('supply/list_simple.html', {'supplies': supplies})
+
+def remove_supply(request, supply_id):
     if request.is_ajax():
-        term = unquote(request.GET["term"])
-        matching_suppliers = Supplier.objects.filter(name__icontains = term)
-        data = serializers.serialize("json", matching_suppliers)
-        return HttpResponse(data, 'application/javascript')
-    return render_to_response('suppliers/find.html')
+        supply = get_object_or_404(Supply, pk=supply_id)
+        supply.delete()
+        return HttpResponse(status=200)
+    return HttpResponse(status=400)
     
-def show_supplier(request, id):
-    supplier = get_object_or_404(Supplier, pk=id)
-    return render_to_response('suppliers/show.html', {'supplier': supplier})
-
-def add_supplier(request):
-    if request.method == 'POST':
-        form = SupplierForm(request.POST)
+def add_supply(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    bad_request = False
+    supply = Supply(product = product)
+    if request.method == "POST":
+        form = SupplyForm(request.POST, instance = supply)
         if form.is_valid():
-            new_supplier = form.save()
-            if request.is_ajax():
-                return render_to_response('suppliers/ajax_add.html')
-            else:
-                return redirect(show_supplier, new_supplier.id)
+            form.save()
+        else:
+            bad_request = True
     else:
-        form = SupplierForm()
-    return render_to_response('suppliers/%sadd.html' % (request.is_ajax() and 'ajax_' or ''), {'form': form})
-
-#
-#   CLIENTI
-#
-
-def find_customer(request):
-    return render_to_response('customers/find.html')
+        form = SupplyForm(instance = supply)
+    # query da semplificare: Supplier.objects.exclude(products__in ... ) o qualcosa del genere
+    form.fields["supplier"].queryset = Supplier.objects.exclude(pk__in=product.suppliers.all())
+    response = render_to_response('product/dialogs/add_supply.html', {'form':  form, 'product': product})
+    if bad_request: 
+        response.status_code = 400
+    return response
     
-def show_customer(request, id):
-    customer = get_object_or_404(Customer, pk=id)
-    return render_to_response('customers/show.html', {'customer': customer})
-
-def add_customer(request):
-    #CustomerFormset = inlineformset_factory(Address, Customer, fk_name="main_address")
-    if request.method == 'POST':
-        form = CustomerForm(request.POST)
+def modify_supply(request, supply_id):
+    supply = get_object_or_404(Supply, pk=supply_id)
+    bad_request = False
+    if request.method == "POST":
+        form = ModifySupplyForm(request.POST, instance = supply)
         if form.is_valid():
-            new_customer = form.save()
-            return redirect(show_customer, new_customer.id)
+            form.save()
+        else:
+            bad_request = True
     else:
-        form = CustomerForm()
-        print form
-    return render_to_response('customers/%sadd.html' % (request.is_ajax() and 'ajax_' or ''), {'form': form})
+        form = ModifySupplyForm(instance = supply)
+    #del(form.fields["supplier"])
+    response = render_to_response('product/dialogs/modify_supply.html', {'form':  form, 'supply': supply})
+    if bad_request: 
+        response.status_code = 400
+    return response
+
 
 #
 # RIFORNIMENTI
@@ -264,89 +287,51 @@ def create_product_dialog(request):
     response.status_code = status
     return response
 
-#
-# VENDITE
-#
 
-def show_cart(request):
-    pass
-
-#____________________
 #
-# AJAX only views 
-#____________________
+# PREZZI
 #
 
-#---- children of the show_product view
+# xxx: lots of unnecessary duplication here
 
-def product_tab(request, id):
-    product = get_object_or_404(Product, pk=id)
+def modify_price(request, product_id, pricelist_id):
+    try:
+        price = Price.objects.get(product__id = product_id, pricelist__name = pricelist_id)
+    except Price.DoesNotExist:
+        product = Product.objects.get(pk=product_id)
+        pricelist = Pricelist.objects.get(pk=pricelist_id)
+        price = Price(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup)
     bad_request = False
     if request.method == "POST":
-        form = ProductForm(request.POST, instance = product)
+        form = ModifyPriceForm(request.POST, instance = price)
         if form.is_valid():
             form.save()
         else:
             bad_request = True
     else:
-        form = ProductForm(instance = product)
-    response = render_to_response('product/tabs/main.html', {'form': form, 'product': product})
+        form = ModifyPriceForm(instance = price)
+    response = render_to_response('product/dialogs/modify_price.html', {'form':  form, 'price': price})
     if bad_request: 
         response.status_code = 400
     return response
 
-def prices_tab(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
-    return render_to_response('product/tabs/prices.html', {'product': product, 
-            'can_add_supply': product.suppliers.count() < Supplier.objects.count()})
-
-def list_supplies(request, product_id):
-    supplies = Supply.objects.filter(product__id = product_id)
-    return render_to_response('supply/list.html', {'supplies': supplies, 'product': Product.objects.get(pk=product_id)})
-    
-def list_supplies_readonly(request, product_id):
-    supplies = Supply.objects.filter(product__id = product_id)
-    return render_to_response('supply/list_simple.html', {'supplies': supplies})
-    
-def add_supply(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
+def modify_temp_price(request, product_id, pricelist_id):
+    try:
+        price = NewPrice.objects.get(product__id = product_id, pricelist__name = pricelist_id)
+    except NewPrice.DoesNotExist:
+        product = IncomingProduct.objects.get(pk=product_id)
+        pricelist = Pricelist.objects.get(pk=pricelist_id)
+        price = NewPrice(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, value=0)
     bad_request = False
-    supply = Supply(product = product)
     if request.method == "POST":
-        form = SupplyForm(request.POST, instance = supply)
+        form = ModifyPriceForm(request.POST, instance = price)
         if form.is_valid():
             form.save()
         else:
             bad_request = True
     else:
-        form = SupplyForm(instance = supply)
-    # query da semplificare: Supplier.objects.exclude(products__in ... ) o qualcosa del genere
-    form.fields["supplier"].queryset = Supplier.objects.exclude(pk__in=product.suppliers.all())
-    response = render_to_response('product/dialogs/add_supply.html', {'form':  form, 'product': product})
-    if bad_request: 
-        response.status_code = 400
-    return response
-
-def remove_supply(request, supply_id):
-    if request.is_ajax():
-        supply = get_object_or_404(Supply, pk=supply_id)
-        supply.delete()
-        return HttpResponse(status=200)
-    return HttpResponse(status=400)
-
-def modify_supply(request, supply_id):
-    supply = get_object_or_404(Supply, pk=supply_id)
-    bad_request = False
-    if request.method == "POST":
-        form = ModifySupplyForm(request.POST, instance = supply)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = ModifySupplyForm(instance = supply)
-    #del(form.fields["supplier"])
-    response = render_to_response('product/dialogs/modify_supply.html', {'form':  form, 'supply': supply})
+        form = ModifyPriceForm(instance = price)
+    response = render_to_response('product/dialogs/modify_price_temp.html', {'form':  form, 'price': price})
     if bad_request: 
         response.status_code = 400
     return response
@@ -367,7 +352,6 @@ def list_prices(request, product_id):
         else:
             price = Price(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
             # this does not save anything to the db!
-            price.update()
             pricelist.price = price
         if pricelist.price.method == '==':    
             pricelist.desc = "Prezzo fisso"
@@ -376,8 +360,8 @@ def list_prices(request, product_id):
         else:
             pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup
         price.tax = price.gross - price.net
-    return render_to_response('price/list.html', {'pricelists': pricelists, 'product': product})
-    
+    return render_to_response('price/list.html', {'pricelists': pricelists, 'product': product}) 
+
 def list_temp_prices(request):
     product_id = request.GET["product_pk"]
     prices = list(NewPrice.objects.filter(product = product_id))
@@ -405,113 +389,103 @@ def list_temp_prices(request):
             pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
     return render_to_response('price/list_temp.html', {'pricelists': pricelists, 'product': product})
 
-def modify_price(request, product_id, pricelist_id):
-    try:
-        price = Price.objects.get(product__id = product_id, pricelist__name = pricelist_id)
-    except Price.DoesNotExist:
-        product = Product.objects.get(pk=product_id)
-        pricelist = Pricelist.objects.get(pk=pricelist_id)
-        price = Price(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, gross = 0)
-    bad_request = False
-    if request.method == "POST":
-        form = ModifyPriceForm(request.POST, instance = price)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = ModifyPriceForm(instance = price)
-    response = render_to_response('product/dialogs/modify_price.html', {'form':  form, 'price': price})
-    if bad_request: 
-        response.status_code = 400
-    return response   
-        
-        
+def ajax_get_prices(request, product_id, pricelist):
+    if request.is_ajax():
+        pricelist = Pricelist.objects.get(name=pricelist)
+        try:
+            price = Price.objects.get(product = product_id, pricelist = pricelist)
+        except:
+            price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
+        data = simplejson.dumps({'net': str(price.net), 'gross': str(price.gross), 'tax': str(price.gross - price.net)})
+        return HttpResponse(data, 'application/javascript')
+    return HttpResponse(status=400)
+    
 def reset_price(request, price_id):
     if request.is_ajax():
         price = get_object_or_404(Price, pk=price_id)
         price.delete()
         return HttpResponse(status=200)
-    return HttpResponse(status=400)
-    
-def modify_temp_price(request, product_id, pricelist_id):
-    try:
-        price = NewPrice.objects.get(product__id = product_id, pricelist__name = pricelist_id)
-    except NewPrice.DoesNotExist:
-        product = IncomingProduct.objects.get(pk=product_id)
-        pricelist = Pricelist.objects.get(pk=pricelist_id)
-        price = NewPrice(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, value=0)
-    bad_request = False
-    if request.method == "POST":
-        form = ModifyPriceForm(request.POST, instance = price)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = ModifyPriceForm(instance = price)
-    response = render_to_response('product/dialogs/modify_price_temp.html', {'form':  form, 'price': price})
-    if bad_request: 
-        response.status_code = 400
-    return response   
-        
+    return HttpResponse(status=400)        
         
 def reset_temp_price(request, price_id):
     if request.is_ajax():
         price = get_object_or_404(NewPrice, pk=price_id)
         price.delete()
         return HttpResponse(status=200)
-    return HttpResponse(status=400)        
+    return HttpResponse(status=400)
+    
+
+#
+# VENDITE (todo: move this to its own app)
+#
+
+def show_cart(request):
+    pass
+
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    bad_request = False
+    try:
+        cart = Cart.objects.get(current = True)
+    except:
+        cart = Cart()
+        cart.save()
+    item = CartItem(product = product, cart = cart)
+    
+    if request.method == "POST":
+        form = CartItemForm(request.POST, instance = item)
+        if form.is_valid():
+            form.save()
+        else:
+            bad_request = True
+    else:
+        form = CartItemForm(instance = item)
+    
+    response = render_to_response('cart/dialogs/add_product.html', {'form':  form, 'item': item})
+    if bad_request: 
+        response.status_code = 400
+    return response
+
+
+#____________________
+#
+# Tabs 
+#____________________
+#
+
+#
+# children of the show_product view
+#
+
+def product_tab(request, id):
+    product = get_object_or_404(Product, pk=id)
+    bad_request = False
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance = product)
+        if form.is_valid():
+            form.save()
+        else:
+            bad_request = True
+    else:
+        form = ProductForm(instance = product)
+    response = render_to_response('product/tabs/main.html', {'form': form, 'product': product})
+    if bad_request: 
+        response.status_code = 400
+    return response
+
+def prices_tab(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    return render_to_response('product/tabs/prices.html', {'product': product, 
+            'can_add_supply': product.suppliers.count() < Supplier.objects.count()})
 
 def history_tab(request, product_id):
     product = get_object_or_404(Product, pk=id)
     return render_to_response('product/tabs/history.html', {'product': product})
 
-#---- children ogf the show_supplier view
 
-def supplier_info_tab(request, id):
-    supplier = get_object_or_404(Supplier, pk=id)
-    bad_request = False
-    if request.method == "POST":
-        form = SupplierForm(request.POST, instance = supplier)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = SupplierForm(instance = supplier)
-    response = render_to_response('suppliers/tabs/info.html', {'form': form, 'supplier': supplier})
-    if bad_request: 
-        response.status_code = 400
-    return response
-
-def supplier_history_tab(request, supplier_id):
-    supplier = get_object_or_404(Costumer, pk=supplier_id)
-    return render_to_response('suppliers/tabs/history.html', {'supplier': supplier})
-
-#---- children ogf the show_customer view
-
-def customer_info_tab(request, id):
-    customer = get_object_or_404(Customer, pk=id)
-    bad_request = False
-    if request.method == "POST":
-        form = CustomerForm(request.POST, instance = customer)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = CustomerForm(instance = customer)
-    response = render_to_response('customers/tabs/info.html', {'form': form, 'customer': customer})
-    if bad_request: 
-        response.status_code = 400
-    return response
-
-def customer_history_tab(request, customer_id):
-    customer = get_object_or_404(Costumer, pk=customer_id)
-    return render_to_response('customers/tabs/history.html', {'customer': customer})
-
-#---- autocomplete for string fields
+#
+# SEARCHING
+#
 
 def get_name_query(term):
     words = term.split(" ")
@@ -563,42 +537,3 @@ def ajax_find_product2(request):
     return HttpResponse(status=400)
 
 
-def ajax_get_prices(request, product_id, pricelist):
-    if request.is_ajax():
-        pricelist = Pricelist.objects.get(name=pricelist)
-        try:
-            price = Price.objects.get(product = product_id, pricelist = pricelist)
-        except:
-            price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
-            price.update()
-        data = simplejson.dumps({'net': str(price.net), 'gross': str(price.gross), 'tax': str(price.gross - price.net)})
-        return HttpResponse(data, 'application/javascript')
-    return HttpResponse(status=400)
-        
-    
-
-#--- sort this
-
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
-    bad_request = False
-    try:
-        cart = Cart.objects.get(current = True)
-    except:
-        cart = Cart()
-        cart.save()
-    item = CartItem(product = product, cart = cart)
-    
-    if request.method == "POST":
-        form = CartItemForm(request.POST, instance = item)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = CartItemForm(instance = item)
-    
-    response = render_to_response('cart/dialogs/add_product.html', {'form':  form, 'item': item})
-    if bad_request: 
-        response.status_code = 400
-    return response

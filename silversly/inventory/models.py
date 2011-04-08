@@ -2,9 +2,26 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import F
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import datetime
 
+class FixedDecimalField(models.DecimalField):
+    __metaclass__ = models.SubfieldBase
+
+    def __init__(self, *args, **kwargs):
+        self.unit = Decimal("." + "1" * kwargs["decimal_places"])
+        super(FixedDecimalField, self).__init__(*args, **kwargs)
+        
+    def to_python(self, value):
+        if value is None:
+            return value
+        try:
+            return Decimal(value).quantize(self.unit)
+        except InvalidOperation:
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^inventory\.models\.FixedDecimalField"])
 
 PRICE_MAKING_METHODS = (
     (u'==', _(u"Fisso")),
@@ -31,9 +48,10 @@ class Category(models.Model):
         if (self.parent is None):
             return anchor
         return "%s > %s" % (self.parent.breadcrumbs(), anchor)
-
+    
+    @models.permalink
     def get_absolute_url(self):
-        return "/categoria/%i/" % self.id
+        return ('inventory.views.list_by_category', (str(self.id),))
 
     def total_products(self):
         total = Product.objects.filter(category=self).count()
@@ -44,68 +62,7 @@ class Category(models.Model):
     class Meta:
         ordering = ['name']
         verbose_name = _("Categoria")
-        verbose_name_plural = _("Categorie")
-
-class Bank(models.Model):
-    name = models.CharField(_("Descrizione"), max_length=50)
-    abi = models.CharField(_("ABI"), max_length = 5)
-    cab = models.CharField(_("CAB"), max_length = 5)
-    
-    def __unicode__(self):
-        return self.name
-
-class Address(models.Model):
-    street = models.CharField(_("Indirizzo"), max_length = 50)
-    city = models.CharField(_("Città"), max_length=30)
-    province = models.CharField(_("Provincia"), max_length=2)
-    postcode = models.CharField(_("CAP"), max_length=5)    
-
-class Supplier(models.Model):
-    name = models.CharField(_("Nome"), max_length = 50, unique=True)
-    phone = models.CharField(_("Telefono"), max_length=15, default=None, blank=True)
-    fax = models.CharField(_("Fax"), max_length=15, default=None, blank=True)
-    email = models.CharField(_("E-mail"), max_length=30, default=None, blank=True)
-    
-    def clean(self):
-        self.name = self.name.strip().capitalize()
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = _("Fornitore")
-        verbose_name_plural = _("Fornitori")
-
-class RetailCustomer(models.Model):
-    name = models.CharField(_("Nome"), max_length = 50, unique=True)
-    due = models.DecimalField(_(u"Debito"), max_digits = 8, decimal_places = 3, default = 0)
-    phone = models.CharField(_("Telefono"), max_length=15, default=None, blank=True)
-    email = models.CharField(_("E-mail"), max_length=30, default=None, blank=True)
-    
-    def __unicode__(self):
-        return self.name
-    
-class Customer(models.Model):
-    name = models.CharField(_("Nome"), max_length = 50, unique=True)
-    code = models.CharField(_("P. IVA / C. Fiscale"), max_length=20, unique=True)
-    
-    phone = models.CharField(_("Telefono"), max_length=15, default=None, blank=True)
-    email = models.CharField(_("E-mail"), max_length=30, default=None, blank=True)
-    
-    main_address = models.TextField(verbose_name = _("Indirizzo"))
-    shipping_address = models.TextField(verbose_name = _("Indirizzo di spedizione"), null=True, blank=True)
-    
-    payment_method = models.CharField(_("Metodo di pagamento"), max_length = 50)
-    bank = models.OneToOneField('Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
-    costs = models.DecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0) 
-    
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = _("Cliente")
-        verbose_name_plural = _("Clienti")
+        verbose_name_plural = _("Categorie") 
 
 class Pricelist(models.Model):
     name = models.CharField(_("Nome"), max_length = 25, primary_key = True)
@@ -123,16 +80,16 @@ class Product(models.Model):
     code = models.CharField(_("Codice"), max_length = 13)
     name = models.CharField(_("Nome"), max_length = 60, unique = True)
 
-    quantity = models.DecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
-    min_quantity = models.DecimalField(_(u"Scorta minima"), max_digits = 8, decimal_places = 3, default = 0)
+    quantity = FixedDecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
+    min_quantity = FixedDecimalField(_(u"Scorta minima"), max_digits = 8, decimal_places = 3, default = 0)
     unit = models.CharField(_(u"Unità di misura"), max_length = 15)
 
     category = models.ForeignKey(Category, verbose_name = _("Categoria"))
 
-    suppliers = models.ManyToManyField(Supplier, verbose_name = _("Fornitori"), through = 'Supply', null = True)
-    base_price = models.DecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 3, default = 0)
+    suppliers = models.ManyToManyField('people.Supplier', verbose_name = _("Fornitori"), through = 'Supply', null = True)
+    base_price = FixedDecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 2, default = 0)
     prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'Price', null = True)
-
+        
     def __unicode__(self):
         return self.name
 
@@ -146,11 +103,14 @@ class Product(models.Model):
         supplies = Supply.objects.filter(product = self)
         if (supplies.count() > 0):
             supplier_prices = [supply.price for supply in supplies]
-            self.base_price = (sum(supplier_prices) / len(supplier_prices)).quantize(Decimal('.001'))
+            self.base_price = (sum(supplier_prices) / len(supplier_prices))
         else:
             self.base_price = 0
-        print "base price: " + str(self.base_price)
         self.save()
+        prices = Price.objects.filter(product = self).exclude(method = "==")
+        for price in prices:
+            price.update()
+            price.save()
     
     class Meta:
         verbose_name = _("Articolo")
@@ -161,12 +121,12 @@ class IncomingProduct(models.Model):
     actual_product = models.ForeignKey('Product', null=True, blank=True)
     batch = models.ForeignKey('BatchLoad')
     
-    quantity = models.DecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3)
+    quantity = FixedDecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3)
     
     new_supplier_code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
-    new_supplier_price = models.DecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
+    new_supplier_price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
 
-    new_base_price = models.DecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 3, default = 0)
+    new_base_price = FixedDecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 3, default = 0)
     new_prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'NewPrice', null = True)
 
     def clean(self):
@@ -182,7 +142,7 @@ class IncomingProduct(models.Model):
         
 class NewPrice(models.Model):
     method = models.CharField(_("Tipo di prezzo"), max_length = 2, choices = PRICE_MAKING_METHODS)
-    value = models.DecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2, null = True) 
+    value = FixedDecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2, null = True) 
     markup = models.PositiveSmallIntegerField(_("Percentuale ricarico"), null = True)
     pricelist = models.ForeignKey(Pricelist, verbose_name = _("Listino"))
     product = models.ForeignKey(IncomingProduct, verbose_name = _("Prodotto"))
@@ -224,7 +184,7 @@ class NewPrice(models.Model):
         unique_together = ('pricelist', 'product')
     
 class BatchLoad(models.Model):
-    supplier = models.ForeignKey(Supplier, verbose_name = _("Fornitore"), related_name="product_batch", null=True)
+    supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"), related_name="product_batch", null=True)
     document_ref = models.CharField(_(u"Fattura n°"), max_length=5, blank=True) 
     date = models.DateField(auto_now = True)
     loaded = models.BooleanField(default = False)
@@ -232,7 +192,7 @@ class BatchLoad(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-    quantity = models.DecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
+    quantity = FixedDecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
     discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
     update = models.BooleanField(_("Scarica dal magazzino"), default = True)
     
@@ -253,7 +213,7 @@ class Receipt(models.Model):
     number = models.PositiveIntegerField(_("Numero")) 
     date = models.DateTimeField(auto_now = True)
     cart = models.ForeignKey(Cart)
-    customer = models.ForeignKey(RetailCustomer, null=True, blank=True)
+    customer = models.ForeignKey('people.RetailCustomer', null=True, blank=True)
     
     def __unicode__(self):
         return "Scontrino %d del %s" % (self.number, self.date)
@@ -262,7 +222,7 @@ class Ddt(models.Model):
     number = models.PositiveSmallIntegerField(_("Numero"), unique = True) 
     date = models.DateField(auto_now_add = True)
     cart = models.ForeignKey(Cart)
-    customer = models.ForeignKey(RetailCustomer, null=True, blank=True)
+    customer = models.ForeignKey('people.RetailCustomer', null=True, blank=True)
     main_address = models.TextField(verbose_name = _("Indirizzo"))
     shipping_address = models.TextField(verbose_name = _("Indirizzo di spedizione"), null=True, blank=True)
     shipping_date = models.DateTimeField(_("Inizio trasporto"), default = lambda: datetime.datetime.now())
@@ -277,27 +237,32 @@ class Invoice(models.Model):
     number = models.PositiveSmallIntegerField(_("Numero"), unique = True) 
     ddts = models.ManyToManyField(Ddt)
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 50)
-    bank = models.OneToOneField('Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
-    costs = models.DecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0) 
+    bank = models.OneToOneField('people.Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
+    costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0) 
         
 class Price(models.Model):
     method = models.CharField(_("Tipo di prezzo"), max_length = 2, choices = PRICE_MAKING_METHODS)
-    gross = models.DecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2)
-    net = models.DecimalField(_("Prezzo netto"), max_digits = 7, decimal_places = 2, null = True)     
+    gross = FixedDecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2)
+    net = FixedDecimalField(_("Prezzo netto"), max_digits = 7, decimal_places = 2, null = True)     
     markup = models.PositiveSmallIntegerField(_("Percentuale ricarico"), null = True)
     pricelist = models.ForeignKey(Pricelist, verbose_name = _("Listino"))
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-
+    
+    def __init__(self, *args, **kwargs):
+        super(Price, self).__init__(*args, **kwargs)
+        if self.pk is None:
+            self.update()
+        
     def __unicode__(self):
         if self.method == '==':
             return unicode(self.value)
         else:
-            return "+%s%%" % self.markup
+            return u"+%s%%" % self.markup
     
     def update(self, taxes=20, default_precision=Decimal(".01")):
         if self.method == "%=":
-            self.gross = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000).quantize(default_precision)
-        else:
+            self.gross = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000)
+        elif self.method == "%~":
             estimated_net = self.product.base_price * Decimal(str(100 + self.markup)) / 100
             gross = (estimated_net * Decimal(str(100 + taxes)) / 100)
             if gross <= .25:
@@ -311,9 +276,9 @@ class Price(models.Model):
             else:
                 module = Decimal('1')
             corrected_price = gross  + module / 2 # this guarantees that the price gets always rounded up
-            self.gross = (corrected_price - corrected_price.remainder_near(module)).quantize(default_precision)
+            self.gross = (corrected_price - corrected_price.remainder_near(module))
         
-        self.net = (self.gross / 6 * 5).quantize(default_precision)
+        self.net = (self.gross / 6 * 5)
     
     def save(self, *args, **kwargs):
         self.update()       
@@ -332,16 +297,16 @@ MOVEMENTS = (
 class LogEntry(models.Model):
     type = models.CharField(max_length = 1, choices = MOVEMENTS)
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-    supplier = models.ForeignKey(Supplier, verbose_name = _("Fornitore"), null = True)
-    price = models.DecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3, null = True)
-    quantity = models.DecimalField(_(u"Quantità acquistata"), max_digits = 8, decimal_places = 3)
+    supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"), null = True)
+    price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3, null = True)
+    quantity = FixedDecimalField(_(u"Quantità acquistata"), max_digits = 8, decimal_places = 3)
     date = models.DateTimeField(auto_now = True)
 
 class Supply(models.Model):
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-    supplier = models.ForeignKey(Supplier, verbose_name = _("Fornitore"))
+    supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"))
     code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
-    price = models.DecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
+    price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
     updated = models.DateField(_("Ultimo acquisto"), auto_now = True)
 
     def __unicode__(self):

@@ -1,0 +1,17 @@
+<div class="title">{{ product.name }}</div>
+
+<!--<div class="code">Codice: <span></span></div>-->
+<div class="quantity">Disponibilit&agrave;:
+    {{ product.quantity }}
+    {% if product.quantity < product.min_quantity %} <span style="color:red">(sottoscorta)</span> {% endif %}
+</div>
+<div class="price">Prezzo al pubblico: <span>{{ price.gross }}</span>&euro;</div>
+<div class="suppliers">
+    {% include "supply/list_simple.html" %}
+</div>
+
+<br/>
+        
+<a id="go" class="button" href="{% url show_product product.id %}">Scheda</a>
+<a id="sell" class="ajax button" href="#">Vendi</a>
+<a id="load" class="ajax button" href="#">Carica</a>
