@@ -80,8 +80,8 @@ class Product(models.Model):
     code = models.CharField(_("Codice"), max_length = 13)
     name = models.CharField(_("Nome"), max_length = 60, unique = True)
 
-    quantity = FixedDecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
-    min_quantity = FixedDecimalField(_(u"Scorta minima"), max_digits = 8, decimal_places = 3, default = 0)
+    quantity = models.DecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
+    min_quantity = models.DecimalField(_(u"Scorta minima"), max_digits = 8, decimal_places = 3, default = 0)
     unit = models.CharField(_(u"Unità di misura"), max_length = 15)
 
     category = models.ForeignKey(Category, verbose_name = _("Categoria"))
@@ -121,7 +121,7 @@ class IncomingProduct(models.Model):
     actual_product = models.ForeignKey('Product', null=True, blank=True)
     batch = models.ForeignKey('BatchLoad')
     
-    quantity = FixedDecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3)
+    quantity = models.DecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3)
     
     new_supplier_code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
     new_supplier_price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
@@ -192,7 +192,7 @@ class BatchLoad(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-    quantity = FixedDecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
+    quantity = models.DecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
     discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
     update = models.BooleanField(_("Scarica dal magazzino"), default = True)
     
@@ -299,7 +299,7 @@ class LogEntry(models.Model):
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
     supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"), null = True)
     price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3, null = True)
-    quantity = FixedDecimalField(_(u"Quantità acquistata"), max_digits = 8, decimal_places = 3)
+    quantity = models.DecimalField(_(u"Quantità acquistata"), max_digits = 8, decimal_places = 3)
     date = models.DateTimeField(auto_now = True)
 
 class Supply(models.Model):
