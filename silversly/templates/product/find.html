@@ -11,10 +11,6 @@
 	
         var chosenProduct;
         
-        function removeDialogs() {
-            $(".dialog").remove();            
-        }
-        
         $("#main").bind("showResult", function(e, product) {
             chosenProduct = product;
             if (!product) {

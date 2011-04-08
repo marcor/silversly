@@ -376,7 +376,7 @@ def list_prices(request, product_id):
         else:
             pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup
         price.tax = price.gross - price.net
-    return render_to_response('markup/list.html', {'pricelists': pricelists, 'product': product})
+    return render_to_response('price/list.html', {'pricelists': pricelists, 'product': product})
     
 def list_temp_prices(request):
     product_id = request.GET["product_pk"]
@@ -403,7 +403,7 @@ def list_temp_prices(request):
             pricelist.desc = "Prezzo base + %d%% (arrotondato)" % pricelist.price.markup 
         else:
             pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
-    return render_to_response('markup/list_temp.html', {'pricelists': pricelists, 'product': product})
+    return render_to_response('price/list_temp.html', {'pricelists': pricelists, 'product': product})
 
 def modify_price(request, product_id, pricelist_id):
     try:
@@ -421,7 +421,7 @@ def modify_price(request, product_id, pricelist_id):
             bad_request = True
     else:
         form = ModifyPriceForm(instance = price)
-    response = render_to_response('product/dialogs/modify_markup.html', {'form':  form, 'price': price})
+    response = render_to_response('product/dialogs/modify_price.html', {'form':  form, 'price': price})
     if bad_request: 
         response.status_code = 400
     return response   
@@ -450,7 +450,7 @@ def modify_temp_price(request, product_id, pricelist_id):
             bad_request = True
     else:
         form = ModifyPriceForm(instance = price)
-    response = render_to_response('product/dialogs/modify_markup_temp.html', {'form':  form, 'price': price})
+    response = render_to_response('product/dialogs/modify_price_temp.html', {'form':  form, 'price': price})
     if bad_request: 
         response.status_code = 400
     return response   
