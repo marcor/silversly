@@ -3,6 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from inventory.models import *
 from people.models import *
+from sales.models import *
 
 def homepage(request):
     outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")

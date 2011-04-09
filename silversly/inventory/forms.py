@@ -58,8 +58,3 @@ class ChildCategoryForm(ModelForm):
 class CategoryForm(ModelForm):
     class Meta:
         model = Category
-        
-class CartItemForm(ModelForm):
-    class Meta:
-        model = CartItem
-        fields = ("quantity", "discount", "update")

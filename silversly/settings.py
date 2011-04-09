@@ -104,5 +104,6 @@ INSTALLED_APPS = (
     'common',
     'inventory',
     'people',
+    'sales',
     'south',
 )
