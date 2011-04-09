@@ -12,7 +12,7 @@ class Bank(models.Model):
 
 class Address(models.Model):
     street = models.CharField(_("Indirizzo"), max_length = 50)
-    city = models.CharField(_("Citt‡"), max_length=30)
+    city = models.CharField(_(u"Citt√†"), max_length=30)
     province = models.CharField(_("Provincia"), max_length=2)
     postcode = models.CharField(_("CAP"), max_length=5)   
     

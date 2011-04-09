@@ -97,7 +97,12 @@ class Product(models.Model):
         self.quantity += quantity
 
     def clean(self):
-        self.name = self.name.strip()
+        name = self.name.strip()
+        first = name[0]
+        if first.isupper():
+            self.name = first.lower() + name[1:]
+        else:
+            self.name = name
 
     def update_base_price(self):        
         supplies = Supply.objects.filter(product = self)

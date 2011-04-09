@@ -36,12 +36,14 @@
         
         $( "#header" ).bind('infoUpdated', 
             function(event) {
-		var name_field = $("#product_info [name=name]")
-		name_field.val(name_field.val().trim());
-                $( "#header>h1" ).html(name_field.val());
+                $( "#header>h1" ).html($("#product_info [name=name]").val());
             });
         
         $( "#product_info" ).live('submit', function() {
+            var name_field = $("#product_info [name=name]");
+            var name = name_field.val().trim();
+            name = name.substring(0,1).toLowerCase() + name.substring(1); 
+            name_field.val(name);
             $.ajax({
                 "url": "{% url product_tab product.pk %}",
                 "type": "POST",

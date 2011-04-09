@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Silversly - Benvenuta!{% endblock %}
+
+{% block jquery %}
+	$(".navlinks a[title='Pagina riassuntiva'] img").css("opacity", "1").addClass("current");
+{% endblock %}
+
+{% block head %} 
+<style type="text/css">
+    #sidebar { display: none }
+    #main { margin-left: 20px}
+    .columns > div { 
+        float: left; 
+        width: 24%;
+        border: 1px solid #ccc;
+        padding: 1em;
+        margin: 1em}
+    h2 { 
+        margin: 2px;
+        padding: 3px;
+        padding-left: 1em;
+        border: 1px solid #aaa;
+        border-radius: 3px;
+    }
+    #vendite h2 { background-color: #fee   }
+    #magazzino h2 { background-color: #eef   }
+    #acquisti h2 { background-color: #efe   }
+    #outstock {
+        overflow-y: auto;
+        width: 100%;
+        max-height: 300px;
+    }
+    #outstock table {
+        margin-top: 0;
+    }
+</style>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+<div class="columns">
+    <div id="magazzino">
+        <h2>Magazzino</h2>
+        <h3>Articoli sottoscorta ({{ outstock|length }})</h3>
+        {% if outstock %}
+        <div id="outstock">
+        <table >
+            {% for product in outstock %}
+            <tr>
+                <td><a href="{% url show_product product.id %}">{{product.name}}</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+        {% else %}
+        <p>Tutto a posto!</p>
+        {% endif %}
+    </div>
+
+    <div id="acquisti">
+        <h2>Acquisti</h2>
+    </div>
+
+    <div id="vendite">
+        <h2>Vendite</h2>
+    </div>
+</div>
+
+{% endblock %}

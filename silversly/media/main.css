@@ -169,13 +169,19 @@ p input, p select {
 	background-color: #fafafa;
 }
 
-#navlinks {
+.navlinks {
 	position: absolute;
-	left: 1em;
+	margin-left: 1em;
 	bottom: 0px;
 }
 
-#navlinks img {
+.right {
+	position: absolute;
+	right: 200px;
+	bottom: 0px;
+}
+
+.navlinks img {
 	padding-top: 2px;
 	padding-right: 3px;
 	padding-left: 3px;
@@ -183,7 +189,7 @@ p input, p select {
 	border-right: 1px solid transparent;
 }
 
-#navlinks img.current {
+.navlinks img.current {
 	position: relative;
 	top: 13px;
 	padding-bottom: 7px;
@@ -193,7 +199,6 @@ p input, p select {
 	border-top: none;
 	background-color: #fff;
 }
-
 
 #logo {
 	font-family: Verdana, Arial, sans-serif;
