@@ -18,7 +18,7 @@
 			select: function( event, ui ) {
                 $( "#suppliers" ).val( ui.item.fields.name );
 				if (ui.item) {
-                    $( "#go" ).attr("href", "/fornitore/" + ui.item.pk).show();
+                    $( "#go" ).attr("href", "/anagrafica/fornitore/" + ui.item.pk).show();
                 }
                 return false;
 			}
