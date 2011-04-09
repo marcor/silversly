@@ -83,7 +83,8 @@ def list_by_category(request, id):
 
 def list_categories(request):
     categories = Category.objects.filter(parent = None)
-    return render_to_response('category/root_list.html', {'children': categories})
+    return render_to_response('category/root_list.html', {'children': categories, 
+        'total_products': Product.objects.count()})
 
 def add_category(request, parent_id=None, formclass=None):
     if request.method == "POST":

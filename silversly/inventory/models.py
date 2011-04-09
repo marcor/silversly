@@ -42,6 +42,9 @@ class Category(models.Model):
         if (self.parent is None):
             return self.name
         return "%s > %s" % (self.parent, self.name)
+    
+    def clean(self):
+        self.name = self.name.strip().lower()
 
     def breadcrumbs(self):
         anchor = '<a href="%s" title="Mostra i prodotti nella categoria %s">%s</a>' % (self.get_absolute_url(), self.name, self.name)
