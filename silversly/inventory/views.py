@@ -205,18 +205,20 @@ def save_batch_load(request, batch_id):
         for new_price in new_prices:
             try:
                 price = Price.objects.get(pricelist = new_price.pricelist, product = dest)
+                if new_price.reset_pricelist_default:
+                    price.delete()
             except:
-                price = Price(pricelist = new_price.pricelist, product = dest)
-            price.method = new_price.method
-            price.gross = new_price.value
-            price.markup = new_price.markup
-            price.save()
-
-        dest.quantity += item.quantity
+                price = Price(pricelist = new_price.pricelist, 
+                    product = dest,
+                    method = new_price.method,
+                    gross = new_price.gross,
+                    markup = new_price.markup)
+                price.save() # to fix: this triggers update() for the second time!
+        
+        supply.product.quantity += item.quantity
         supply.price = item.new_supplier_price
         supply.code = item.new_supplier_code
-        supply.save()
-        dest.save()		
+        supply.save() # this triggers product save too
     
     batch.loaded = True
     batch.save()
@@ -253,7 +255,7 @@ def add_product_to_batch(request, batch_id):
                 actual_prices = Price.objects.filter(product = editable_product.actual_product)
                 print actual_prices
                 for price in actual_prices:
-                    newprice = NewPrice(method = price.method, value = price.gross, markup = price.markup, product = editable_product, pricelist = price.pricelist)
+                    newprice = NewPrice(method = price.method, gross = price.gross, markup = price.markup, product = editable_product, pricelist = price.pricelist)
                     newprice.save()
                                
             return render_to_response('batch_load/product_row.html',  {'batch': batch, 'item':  editable_product})
@@ -322,9 +324,10 @@ def modify_temp_price(request, product_id, pricelist_id):
     except NewPrice.DoesNotExist:
         product = IncomingProduct.objects.get(pk=product_id)
         pricelist = Pricelist.objects.get(pk=pricelist_id)
-        price = NewPrice(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup, value=0)
+        price = NewPrice(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup)
     bad_request = False
     if request.method == "POST":
+        price.reset_pricelist_default = False
         form = ModifyPriceForm(request.POST, instance = price)
         if form.is_valid():
             form.save()
@@ -375,19 +378,20 @@ def list_temp_prices(request):
             if price.pricelist == pricelist:
                 pricelist.price = price
                 prices.remove(price)
-                pricelist.customized = True
+                if not price.reset_pricelist_default:
+                    pricelist.customized = True
                 break
         else:
             price = NewPrice(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
             # this does not save anything to the db!
             pricelist.price = price
-        pricelist.calculated_price = pricelist.price.calculate_price()
         if pricelist.price.method == '==':    
             pricelist.desc = "Prezzo fisso"
         elif pricelist.price.method == '%~':
             pricelist.desc = "Prezzo base + %d%% (arrotondato)" % pricelist.price.markup 
         else:
-            pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup 
+            pricelist.desc = "Prezzo base + %d%%" % pricelist.price.markup
+        price.tax = price.gross - price.net
     return render_to_response('price/list_temp.html', {'pricelists': pricelists, 'product': product})
 
 def ajax_get_prices(request, product_id, pricelist):
@@ -410,8 +414,13 @@ def reset_price(request, price_id):
         
 def reset_temp_price(request, price_id):
     if request.is_ajax():
-        price = get_object_or_404(NewPrice, pk=price_id)
-        price.delete()
+        new_price = get_object_or_404(NewPrice, pk=price_id)
+        try:
+            price = Price.objects.get(pricelist = new_price.pricelist, product = new_price.product.actual_product)
+            new_price.reset_pricelist_default = True
+            new_price.save()
+        except:
+            new_price.delete()        
         return HttpResponse(status=200)
     return HttpResponse(status=400)
     

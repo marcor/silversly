@@ -47,7 +47,7 @@ class ModifyPriceForm(ModelForm):
         return cleaned_data
             
     class Meta:
-        model = Price
+        model = AbstractPrice
         fields = ("method", "gross", "markup")
 
 class ChildCategoryForm(ModelForm):
