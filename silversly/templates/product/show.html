@@ -28,7 +28,9 @@
                 $("#open_add_supply_dialog").button();                
                 $("#markup_list", info.panel).load("{% url list_prices product.id %}");
             }
-            else {
+            else if (info.index == 2) {
+                $("#id_catalogue").trigger('focus');
+                /*$("#extra_save_product").attr('disabled', true);*/
             }
         });
         
@@ -69,6 +71,26 @@
         
         $( "#product_info" ).live('change', function() {
             $("#save_product").attr('disabled', false);
+        });
+        
+        $('#extra_product_info [type=checkbox]').live('change', function() {
+            $("#extra_save_product").trigger('submit');
+        });
+        
+        $( "#extra_product_info" ).live('submit', function() {
+            $.ajax({
+                "url": "{% url product_extra_tab product.pk %}",
+                "type": "POST",
+                "data": $("#extra_product_info").serialize(),
+                "complete": function(xhr, status) {
+                    $("#Altre_opzioni").html(xhr.responseText);
+                    if (status == "success") {
+                        $("#id_catalogue").trigger('focus');
+                        showMessage("<b>Modifiche salvate!</b>");
+                    };
+                }
+            });
+            return false;
         });
         
         /*--- remove supply link --------*/
@@ -224,7 +246,8 @@
         {% with product.id as id %}
         <ul>
             <li><a href="{% url prices_tab id %}" title="Prezzi e fornitori">Prezzi e fornitori</a></li>
-	    <li><a href="{% url product_tab id %}" title="Dati principali">Dati principali</a></li>
+            <li><a href="{% url product_tab id %}" title="Dati principali">Dati principali</a></li>
+            <li><a href="{% url product_extra_tab id %}" title="Altre opzioni">Altre opzioni</a></li>
             <li><a href="{% url history_tab id %}" title="Storico movimenti">Storico movimenti</a></li>
         </ul>
         {% endwith %}

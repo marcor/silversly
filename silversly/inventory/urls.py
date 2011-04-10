@@ -7,6 +7,7 @@ urlpatterns = patterns('inventory.views',
     url(r'^(\d+)/tab/principale', 'product_tab', name='product_tab'),
     url(r'^(\d+)/tab/prezzi', 'prices_tab', name='prices_tab'),
     url(r'^(\d+)/tab/movimenti', 'history_tab', name='history_tab'),
+    url(r'^(\d+)/tab/extra', 'product_extra_tab', name='product_extra_tab'),
     
     url(r'^(\d+)/fornitore/aggiungi', 'add_supply', name='add_supply'),
     url(r'^(\d+)/fornitori/$', 'list_supplies', name='list_supplies'),

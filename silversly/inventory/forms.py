@@ -7,6 +7,11 @@ class ProductForm(ModelForm):
         model = Product
         fields = ("name", "code", "category", "unit", "quantity", "min_quantity")
 
+class ProductExtraForm(ModelForm):
+    class Meta:
+        model = Product
+        fields = ('catalogue',)
+
 class IncomingProductForm(ModelForm):
     class Meta:
         model = IncomingProduct

@@ -74,6 +74,8 @@ class Product(models.Model):
     suppliers = models.ManyToManyField('people.Supplier', verbose_name = _("Fornitori"), through = 'Supply', null = True)
     base_price = FixedDecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 2, default = 0)
     prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'Price', null = True)
+    
+    catalogue = models.BooleanField(verbose_name = _("Includi nel catalogo"), default = False)
         
     def __unicode__(self):
         return self.name

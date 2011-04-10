@@ -483,6 +483,22 @@ def product_tab(request, id):
         response.status_code = 400
     return response
 
+def product_extra_tab(request, id):
+    product = get_object_or_404(Product, pk=id)
+    bad_request = False
+    if request.method == "POST":
+        form = ProductExtraForm(request.POST, instance = product)
+        if form.is_valid():
+            form.save()
+        else:
+            bad_request = True
+    else:
+        form = ProductExtraForm(instance = product)
+    response = render_to_response('product/tabs/extra.html', {'form': form, 'product': product})
+    if bad_request: 
+        response.status_code = 400
+    return response
+
 def prices_tab(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     return render_to_response('product/tabs/prices.html', {'product': product, 

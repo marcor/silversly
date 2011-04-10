@@ -1,0 +1,11 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %} 
+    <form class="bigform" style="margin-top: 2em" id="extra_product_info" action="" method="post">
+        {{ form.as_p }}
+        <div class="actionbar">
+        <input id="extra_save_product" style="visibility: hidden" type="submit" value="Salva" />
+        </div>
+    </form>
+{% endblock %}
+    
