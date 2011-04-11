@@ -11,6 +11,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         
         # Deleting field 'Price.value'
+        db.add_column('inventory_product', 'catalogue', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
         db.rename_column('inventory_price', 'value', 'gross')
 
         # Adding field 'Price.net'
@@ -28,6 +29,7 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Price.net'
         db.delete_column('inventory_price', 'net')
+        db.delete_column('inventory_product', 'catalogue')
 
 
     models = {
@@ -157,6 +159,7 @@ class Migration(SchemaMigration):
         'inventory.product': {
             'Meta': {'ordering': "['name', 'code']", 'object_name': 'Product'},
             'base_price': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '8', 'decimal_places': '3'}),
+            'catalogue': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['inventory.Category']"}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '13'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

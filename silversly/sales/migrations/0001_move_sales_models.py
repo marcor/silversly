@@ -6,6 +6,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ('inventory', '0013_auto__del_customer__del_address__del_bank__del_retailcustomer__del_sup'),
+    )
+    
     def forwards(self, orm):
         
         # Adding model 'CartItem'

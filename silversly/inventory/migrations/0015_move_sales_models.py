@@ -80,6 +80,7 @@ class Migration(SchemaMigration):
         'inventory.product': {
             'Meta': {'ordering': "['name', 'code']", 'object_name': 'Product'},
             'base_price': ('common.models.FixedDecimalField', [], {'default': '0', 'max_digits': '8', 'decimal_places': '2'}),
+            'catalogue': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['inventory.Category']"}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '13'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
