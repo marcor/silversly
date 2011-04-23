@@ -85,11 +85,12 @@ class Product(models.Model):
 
     def clean(self):
         name = self.name.strip()
-        first = name[0]
-        if first.isupper():
-            self.name = first.lower() + name[1:]
-        else:
-            self.name = name
+        if name:
+            first = name[0]
+            if first.isupper():
+                self.name = first.lower() + name[1:]
+                return
+        self.name = name
 
     def update_base_price(self):        
         supplies = Supply.objects.filter(product = self)
