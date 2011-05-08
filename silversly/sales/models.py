@@ -16,22 +16,19 @@ class CartItem(models.Model):
 
 class Cart(models.Model):
     current = models.BooleanField(default = True)
-    date = models.DateTimeField(auto_now_add = True)
-    
-    #def __unicode__(self):
-    #    return "%d prodotti, %s" % (self.products.count(), self.current and "aperto" or "chiuso")
-        
-    class Meta:
-        ordering = ['date']
         
 class Receipt(models.Model):
+    year = models.PositiveSmallIntegerField(_("Anno"))
     number = models.PositiveIntegerField(_("Numero")) 
     date = models.DateTimeField(auto_now = True)
-    cart = models.ForeignKey(Cart)
+    cart = models.OneToOneField(Cart)
     customer = models.ForeignKey('people.RetailCustomer', null=True, blank=True)
     
     def __unicode__(self):
         return "Scontrino %d del %s" % (self.number, self.date)
+        
+    class Meta:
+        unique_together = ('year', 'number')
         
 class Ddt(models.Model):
     number = models.PositiveSmallIntegerField(_("Numero"), unique = True) 

@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^$', 'common.views.homepage', name="homepage"),
     url(r'^articoli/', include('inventory.urls')),
     url(r'^anagrafica/', include('people.urls')),
+    url(r'^vendite/', include('sales.urls')),
     #(r'', include('inventory.urls')),    
 )
 

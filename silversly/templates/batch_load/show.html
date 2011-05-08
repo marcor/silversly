@@ -110,20 +110,9 @@
     });
         
     $("#suppliers").trigger("focus");
-    $( "#add,#save,#new_product" ).button();
+    $( "#save,#new_product" ).button();
         
-    $( "#add" ).live('click', function() {
-        var sell_button = $(this);
-        $( "#sell_product_dialog" ).dialog({
-                'draggable': false,
-                'resizable': false,
-                'modal': true,
-                'open': function() { $(this).load(sell_button.attr('href'))}
-            });
-            return false;
-        });
-        
-        $( "#products" ).autocomplete({
+    $( "#products" ).autocomplete({
             source: function(request, response) {
         if ($("#search_all").attr("checked")) {
             var data = {'term': request.term}

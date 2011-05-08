@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+ {% block jquery %}
+	$(".navlinks a[title='Carrello'] img").css("opacity", "1").addClass("current");
+ {% endblock %}
+
+{% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url new_receipt %}" title="Vendita con scontrino">
+                <img src="/media/img/receipt.png" />
+            </a>
+            </li>
+            <li>
+                <a href="{% url new_invoice %}" title="Vendita con fattura">
+                <img src="/media/img/invoice.png" />
+                </a>
+            </li>
+        </ul>
+{% endblock %}

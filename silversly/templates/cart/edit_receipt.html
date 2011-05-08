@@ -1,0 +1,191 @@
+{% extends "cart/main.html" %}
+
+{% block title %}Vendita con scontrino{% endblock %}
+
+{% block header %}
+    <h1>Vendita con scontrino</h1>
+{% endblock %}
+
+{% block jquery %}
+    {{block.super}}
+    
+    var customer_id;
+    check_customer(); 
+    
+    
+    function check_customer() { 
+    };
+    
+    
+    $("#id_customer").change(function() {
+        check_customer();    
+    });
+    
+    function updateList(productRow) {
+        var pid = $(productRow).attr("id");
+        var existing =  $("tr#" + pid);
+        if (existing.length > 0) 
+            { existing.replaceWith(productRow) }
+        else { 
+              $("#product_list>tbody").append(productRow);
+              $("#product_list").show();
+              $("#save").show();
+        }; 
+       
+    };
+        
+    function addProductToList(pk) {
+        $.get("{% url add_product_to_cart cart.pk %}",
+                {'product_pk': pk},
+                function(resultForm) {
+                    $("#add_product_dialog").dialog({
+                       'draggable': false,
+                       'resizable': false,
+                       'modal': true,
+                       'open': function() { $(this).html(resultForm); }
+                    });
+                }
+        );
+        return false;
+    }
+    
+    $("a.edit_product").live('click', function() {
+        $.get($(this).attr("href"),
+            {},
+            function(resultForm) {
+                $("#add_product_dialog").dialog({
+                    'draggable': false,
+                    'resizable': false,
+                    'modal': true,
+                    'open': function() { $(this).html(resultForm); $("#id_quantity", this).trigger('focus');}
+                })
+            }
+        );
+        return false;
+    });
+        
+    $("#customers").trigger("focus");
+    
+    $( "#new_customer,#save" ).button();
+        
+    $( "#products" ).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    "url": "{% url ajax_find_product %}",
+                    "data": {'term': request.term},
+                    "dataType": "json",
+                    "success": function(results) {
+                        if (results.length > 0) { 
+                            response(results);
+                        } else {
+                            response(results);
+                            showNothing();                            
+                        }
+                    }
+                });
+            },
+            minLength: 3,
+            search: function(event, ui) {
+                $("#message").hide();
+            },
+            focus: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                return false;
+            },
+            select: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                if (ui.item) {
+                    addProductToList(ui.item.pk);
+                }
+                return false;
+    }
+        }).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
+                .appendTo( ul );
+        };
+    
+    
+    
+    $( "#add_product" ).live('click', function() {
+            var form = $( "#add_product_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $( "#add_product_dialog" ).dialog("close");
+             updateList(xhr.responseText);                                                
+                    } else {
+                        $("#add_product_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+    
+     $( "#new_customer" ).live('click', function() {
+            $( "#new_customer_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load("{% url add_customer %}")}
+            });
+            return false;
+        });    
+    
+{% endblock %}
+
+{% block content %}
+
+    <form id="baseform" action="" method="post">
+    {{ base_form.as_p }}
+    </form>
+    <a id="new_product" href="#" />Nuovo articolo</a>
+    
+<div class="framed">
+    <div id="search_customer">
+        <span>Cerca cliente:</span>
+        <input id="customers" />
+    </div>
+    
+    <div id="message2" style="display:none">Nessun risultato</div>
+
+
+</div>
+    
+<div class="framed">
+    
+    <div id="search_product">
+        <span>Cerca prodotto:</span>
+        <input id="products" />
+    </div>
+    
+    <div id="message2" style="display:none">Nessun risultato</div>
+    
+    <table id="product_list" {% if not products %}style="display:none"{% endif %}>
+    <thead>
+        <tr>
+            <td>Articolo</td>
+            <td>Quantit&agrave;</td>
+            <td>Valore</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in products %}
+            {% include  "cart/product_row.html" %}
+        {% endfor %}
+    </tbody>
+    </table>
+    </div>
+    
+    <a id="save" href="{% url save_receipt receipt.id %}" {% if not products %}style="display: none"{% endif %}>Carica tutto</a>
+        
+    
+    <div id="add_product_dialog" title="Vendi un prodotto" class="dialog"></div>
+    <div id="new_customer_dialog" title="Aggiungi un cliente" class="dialog"></div>
+    
+    
+{% endblock %}

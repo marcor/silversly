@@ -35,7 +35,7 @@ class Supplier(models.Model):
 
 class RetailCustomer(models.Model):
     name = models.CharField(_("Nome"), max_length = 50, unique=True)
-    due = models.DecimalField(_(u"Debito"), max_digits = 8, decimal_places = 3, default = 0)
+    due = models.DecimalField(_(u"Debito"), max_digits = 8, decimal_places = 2, default = 0)
     phone = models.CharField(_("Telefono"), max_length=15, default=None, blank=True)
     email = models.CharField(_("E-mail"), max_length=30, default=None, blank=True)
     
