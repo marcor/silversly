@@ -1,0 +1,13 @@
+<div>
+    <script type="text/javascript">
+        $(function() {
+            $("#id_default_method").trigger('focus');
+            $("#id_name").attr('editable', false);
+        });
+    </script>
+    <p>Nome: {{pricelist.name}}</p>
+    <form id="edit_pricelist_form" action="{% url edit_pricelist pricelist.name %}" method="post">
+        {{ form.as_p }}
+        <input id="save_pricelist" type="submit" value="Accetta" />
+    </form>
+<div>

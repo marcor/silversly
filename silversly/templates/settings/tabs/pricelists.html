@@ -1,0 +1,25 @@
+<div>
+    <h3>Listini disponibili</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Ricarico</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for pricelist in pricelists %}
+            <tr>
+                <td>{{ pricelist.name }}</td>
+                <td>{{ pricelist.get_default_method_display }}</td>
+                <td>{{ pricelist.default_markup }}%</td>
+                <td>
+                <a class="edit_pricelist" href="{% url edit_pricelist pricelist.name %}" title="Modifica"><img src="/media/img/edit-small.png"/></a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+<div>

@@ -1,0 +1,81 @@
+{% extends "settings/main.html" %}
+
+{% block title %}{{ product }}{% endblock %}
+
+{% block jquery %}
+	{{ block.super }}
+	
+        function removeDialogs() {
+            $(".dialog").remove();            
+        }
+        
+        function showMessage(content) {
+            $(".message_pane").html(content).show('fade', {}, 'fast', function() {
+                var pane = $(this);
+                setTimeout(function() {pane.hide("fade", {}, "slow")}, 500);
+            });
+        }
+        
+        $( "#tabset" ).tabs({'cache': true});
+        
+        $('#tabset').bind('tabsload', function(event, info){d
+        });
+        
+    /*--- event bindings -------------*/
+    
+    $( ".edit_pricelist" ).live('click', function() {
+            var modify_anchor = $(this);
+            $( "#edit_pricelist_dialog" ).dialog({
+                'draggable': false,
+                'resizable': false,
+                'modal': true,
+                'open': function() { $(this).load(modify_anchor.attr('href'))}
+            });
+            return false;
+        });
+    
+    $( "#save_pricelist" ).live('click', function() {
+            var form = $( "#edit_pricelist_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        removeDialogs();
+                        $( "#tabset" ).tabs('load', 0);                        
+                    } else {
+                        $("#edit_pricelist_dialog").html(xhr.responseText);                    
+                    };
+                }
+            });
+            return false;
+        });
+        
+        
+        
+ 
+{% endblock %}
+
+{% block header %}
+    <h1>Impostazioni generali</h1>
+{% endblock %}
+
+
+{% block content %}
+    
+    <div id="tabset">
+        {% with product.id as id %}
+        <ul>
+            <li><a href="{% url pricelists_tab %}" title="Listini">Listini</a></li>
+        </ul>
+        {% endwith %}
+        <div class="message_pane">
+            <b>Area messaggi</b>
+        </div>
+    </div>
+    
+    <div id="edit_pricelist_dialog" title="Modifica un listino" class="dialog"></div>
+    <div id="add_pricelist_dialog" title="Aggiungi un listino" class="dialog"></div>
+    
+{% endblock %}
