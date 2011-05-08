@@ -35,7 +35,7 @@
     };
         
     function addProductToList(pk) {
-        $.get("{% url add_product_to_cart cart.pk %}",
+        $.get("{% url add_product_to_cart %}",
                 {'product_pk': pk},
                 function(resultForm) {
                     $("#add_product_dialog").dialog({
@@ -143,15 +143,18 @@
     <form id="baseform" action="" method="post">
     {{ base_form.as_p }}
     </form>
-    <a id="new_product" href="#" />Nuovo articolo</a>
+    
     
 <div class="framed">
     <div id="search_customer">
         <span>Cerca cliente:</span>
         <input id="customers" />
+        <a id="new_customer" href="#" />Nuovo cliente</a>
     </div>
     
     <div id="message2" style="display:none">Nessun risultato</div>
+    
+    
 
 
 </div>
@@ -181,7 +184,7 @@
     </table>
     </div>
     
-    <a id="save" href="{% url save_receipt receipt.id %}" {% if not products %}style="display: none"{% endif %}>Carica tutto</a>
+    <a id="save" href="{% url save_receipt receipt.id %}" {% if not products %}style="display: none"{% endif %}>Salva</a>
         
     
     <div id="add_product_dialog" title="Vendi un prodotto" class="dialog"></div>

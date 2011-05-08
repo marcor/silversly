@@ -1,0 +1,10 @@
+<tr id="p{{ item.id }}">
+	<td>{{ item.product.name}}</td>
+	<td class="decimal">{{ item.quantity}}</td>
+	<td class="decimal">{{ item.new_supplier_price}}</td>
+	<td class="actions">
+		<a class="edit_product" href="{% url add_product_to_cart %}?product_pk={{ item.product.id}}" title="Modifica"><img src="/media/img/edit-small.png"/></a>
+		<a class="delete_product" href="{% url remove_product_from_cart item.id %}" title="Togli questo articolo"><img src="/media/img/cancel-small.png"/></a>
+    </td>  
+</tr>
+	

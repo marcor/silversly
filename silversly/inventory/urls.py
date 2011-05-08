@@ -37,13 +37,10 @@ urlpatterns = patterns('inventory.views',
     url(r'^cerca/$', 'find_product', name='find_product'),
     url(r'^cerca/ajax/', 'ajax_find_product', name='ajax_find_product'),
     url(r'^(\d+)/prezzi_listino/(.+)/ajax/', 'ajax_get_prices', name='ajax_get_prices'),
-    
-    url(r'^vendite/carrello/', 'show_cart', name='show_cart'),
        
     url(r'^categorie/', 'list_categories', name='list_categories'),
     url(r'^categoria/(\d+)', 'list_by_category', name='list_by_category'),
     url(r'^categoria/aggiungi', 'add_category', name='add_category', kwargs={'formclass': CategoryForm}),
     url(r'^categoria/(\d+)/aggiungi', 'add_category', name='add_child_category', kwargs={'formclass': ChildCategoryForm}),
     
-    url(r'^carrello/aggiungi_articolo/(\d+)', 'add_to_cart', name='add_to_cart')
 )

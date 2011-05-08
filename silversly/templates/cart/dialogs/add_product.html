@@ -1,6 +1,12 @@
 <div>
-    <form id="add_product_to_cart_form" action="{% url add_to_cart item.product.id %}" method="post">
+    <script type="text/javascript">
+        $(function() {
+            $("#id_quantity").trigger('focus');
+        });
+    </script>    
+    <form id="add_product_to_cart_form" action="{% url add_product_to_cart %}" method="post">
         {{ form.as_p }}
-        <input id="add_product_to_cart" type="submit" value="Aggiungi" />
+	<input type="hidden" name="product_pk" value="{{ item.product.pk  }}"/>
+        <input id="add_product" type="submit" value="Accetta" />
     </form>
 <div>

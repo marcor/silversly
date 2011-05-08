@@ -423,38 +423,6 @@ def reset_temp_price(request, price_id):
             new_price.delete()        
         return HttpResponse(status=200)
     return HttpResponse(status=400)
-    
-
-#
-# VENDITE (todo: move this to its own app)
-#
-
-def show_cart(request):
-    pass
-
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
-    bad_request = False
-    try:
-        cart = Cart.objects.get(current = True)
-    except:
-        cart = Cart()
-        cart.save()
-    item = CartItem(product = product, cart = cart)
-    
-    if request.method == "POST":
-        form = CartItemForm(request.POST, instance = item)
-        if form.is_valid():
-            form.save()
-        else:
-            bad_request = True
-    else:
-        form = CartItemForm(instance = item)
-    
-    response = render_to_response('cart/dialogs/add_product.html', {'form':  form, 'item': item})
-    if bad_request: 
-        response.status_code = 400
-    return response
 
 
 #____________________
