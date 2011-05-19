@@ -9,7 +9,3 @@ class CustomerForm(ModelForm):
     class Meta:
         model = Customer
         fields = ("name", "code", "phone", "email", "payment_method", "bank", "costs")
-
-class MainAddressForm(ModelForm):
-    class Meta: 
-        model = Address
