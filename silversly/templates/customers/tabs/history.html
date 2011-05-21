@@ -1,0 +1,34 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %}
+
+    <table id="receipts" style="width: 60%">
+        <thead>
+            <th>Documento di vendita</th>
+            <th>Totale</th>
+            <th>Ancora dovuto</th>
+        </thead>
+        <tbody>
+        {% for receipt in receipts %}
+            <tr>
+            {% if receipt.type == "scontrino" %}
+                <td style="background-color: #ffe">{{ receipt }}</td>
+                <td>{{ receipt.cart.discounted_total }}</td>
+                <td>{{ receipt.due }}</td>
+            {% else %}
+                {% if receipt.type == "ddt" %}
+                    <td style="background-color: #fee">{{ receipt }}</td>
+                    <td>{{ receipt.cart.discounted_total }}</td>
+                    <td></td>
+                    {% else %}
+                    <td style="background-color: #eef">{{ receipt }}</td>
+                    <td>{{ receipt.cart.discounted_total }}</td>
+                    <td></td>
+                {% endif %}
+            {% endif %}
+            </tr>
+        {% endfor %}
+
+        </tbody>
+
+{% endblock %}

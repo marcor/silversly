@@ -3,7 +3,7 @@
 {% block jquery %}
 	$(".navlinks a[title='Clienti'] img").css("opacity", "1").addClass("current");
  {% endblock %}
- 
+
 {% block sidebar %}
         <ul>
            <li>
@@ -12,9 +12,14 @@
 		</a>
             </li>
             <li>
-                <a href="{% url add_customer %}" title="Aggiungi un cliente">
-			<img src="/media/img/add.png" />
-		</a>
+                <a href="{% url add_customer %}" title="Nuovo cliente privato">
+                    <img src="/media/img/add.png" />
+                </a>
+            </li>
+            <li>
+                <a href="{% url add_company %}" title="Nuovo cliente con P.Iva">
+                    <img src="/media/img/add.png" />
+                </a>
             </li>
         </ul>
 {% endblock %}

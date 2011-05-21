@@ -11,6 +11,11 @@ a img {
 	border: 0;
 }
 
+textarea {
+	height: 4em;
+	width: 15em;
+}
+
 h1 {
 	font-weight: normal;
 	color: #666;
@@ -57,7 +62,7 @@ table {
 }
 
 thead tr {
-	background-color: #eee; 
+	background-color: #eee;
 }
 
 td {
@@ -77,20 +82,20 @@ td.warning {
 	background-color: #f66;
 }
 
-	
+
 ul, ol {
 	list-style: none;
 	padding-left: 6px;
 }
 
-#message, .errorlist {
+.autocomplete-message, .message, #message, .errorlist {
 	border: 1px solid #e99;
 	font-size: .8em;
 	padding: 3px;
 	background-color: #ffc;
 }
 
-#message {
+.autocomplete-message, .message, #message {
 	display: inline;
 }
 
@@ -99,7 +104,7 @@ form {
 }
 
 .bigform p {
-	height: 1em;
+	min-height: 1em;
 	padding: 8px 5px;
 	margin: 5px 0;
 }
@@ -126,7 +131,7 @@ p input, p select {
 }
 
 .bigform input[type="submit"] {
-	margin: 5px 1em; 
+	margin: 5px 1em;
 }
 
 #sidebar {
@@ -142,14 +147,14 @@ p input, p select {
 #sidebar ul {
 	padding-left: 0;
 }
-	
+
 
 #sidebar img {
 	padding-right: 20px;
 	padding-top: 2px;
 	padding-left: 10px;
 	border: 1px solid transparent;
-	border-left: none; 
+	border-left: none;
 	border-right: none;
 	margin-left: 0;
 }
@@ -259,7 +264,7 @@ a:hover {
 	top: 0px;
 	right: -70px;
 	width: 470px;
-	font-size: 1.2em; 
+	font-size: 1.2em;
 }
 
 #infobox .title {
@@ -351,7 +356,7 @@ a:hover {
 	clear: both;
 }
 
-input#products {
+.ui-autocomplete-input {
 	border: 1px solid #ccc;
 	-moz-border-radius: 4px;
 	font-size: 1.5em;

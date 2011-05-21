@@ -5,21 +5,21 @@
 {% block jquery %}
 	{{ block.super }}
         function removeDialogs() {
-            $(".dialog").remove();            
+            $(".dialog").remove();
         }
-        
+
         $( "#tabset" ).tabs({'cache': true});
-        
+
         $('#tabset').bind('tabsload', function(event, info){
         });
-        
+
     /*--- event bindings -------------*/
-        
-        $( "#header" ).bind('infoUpdated', 
+
+        $( "#header" ).bind('infoUpdated',
             function(event) {
                 $( "#header>h1" ).html($("#customer_info [name=name]").get(0).value);
             });
-        
+
         $( "#save_customer" ).live('click', function() {
             $.ajax({
                 "url": "{% url customer_info_tab customer.pk %}",
@@ -35,11 +35,31 @@
             });
             return false;
         });
-        
+
+        $( "#save_commercial" ).live('click', function() {
+            $.ajax({
+                "url": "{% url customer_commercial_tab customer.pk %}",
+                "type": "POST",
+                "data": $("#customer_commercial").serialize(),
+                "complete": function(xhr, status) {
+                    $("#Commerciale").html(xhr.responseText);
+                    if (status == "success") {
+                        $("#header").triggerHandler('infoUpdated');
+                        $( "#save_commercial" ).attr('disabled', true);
+                    };
+                }
+            });
+            return false;
+        });
+
         $( "form#customer_info" ).live('change', function() {
             $( "#save_customer" ).attr('disabled', false);
-        });        
-        
+        });
+
+        $( "form#customer_commercial" ).live('change', function() {
+            $( "#save_commercial" ).attr('disabled', false);
+        });
+
 {% endblock %}
 
 {% block header %}
@@ -47,11 +67,12 @@
 {% endblock %}
 
 {% block content %}
-    
+
     <div id="tabset">
         {% with customer.id as id %}
         <ul>
             <li><a href="{% url customer_info_tab id %}" title="Dati principali">Dati principali</a></li>
+            <li><a href="{% url customer_commercial_tab id %}" title="Commerciale">Commerciale</a></li>
             <li><a href="{% url customer_history_tab id %}" title="Acquisti">Acquisti</a></li>
         </ul>
         {% endwith %}

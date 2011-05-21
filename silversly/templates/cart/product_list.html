@@ -1,0 +1,22 @@
+<table id="product_list" style="{% if not products %}display:none;{% endif %} width: 100%">
+    <thead>
+        <tr style="text-align: right">
+            <th></th>
+            <th style="text-align: left">Articolo</th>
+            <th>Q.t&agrave;</th>
+            <th>Prezzo</th>
+            <th>Sc.%</th>
+            <th>Valore</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in products %}
+            {% include  "cart/product_row.html" %}
+        {% endfor %}
+    </tbody>
+</table>
+
+<div id="cart_summary">
+    {% include "cart/summary.html" %}
+</div>
+

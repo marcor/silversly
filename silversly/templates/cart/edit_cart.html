@@ -1,0 +1,356 @@
+{% extends "cart/main.html" %}
+
+{% block title %}Carrello{% endblock %}
+
+{% block header %}
+    <h1>Carrello</h1>
+{% endblock %}
+
+{% block jquery %}
+    {{block.super}}
+
+    // object holding the current Customer
+    var customer = {{ customer|safe }};
+
+    initialize();
+
+    function initialize() {
+        $( "#new_customer :button,#save,  #new_receipt, #new_invoice, #new_ddt" ).button();
+
+        $("#open_customer_search").button({text: false, icons: { primary: 'ui-icon-search' }});
+        $("#reset_customer").button({text: false, icons: { primary: 'ui-icon-arrowreturn-1-w' }});
+        update_customer(customer, false)
+        close_customer_search();
+    };
+
+    function close_customer_search() {
+        $("#customers").hide();
+        $("#new_customer").hide();
+        $("#customer_name").show();
+        if (customer != null) {
+            $("#reset_customer").show();
+        } else {
+            $("#reset_customer").hide();
+        };
+        $("#open_customer_search").show();
+        $("#customer_search_message").hide();
+    };
+
+    function update_customer(c, reload_cart) {
+        if (c != null) {
+            $("#customer_name").button({label: c.name});
+            if (c.is_company) {
+                $(".retail:button").hide();
+                $(".invoice:button").show();
+            }
+            else if (c.cf != false) {
+                $(".retail:button, #new_invoice").show();
+                $("#new_ddt").hide();
+            }
+            else {
+                $(".retail:button").show();
+                $(".invoice:button").hide();
+            }
+            data = {'customer_id': c.id};
+        } else {
+            $("#customer_name").button({label: "Cliente anonimo"});
+            $(".retail:button").show();
+            $(".invoice:button").hide();
+            data = {};
+        }
+        customer = c;
+        if (reload_cart != false)
+            $.post("{% url edit_cart_customer %}", data, function(html, status) {$("#cart_display").html(html)}, "html");
+    };
+
+    function updateList(productRow) {
+        var pid = $(productRow).attr("id");
+        var existing =  $("tr#" + pid);
+        if (existing.length > 0)
+            { existing.replaceWith(productRow) }
+        else {
+              $("#product_list>tbody").append(productRow);
+              $("#product_list").show();
+              $("#save").show();
+        };
+        $("#cart_summary").load("{% url get_cart_summary %}");
+
+    };
+
+    function addProductToList(pk) {
+        $.get("{% url add_product_to_cart %}",
+                {'product_pk': pk},
+                function(resultForm) {
+                    $("#add_product_dialog").modal({
+                       'open': function() { $(this).html(resultForm); }
+                    });
+                }
+        );
+        return false;
+    }
+
+
+    $("#open_customer_search").live('click', function() {
+        $(this).hide();
+        $("#new_customer").show();
+        $("#customer_name").hide();
+        $("#reset_customer").hide();
+        $("#customers").val("").show().trigger("focus");
+    });
+
+    $("#reset_customer").live('click', function() {
+        update_customer(null);
+    });
+
+    $("a.edit_product").live('click', function() {
+        $.get($(this).attr("href"),
+            {},
+            function(resultForm) {
+                $("#add_product_dialog").modal({
+                    'open': function() { $(this).html(resultForm); $("#id_quantity", this).trigger('focus');}
+                })
+            }
+        );
+        return false;
+    });
+
+    $( "#customers" ).autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                "url": "{% url ajax_find_customer %}",
+                "data": {'term': request.term},
+                "dataType": "json",
+                "success": function(results) {
+                    response(results);
+                    if (results.length == 0) {
+                        $("#customer_search_message").show();
+                    }
+                }
+            });
+        },
+        minLength: 2,
+        search: function(event, ui) {
+            $("#customer_search_message").hide();
+        },
+        focus: function( event, ui ) {
+            /*$( "#products" ).val( ui.item.fields.name );*/
+            return false;
+        },
+        select: function( event, ui ) {
+            /*$( "#products" ).val( ui.item.fields.name );*/
+            if (ui.item) {
+                update_customer(ui.item);
+                close_customer_search();
+            }
+            return false;
+        }
+    }).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.name + "</a>" )
+                .appendTo( ul );
+    };
+
+    $("#customers").keypress(function(e){
+        if(e.keyCode==27){
+            close_customer_search();
+        }
+    });
+
+    $( "#products" ).autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                "url": "{% url ajax_find_product %}",
+                "data": {'term': request.term},
+                "dataType": "json",
+                "success": function(results) {
+                    response(results);
+                    if (results.length == 0) {
+                        $("#product_search_message").show();
+                    }
+                }
+            });
+        },
+        minLength: 3,
+        search: function(event, ui) {
+            $("#product_search_message").hide();
+        },
+        focus: function( event, ui ) {
+            /*$( "#products" ).val( ui.item.fields.name );*/
+            return false;
+        },
+        select: function( event, ui ) {
+            /*$( "#products" ).val( ui.item.fields.name );*/
+            if (ui.item) {
+                addProductToList(ui.item.pk);
+            }
+            return false;
+        }
+    }).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
+                .appendTo( ul );
+    };
+
+
+
+    $( "#add_product" ).live('click', function() {
+            var form = $( "#add_product_to_cart_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $( "#add_product_dialog" ).dialog("close");
+             updateList(xhr.responseText);
+                    } else {
+                        $("#add_product_dialog").html(xhr.responseText);
+                    };
+                }
+            });
+            return false;
+        });
+
+     $( "#new_retail" ).live('click', function() {
+            $( "#new_customer_dialog" ).modal({
+                'open': function() { $(this).load("{% url add_customer %}")}
+            });
+            return false;
+    });
+
+    $( "#new_company" ).live('click', function() {
+        $( "#new_customer_dialog" ).modal({
+            'open': function() { $(this).load("{% url add_company %}")}
+        });
+        return false;
+    });
+
+    $( "#save_new_customer" ).live('click', function() {
+            var form = $( "#new_customer_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $( "#new_customer_dialog" ).dialog("close");
+                        update_customer($.parseJSON(xhr.responseText));
+                        close_customer_search();
+                    } else {
+                        $("#new_customer_dialog").html(xhr.responseText);
+                    };
+                }
+            });
+            return false;
+        });
+
+     $( "#new_receipt" ).live('click', function() {
+        $( "#new_receipt_dialog" ).modal({
+            'open': function() { $(this).load("{% url new_receipt %}")}
+        });
+        return false;
+    });
+
+    $( "#save_new_receipt" ).live('click', function() {
+            var form = $( "#new_receipt_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        window.location.href = xhr.responseText;
+                    } else {
+                        $("#new_receipt_dialog").html(xhr.responseText);
+                    };
+                }
+            });
+            return false;
+        });
+
+    $("#discount_button").live('click', function() {
+        $(this).hide();
+        $("#discount_input").show().trigger('focus');
+    });
+    $("#discount_input").live('keypress', function(e){
+        $("#discount_error").hide();
+        if(e.keyCode==27){
+            $(this).hide().val(discount);
+            $("#discount_button").show();
+        }
+        else if (e.keyCode==13) {
+            $.ajax({
+                "url": "{% url edit_cart_discount %}",
+                "type": "POST",
+                "data": {'discount': $(this).val().trim()},
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#cart_summary").html(xhr.responseText);
+                    } else {
+                        $("#discount_input").val(discount);
+                        $("#discount_error").show();
+                    }
+                }
+            });
+        }
+    });
+
+    $("#customer_name").live("click", function() {
+        if (customer) {
+            window.location.href = customer.url;
+        }
+    });
+
+{% endblock %}
+
+{% block content %}
+
+    <form id="baseform" action="" method="post">
+    {{ base_form.as_p }}
+    </form>
+
+<div class="framed">
+    <div id="customer_choice">
+        <button id="customer_name" style="font-weight: bold">Nome cliente</button>
+        <button id="open_customer_search">Cerca</button>
+        <button id="reset_customer">Resetta</button>
+        <input id="customers" />
+        <span id="new_customer">
+            Nuovo cliente:
+            <button id="new_retail" type="button" >Privato</button>
+            <button id="new_company" type="button" >Azienda</button>
+        </span>
+    </div>
+
+    <div id="customer_search_message" class="autocomplete-message" style="display:none">Nessun risultato</div>
+
+
+
+    <div style="margin-top: 50px" id="search_product">
+            <span>Cerca prodotto:</span>
+        <input id="products" />
+    </div>
+
+    <div id="product_search_message" class="autocomplete-message" style="display:none">Nessun risultato</div>
+
+    <div id="cart_display">
+            {% include "cart/product_list.html" %}
+    </div>
+
+</div>
+
+    <div id="buttons">
+        <button id="new_receipt" class="retail" type="submit">Scontrino</button>
+        <button id="new_invoice" class="invoice" type="submit">Fattura immediata</button>
+        <button id="new_ddt" class="invoice" type="submit">Ddt</button>
+    </div>
+
+
+    <div id="add_product_dialog" title="Vendi un prodotto" class="dialog"></div>
+    <div id="new_receipt_dialog" title="Emetti lo scontrino" class="dialog"></div>
+    <div id="new_customer_dialog" title="Aggiungi un cliente" class="dialog"></div>
+
+
+{% endblock %}

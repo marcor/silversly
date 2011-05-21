@@ -4,11 +4,22 @@
 <head>
     <link rel="stylesheet" href="/media/main.css" />
     <title>{% block title %}Site title{% endblock %}</title>
-    <link type="text/css" href="/media/css/smoothness/jquery-ui-1.8.11.custom.css" rel="Stylesheet" />	
+    <link type="text/css" href="/media/css/smoothness/jquery-ui-1.8.11.custom.css" rel="Stylesheet" />
     <script type="text/javascript" src="/media/js/jquery-1.5.1.min.js"></script>
     <script type="text/javascript" src="/media/js/jquery-ui-1.8.11.custom.min.js"></script>
     {% block head %} {% endblock %}
     <script type="text/javascript">
+        $.fn.modal = function(options) {
+            return this.dialog(
+                $.extend({
+                    /*
+                    'draggable': false,
+                    'resizable': false,*/
+                    'modal': true
+                    }, options)
+            );
+        }
+
         $(function() {
 		$(".navlinks img").css("opacity", "0.2");
         {% block jquery %}{% endblock %}
@@ -18,8 +29,8 @@
 			},
 			function() {
 				$(this).css("opacity", "0.3").removeClass("current");
-			});			
-			
+			});
+
         });
     </script>
 </head>
@@ -30,7 +41,7 @@
         <div id="logo">Silver Sly <span>v0.5</span></div>
         <div class="navlinks">
         <a href="{% url find_product %}" title="Articoli"><img src="/media/img/products.png" /></a>
-        <a href="{% url new_receipt %}" title="Carrello"><img src="/media/img/cart.png" /></a>
+        <a href="{% url edit_cart %}" title="Carrello"><img src="/media/img/cart.png" /></a>
         <a href="{% url find_supplier %}" title="Fornitori"><img src="/media/img/suppliers.png" /></a>
         <a href="{% url find_customer %}" title="Clienti"><img src="/media/img/customers.png" /></a>
         <a href="{% url list_categories %}" title="Categorie"><img src="/media/img/categories.png" /></a>
@@ -40,7 +51,7 @@
         <a href="{% url homepage %}" title="Pagina riassuntiva"><img src="/media/img/home.png" /></a>
         </div>
     </div>
-    
+
     <div id="sidebar">
         {% block sidebar %}
         <ul>
@@ -74,6 +85,6 @@
             {% block content %}{% endblock %}
         </div>
     </div>
-    
+
 </body>
 </html>

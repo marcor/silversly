@@ -1,0 +1,16 @@
+<script type="text/javascript">
+    var discount = {{ cart.discount }};
+</script>
+
+<hr/>
+<div style="float: left; font-size: 1.2em">
+    <p>Totale: <b id="total">{{ cart.final_total }}</b> (IVA inclusa)</p>
+    <span>Sconto:</span><button id="discount_button" type="submit">{{ cart.discount }}%</button>
+    <input name="discount" type="text" size="3" id="discount_input" style="display: none" value="{{ cart.discount }}"/>
+    <p class="message" id="discount_error" style="display:none">Inserisci un numero positivo senza virgola</p>
+</div>
+
+<div style="text-align: right">
+<p style="font-style: italic">Da pagare:<p>
+<p style="font-size: 3em; margin: 5px 5px" id="total_discounted">{{ cart.discounted_total }}&euro;</p>
+</div>
