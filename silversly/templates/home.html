@@ -44,7 +44,7 @@
 {% block content %}
 <div class="columns">
     <div id="magazzino">
-        <h2>Magazzino</h2>
+        <h2>Magazzino <a href="{% url print_catalogue %}" target="_blank">(stampa catalogo)</a></h2>
         <h3>Articoli sottoscorta ({{ outstock|length }})</h3>
         {% if outstock %}
         <div id="outstock">

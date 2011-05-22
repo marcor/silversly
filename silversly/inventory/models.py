@@ -76,7 +76,14 @@ class Product(models.Model):
     prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'Price', null = True)
     
     catalogue = models.BooleanField(verbose_name = _("Includi nel catalogo"), default = False)
-        
+    
+    def is_ean_encoded(self):
+        try:
+            int(self.code)
+            return True
+        except:
+            return False
+            
     def __unicode__(self):
         return self.name
 

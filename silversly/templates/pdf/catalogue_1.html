@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<style type="text/css">
+h2 {
+    font-family: verdana;
+    font-size: 1.6em;
+    font-weight: normal;
+}
+@page {
+    
+    @frame {
+        top: 1cm;
+        left: 1cm;
+        width: 9cm;
+        /*-pdf-frame-border: 1*/
+        margin-bottom: 1cm
+    }
+    @frame {
+        top: 1cm;
+        left: 11cm;
+        /*-pdf-frame-border: 1*/
+        margin-bottom: 2cm;
+  }
+  @frame footer {
+  -pdf-frame-content: footerblock;
+    height: 0.5cm;
+    bottom: 0cm;
+  } 
+} 
+</style>
+</head>
+<body>
+{% for product in products %}
+<div>
+    {% if product.is_ean_encoded %}
+        <pdf:barcode value="{{ product.code }}" type="ean13"
+        humanreadable="1" barwidth="0.33mm" barheight="1.5cm" align="middle">
+    {% else %}
+        <pdf:barcode value="{{ product.code }}" type="code128"
+        humanreadable="1" barwidth="0.33mm" barheight="1cm" align="middle">
+    {% endif %}
+    <h2>{{ product.name }}</h2>
+</div>
+{% if forloop.counter|divisibleby:"9" %}
+   {% if not forloop.last %}
+        <pdf:nextframe />
+    {% endif %}
+{% endif %}
+
+
+{% endfor %}
+<div id="footerblock" style="text-align: center">
+{%block pager %}
+    <pdf:pagenumber>
+{%endblock%}
+</div>
+</body>
+</html>

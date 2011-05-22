@@ -531,3 +531,28 @@ def ajax_find_product2(request):
     return HttpResponse(status=400)
 
 
+from django import http
+from django.template.loader import get_template
+from django.template import Context
+import ho.pisa as pisa
+import cStringIO as StringIO
+import cgi
+
+def write_pdf(template_src, context_dict):
+    template = get_template(template_src)
+    context = Context(context_dict)
+    html  = template.render(context)
+    result = StringIO.StringIO()
+    pdf = pisa.pisaDocument(StringIO.StringIO(
+        html.encode("iso-8859-1")), result)
+    if not pdf.err:
+        return http.HttpResponse(result.getvalue(), \
+             mimetype='application/pdf')
+    return http.HttpResponse('Errore nella generazione del pdf!\n %s' % cgi.escape(html))
+
+def print_catalogue(request):
+    products = Product.objects.filter(catalogue = True)
+
+    return write_pdf('pdf/catalogue_1.html',{
+        'pagesize' : 'A4',
+        'products' : products})
