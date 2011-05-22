@@ -68,6 +68,19 @@ class Cart(models.Model):
 class Receipt(models.Model):
     cart = models.OneToOneField(Cart, null=True)
 
+def prep(decim):
+    return str((decim * 1000).quantize(Decimal("1")))
+
+sep = "\x7f"
+def print_article(desc, price, quantity):
+    return sep.join(("1", desc[:16], prep(quantity), prep(price), "1", sep, "1", "1")) + sep
+
+def print_discount(discount, markdown):
+    return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto %d%%" % markdown, "1", sep)) + "-1" + sep
+
+def print_total_discount(discount):
+    return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto cliente", "1", sep)) + "-1" + sep
+    
 class Scontrino(Receipt):
     date = models.DateTimeField(auto_now_add = True, unique = True)
     #cart = models.OneToOneField(Cart)
@@ -80,7 +93,15 @@ class Scontrino(Receipt):
         return u"Scontrino del %s" % (self.date,)
         
     def send_to_register(self, close = False):
-        pass
+        filescontrino = open('c:\\scontrini\\scontrino.txt', 'w')
+        items = self.cart.cartitem_set.all()
+        for item in items:
+            filescontrino.write(print_article(item.product.name.encode("iso-8859-1"), item.quantity, item.final_price) + "\n")
+            if item.discount:
+                filescontrino.write(print_discount(item.final_discount, item.discount) + "\n")
+        if self.cart.discount:
+            filescontrino.write(print_total_discount(self.cart.final_discount) + "\n")
+        filescontrino.close()
 
     def save(self, *args, **kwargs):
         self.due =  self.cart.discounted_total() - self.payed
