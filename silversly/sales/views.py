@@ -70,12 +70,17 @@ def new_receipt(request):
             form.save()
             cart.current = False
             cart.save()
-            # scarica articoli da magazzino
-            # invia alla stampante
+            for item in cart.cartitem_set.all():
+                if item.update:
+                    product = item.product
+                    product.quantity -= item.quantity
+                    product.save()
+            scontrino.send_to_register(close=False)
             return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
         else:
             bad_request = True
     else:
+        scontrino.payed = cart.discounted_total()
         form = ReceiptForm(instance=scontrino)
 
     response = render_to_response('cart/dialogs/new_receipt.html',  {'form': form, 'cart': cart, 'receipt': scontrino})
@@ -87,7 +92,7 @@ def show_receipt(request, id):
     receipt = get_object_or_404(Scontrino, pk=id)
     cart = receipt.cart
     customer = cart.customer
-    return render_to_response('sales/show_receipt.html',  {'cart': cart, 'customer': customer, 'receipt': receipt})
+    return render_to_response('documents/show_receipt.html',  {'cart': cart, 'customer': customer, 'receipt': receipt})
 
 
 def add_product_to_cart(request):

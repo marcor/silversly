@@ -78,6 +78,9 @@ class Scontrino(Receipt):
 
     def __unicode__(self):
         return u"Scontrino del %s" % (self.date,)
+        
+    def send_to_register(self, close = False):
+        pass
 
     def save(self, *args, **kwargs):
         self.due =  self.cart.discounted_total() - self.payed

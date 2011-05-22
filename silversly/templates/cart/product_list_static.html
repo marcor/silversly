@@ -1,0 +1,35 @@
+<table id="product_list" style="width: 100%">
+    <thead>
+        <tr style="text-align: right">
+            <th style="text-align: left">Articolo</th>
+            <th>Q.t&agrave;</th>
+            <th>Prezzo</th>
+            <th>Sc.%</th>
+            <th>Valore</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart.cartitem_set.all %}
+            <tr id="p{{ item.id }}">
+	<td><a href="{% url show_product item.product.id %}">{{ item.product.name}}</a></td>
+	<td class="decimal" style="font-size: 1.2em;">{{ item.quantity}}</td>
+    <td class="decimal" style="background-color: #ffe;font-size: 1.2em;">{{ item.final_price }}</td>
+	<td class="decimal" style="color:#666">{{ item.discount }}%</td>
+    <td class="decimal" style="font-size: 1.2em; background-color: #efe">{{ item.final_value }}</td>
+    </td>
+</tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div id="cart_summary">
+    <div style="float: left; font-size: 1.2em">
+    <p>Totale: <b id="total">{{ cart.final_total }}</b> (IVA inclusa)</p>
+    <span>Sconto:</span>{{ cart.discount }}%</span>
+</div>
+    <div style="text-align: right">
+        <p style="font-style: italic">Totale scontato:<p>
+        <p  style="font-size: 3em; margin: 5px 5px" id="total_discounted">{{ cart.discounted_total }}&euro;</p>
+    </div>
+</div>
+

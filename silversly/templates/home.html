@@ -70,6 +70,15 @@
         <h2>Vendite</h2>
         <h3>Crediti</h3>
         <h3>Ultimi scontrini</h3>
+         <div id="outstock">
+         <table >
+            {% for scontrino in last_receipts %}
+            <tr>
+                <td><a href="{% url show_receipt scontrino.id %}">{{scontrino}}</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+         </div>
         <h3>Ultimi DDT</h3>
     </div>
 </div>

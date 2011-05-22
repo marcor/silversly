@@ -24,7 +24,7 @@ class DecimalEncoder(json.JSONEncoder):
 def homepage(request):
     outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")
     open_batchloads = BatchLoad.objects.filter(loaded = False)
-    last_receipts = Receipt.objects.order_by("-date")[:5]
+    last_receipts = Scontrino.objects.order_by("-date")[:5]
     last_ddts = Ddt.objects.order_by("-date")[:5]
     debtors = Customer.objects.raw("select * from people_customer where due > 0 collate nocase")
 

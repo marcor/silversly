@@ -1,0 +1,23 @@
+{% extends "cart/main.html" %}
+
+{% block title %}Scontrino{% endblock %}
+
+{% block header %}
+    <h1>{{ receipt }}</h1>
+{% endblock %}
+
+{% block jquery %}
+    {{block.super}}
+{% endblock %}
+
+{% block content %}
+
+<div class="framed">
+
+    <div id="cart_display">
+            {% include "cart/product_list_static.html" %}
+    </div>
+
+</div>
+
+{% endblock %}
