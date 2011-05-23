@@ -16,7 +16,11 @@
     </tbody>
 </table>
 
-<div id="cart_summary">
+<div id="summary_temp">
     {% include "cart/summary.html" %}
 </div>
 
+<script type="text/javascript">
+    $("#summary_temp").replaceAll($("#cart_summary")).attr("id", "cart_summary");
+
+</script>

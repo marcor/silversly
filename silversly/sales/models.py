@@ -5,6 +5,7 @@ from common.models import FixedDecimalField
 from decimal import Decimal
 import datetime
 from django.utils.translation import ugettext_lazy as _
+from inventory.models import Pricelist
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
@@ -65,6 +66,9 @@ class Cart(models.Model):
         self.final_total = value
         self.final_discount = self.final_total * self.discount / 100
 
+    def pricelists(self):
+        return Pricelist.objects.all()
+
 class Receipt(models.Model):
     cart = models.OneToOneField(Cart, null=True)
 
@@ -80,7 +84,7 @@ def print_discount(discount, markdown):
 
 def print_total_discount(discount):
     return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto cliente", "1", sep)) + "-1" + sep
-    
+
 class Scontrino(Receipt):
     date = models.DateTimeField(auto_now_add = True, unique = True)
     #cart = models.OneToOneField(Cart)
@@ -91,7 +95,7 @@ class Scontrino(Receipt):
 
     def __unicode__(self):
         return u"Scontrino del %s" % (self.date,)
-        
+
     def send_to_register(self, close = False):
         filescontrino = open('c:\\scontrini\\scontrino.txt', 'w')
         items = self.cart.cartitem_set.all()

@@ -13,6 +13,7 @@ urlpatterns = patterns('sales.views',
 
     url(r'carrello/cambia_cliente', 'edit_cart_customer', name='edit_cart_customer'),
     url(r'carrello/cambia_sconto', 'edit_cart_discount', name='edit_cart_discount'),
+    url(r'carrello/cambia_listino', 'edit_cart_pricelist', name='edit_cart_pricelist'),
     url(r'carrello/totali', 'get_cart_summary', name='get_cart_summary'),
 
 )

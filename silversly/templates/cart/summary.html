@@ -2,15 +2,24 @@
     var discount = {{ cart.discount }};
 </script>
 
-<hr/>
-<div style="float: left; font-size: 1.2em">
-    <p>Totale: <b id="total">{{ cart.final_total }}</b> (IVA inclusa)</p>
+<div id="cart_params">
+    <span>Listino:</span>
+        <select id='id_pricelist'>
+            {% for pricelist in cart.pricelists %}
+                <option value='{{ pricelist.pk }}' {% if pricelist == cart.pricelist %}selected="selected"{% endif %}>
+                    {{ pricelist.pk }}
+                </option>
+            {% endfor %}
+        </select>
+
     <span>Sconto:</span><button id="discount_button" type="submit">{{ cart.discount }}%</button>
     <input name="discount" type="text" size="3" id="discount_input" style="display: none" value="{{ cart.discount }}"/>
     <p class="message" id="discount_error" style="display:none">Inserisci un numero positivo senza virgola</p>
 </div>
 
-<div style="text-align: right">
-<p style="font-style: italic">Da pagare:<p>
-<p style="font-size: 3em; margin: 5px 5px" id="total_discounted">{{ cart.discounted_total }}&euro;</p>
+<div id="total_values">
+    <p>subtotale: <span id="subtotal">{{ cart.final_total }}&euro;</span></p>
+    <p>sconto: <span id="discount">-{{ cart.final_discount }}&euro;</span></p>
+    <p id="total">{{ cart.discounted_total }}&euro;</p>
+    <p>Totale (IVA inclusa)</p>
 </div>

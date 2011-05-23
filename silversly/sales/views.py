@@ -55,6 +55,21 @@ def edit_cart_discount(request):
     else:
         return HttpResponse(status=400)
 
+def edit_cart_pricelist(request):
+    cart = get_object_or_404(Cart, current=True)
+    form = EditPricelistForm(request.POST, instance=cart)
+    if form.is_valid():
+        form.save()
+        items = cart.cartitem_set.all()
+        for item in items:
+            item.save()
+        cart.update_value()
+        cart.save()
+        return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart})
+    else:
+        return HttpResponse(status=400)
+
+
 def get_cart_summary(request):
     cart = get_object_or_404(Cart, current=True)
     return render_to_response('cart/summary.html', {'cart': cart})

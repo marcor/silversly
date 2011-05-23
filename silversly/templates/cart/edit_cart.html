@@ -2,8 +2,53 @@
 
 {% block title %}Carrello{% endblock %}
 
+{% block head %}
+    <style type="text/css">
+        #cart_params, #cart_summary {
+            display: inline
+        }
+        #total_values {
+            top: 0;
+            padding: 0.5em 1.8em;
+            position: absolute;
+            right: -300px; width: 200px;
+            border: 1px solid #ccc;
+            text-align: right;
+            color: #999;
+        }
+        #subtotal, #discount {
+            font-size: 1.5em;
+            color: #000;
+            margin-left: 10px;
+        }
+        #total {
+            border-top: 2px solid black;
+            font-size: 2.8em;
+            color: #000;
+            margin: 5px 0;
+        }
+        #product_search_message {
+            position: absolute; left: 10px; top:30px; display: none;
+        }
+    </style>
+{% endblock %}
+
 {% block header %}
-    <h1>Carrello</h1>
+    <h1>Carrello di
+    <span id="customer_choice">
+        <button id="customer_name" style="font-weight: bold">Nome cliente</button>
+        <button id="open_customer_search">Cerca</button>
+        <button id="reset_customer">Resetta</button>
+        <input id="customers" />
+        <span id="new_customer">
+            Nuovo cliente:
+            <button id="new_retail" type="button" >Privato</button>
+            <button id="new_company" type="button" >Azienda</button>
+        </span>
+    </span>
+    </h1>
+
+
 {% endblock %}
 
 {% block jquery %}
@@ -15,7 +60,7 @@
     initialize();
 
     function initialize() {
-        $( "#new_customer :button,#save,  #new_receipt, #new_invoice, #new_ddt" ).button();
+        $( "#new_customer :button,#save" ).button();
 
         $("#open_customer_search").button({text: false, icons: { primary: 'ui-icon-search' }});
         $("#reset_customer").button({text: false, icons: { primary: 'ui-icon-arrowreturn-1-w' }});
@@ -40,22 +85,22 @@
         if (c != null) {
             $("#customer_name").button({label: c.name});
             if (c.is_company) {
-                $(".retail:button").hide();
-                $(".invoice:button").show();
+                $(".retail").hide();
+                $(".invoice").show();
             }
             else if (c.cf != false) {
-                $(".retail:button, #new_invoice").show();
+                $(".retail, #new_invoice").show();
                 $("#new_ddt").hide();
             }
             else {
-                $(".retail:button").show();
-                $(".invoice:button").hide();
+                $(".retail").show();
+                $(".invoice").hide();
             }
             data = {'customer_id': c.id};
         } else {
-            $("#customer_name").button({label: "Cliente anonimo"});
-            $(".retail:button").show();
-            $(".invoice:button").hide();
+            $("#customer_name").button({label: "Anonimo"});
+            $(".retail").show();
+            $(".invoice").hide();
             data = {};
         }
         customer = c;
@@ -151,7 +196,8 @@
                 .appendTo( ul );
     };
 
-    $("#customers").keypress(function(e){
+    // keypress does not work on chrome
+    $("#customers").keyup(function(e){
         if(e.keyCode==27){
             close_customer_search();
         }
@@ -274,7 +320,23 @@
         $(this).hide();
         $("#discount_input").show().trigger('focus');
     });
-    $("#discount_input").live('keypress', function(e){
+
+    $("#id_pricelist").live('change', function(e){
+            $.ajax({
+                "url": "{% url edit_cart_pricelist %}",
+                "type": "POST",
+                "data": {'pricelist': $(this).val()},
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#cart_display").html(xhr.responseText);
+                    }
+                }
+            });
+
+    });
+
+
+    $("#discount_input").live('keyup', function(e){
         $("#discount_error").hide();
         if(e.keyCode==27){
             $(this).hide().val(discount);
@@ -312,41 +374,25 @@
     </form>
 
 <div class="framed">
-    <div id="customer_choice">
-        <button id="customer_name" style="font-weight: bold">Nome cliente</button>
-        <button id="open_customer_search">Cerca</button>
-        <button id="reset_customer">Resetta</button>
-        <input id="customers" />
-        <span id="new_customer">
-            Nuovo cliente:
-            <button id="new_retail" type="button" >Privato</button>
-            <button id="new_company" type="button" >Azienda</button>
+
+    <div id="search_product" style="position: relative">
+        <span id="product_search_message" class="autocomplete-message">
+            Nessun risultato
         </span>
-    </div>
-
-    <div id="customer_search_message" class="autocomplete-message" style="display:none">Nessun risultato</div>
-
-
-
-    <div style="margin-top: 50px" id="search_product">
-            <span>Cerca prodotto:</span>
+        <span>Cerca prodotto:</span>
         <input id="products" />
+
+        <div id="cart_summary"></div>
+
     </div>
 
-    <div id="product_search_message" class="autocomplete-message" style="display:none">Nessun risultato</div>
+
 
     <div id="cart_display">
             {% include "cart/product_list.html" %}
     </div>
 
 </div>
-
-    <div id="buttons">
-        <button id="new_receipt" class="retail" type="submit">Scontrino</button>
-        <button id="new_invoice" class="invoice" type="submit">Fattura immediata</button>
-        <button id="new_ddt" class="invoice" type="submit">Ddt</button>
-    </div>
-
 
     <div id="add_product_dialog" title="Vendi un prodotto" class="dialog"></div>
     <div id="new_receipt_dialog" title="Emetti lo scontrino" class="dialog"></div>

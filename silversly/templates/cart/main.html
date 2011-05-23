@@ -5,5 +5,28 @@
  {% endblock %}
 
 {% block sidebar %}
-        
+        <ul>
+            <li>
+                <a href="{% url edit_cart %}" title="Ricalcola i prezzi">
+                <img src="/media/img/reload.png" />
+                </a>
+            </li>
+
+            <li class="retail" id="new_receipt">
+                <a href="#" title="Emetti uno scontrino">
+                    <img src="/media/img/cash_register.png" />
+                </a>
+            </li>
+            <li class="invoice" id="new_ddt">
+                <a href="#" title="Documento di trasporto">
+                <img src="/media/img/ddt.png" />
+                </a>
+            </li>
+            <li class="invoice" id="new_invoice">
+                <a href="#" title="Fattura immediata">
+                <img src="/media/img/invoice.png" />
+                </a>
+            </li>
+
+        </ul>
 {% endblock %}

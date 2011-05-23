@@ -65,6 +65,11 @@ thead tr {
 	background-color: #eee;
 }
 
+th {
+	border: 1px solid #ccc;
+	padding: 2px 3px;
+}
+
 td {
 	padding: 2px 5px;
 	border: 1px solid #ccc;

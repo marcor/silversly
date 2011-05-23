@@ -11,6 +11,11 @@ class EditDiscountForm(ModelForm):
         model = Cart
         fields = ("discount",)
 
+class EditPricelistForm(ModelForm):
+    class Meta:
+        model = Cart
+        fields = ("pricelist",)
+
 class ReceiptForm(ModelForm):
     class Meta:
         model = Scontrino
