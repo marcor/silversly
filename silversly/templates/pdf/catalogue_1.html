@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -10,7 +10,7 @@ h2 {
     font-weight: normal;
 }
 @page {
-    
+
     @frame {
         top: 1cm;
         left: 1cm;
@@ -28,8 +28,8 @@ h2 {
   -pdf-frame-content: footerblock;
     height: 0.5cm;
     bottom: 0cm;
-  } 
-} 
+  }
+}
 </style>
 </head>
 <body>
@@ -37,14 +37,14 @@ h2 {
 <div>
     {% if product.is_ean_encoded %}
         <pdf:barcode value="{{ product.code }}" type="ean13"
-        humanreadable="1" barwidth="0.33mm" barheight="1.5cm" align="middle">
+        humanreadable="1" barwidth="0.33mm" barheight="1cm" align="middle">
     {% else %}
         <pdf:barcode value="{{ product.code }}" type="code128"
-        humanreadable="1" barwidth="0.33mm" barheight="1cm" align="middle">
+         barwidth="0.33mm" barheight="1cm" align="middle">
     {% endif %}
     <h2>{{ product.name }}</h2>
 </div>
-{% if forloop.counter|divisibleby:"9" %}
+{% if forloop.counter|divisibleby:"10" %}
    {% if not forloop.last %}
         <pdf:nextframe />
     {% endif %}
