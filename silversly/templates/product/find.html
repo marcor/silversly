@@ -2,16 +2,16 @@
 
 {% block title %}Cerca un articolo{% endblock %}
 
-{% block head %} 
+{% block head %}
     <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
 {% endblock %}
 
 {% block jquery %}
 	{{ block.super }}
-	
+
         var chosenProduct;
         var cache = {};
-        
+
         $("#main").bind("showResult", function(e, product) {
             chosenProduct = product;
             var box = $("#infobox").hide();
@@ -21,26 +21,33 @@
                 return;
             }
             $("#message").hide();
-            
+
             if (product.pk in cache) {
                 box.html(cache[product.pk]).show();
                 $(".button", box).button();
-            }  
+                if (product.perfect_match) {
+                    $( "#sell" ).trigger("focus");
+                }
+            }
             else {
-                $.get("{% url show_infobox %}", 
-                    {'id': product.pk}, 
-                    function(data) { 
-                        cache[product.pk] = data; 
+                $.get("{% url show_infobox %}",
+                    {'id': product.pk},
+                    function(data) {
+                        cache[product.pk] = data;
                         box.html(data).show();
                         $(".button", box).button();
+                        if (product.perfect_match) {
+                            $( "#sell" ).trigger("focus");
+                        }
                     }
                 );
             };
-            
+
+
         });
-        
+
         $("#products").trigger("focus");
-        
+
         $( "#sell" ).live('click', function() {
             var sell_button = $(this);
             $( "#sell_product_dialog" ).dialog({
@@ -51,7 +58,7 @@
             });
             return false;
         });
-        
+
         $( "#add_product_to_cart_form" ).live('submit', function() {
             $.ajax({
                 "url": $(this).attr("action"),
@@ -60,17 +67,18 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         $("#sell_product_dialog").dialog('close');
+                        $("#products").trigger("select");
                     } else {
-                        $("#sell_product_dialog").html(xhr.responseText);                    
+                        $("#sell_product_dialog").html(xhr.responseText);
                     };
                 }
             });
             return false;
         });
-        
+
 		$("#products").autocomplete({source_url: "{% url ajax_find_product %}"});
-        
-            
+
+
 {% endblock %}
 
 {% block header %}
@@ -81,14 +89,14 @@
 
     <div class="search_field">
         <input id="products" />
-        
+
     </div>
-    
+
     <div id="message" style="display:none">Nessun risultato</div>
-    
+
     <div id="infobox" class="framed" style="display: none">
     </div>
-    
+
     <div id="sell_product_dialog" title="Vendi questo prodotto" class="dialog"></div>
-    
+
 {% endblock %}
