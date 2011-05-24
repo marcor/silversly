@@ -30,6 +30,15 @@ class Supplier(models.Model):
     def __unicode__(self):
         return self.name
 
+    def to_dict(self):
+        data = {'id': self.id,
+            'name': self.name,
+            'url': self.get_absolute_url()}
+        return data
+
+    def get_absolute_url(self):
+        return reverse("show_supplier", args=(self.id,))
+
     class Meta:
         ordering = ["name"]
         verbose_name = _("Fornitore")

@@ -4,30 +4,43 @@
 
 {% block jquery %}
 	{{ block.super }}
-        $( "#go" ).button().hide();
-		$( "#suppliers" ).autocomplete({
-			source: "{% url find_supplier %}",
-            minLength: 2,
-            search: function(event, ui) {
-                $( "#go" ).hide();
-            },
-            focus: function( event, ui ) {
-                $( "#suppliers" ).val( ui.item.fields.name );
-                return false;
-            },
-			select: function( event, ui ) {
-                $( "#suppliers" ).val( ui.item.fields.name );
-				if (ui.item) {
-                    $( "#go" ).attr("href", "/anagrafica/fornitore/" + ui.item.pk).show();
+        {{ block.super }}
+        $( "#suppliers" ).autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                "url": "{% url find_supplier %}",
+                "data": {'term': request.term},
+                "dataType": "json",
+                "success": function(results) {
+                    response(results);
+                    if (results.length == 0) {
+                        $("#search_message").show();
+                    }
                 }
-                return false;
-			}
-		}).data( "autocomplete" )._renderItem = function( ul, item ) {
+            });
+        },
+        minLength: 1,
+        search: function(event, ui) {
+            $("#search_message").hide();
+        },
+        focus: function( event, ui ) {
+            return false;
+        },
+        select: function( event, ui ) {
+            if (ui.item) {
+                window.location.href = ui.item.url;
+            }
+            return false;
+        }
+    }).data( "autocomplete" )._renderItem = function( ul, item ) {
             return $( "<li></li>" )
                 .data( "item.autocomplete", item )
-                .append( "<a>" + item.fields.name + "   </a>" )
+                .append( "<a>" + item.name + "</a>" )
                 .appendTo( ul );
-        };
+    };
+
+    $( "#suppliers" ).trigger("focus");
+
 {% endblock %}
 
 {% block header %}
@@ -38,7 +51,9 @@
 
     <div class="search_field">
         <input id="suppliers" />
-        <a id="go" href="">Vai</a>
+        <span id="search_message" class="autocomplete-message" style="display: none">
+            Nessun risultato
+        </span>
     </div>
-    
+
 {% endblock %}

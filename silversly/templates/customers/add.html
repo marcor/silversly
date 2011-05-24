@@ -2,6 +2,16 @@
 
 {% block jquery %}
     {{ block.super }}
+    $("#id_name").trigger("focus");
+    $(".errorlist+p>input").css("background-color", "#fef").css("border-color", "red").slice(0,1).trigger("focus");
+
+    $("#id_name").change(function() {
+        var name_field = $(this);
+        var name = name_field.val().trim();
+        name = name.substring(0,1).toUpperCase() + name.substring(1);
+        name_field.val(name);
+    });
+
 {% endblock %}
 
 {% block title %}Aggiungi un cliente{% endblock %}
@@ -15,8 +25,8 @@
         <div class="framed">
             {{ form.as_p }}
         </div>
-        <input type="submit" value="Aggiungi" />
+        <input type="submit" value="Aggiungi" style="visibility: hidden" />
     </form>
 {% endblock %}
 
-        
+

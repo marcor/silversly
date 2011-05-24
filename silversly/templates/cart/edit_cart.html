@@ -78,7 +78,6 @@
             $("#reset_customer").hide();
         };
         $("#open_customer_search").show();
-        $("#customer_search_message").hide();
     };
 
     function update_customer(c, reload_cart) {
@@ -162,21 +161,15 @@
     $( "#customers" ).autocomplete({
         source: function(request, response) {
             $.ajax({
-                "url": "{% url ajax_find_customer %}",
+                "url": "{% url find_customer %}",
                 "data": {'term': request.term},
                 "dataType": "json",
                 "success": function(results) {
                     response(results);
-                    if (results.length == 0) {
-                        $("#customer_search_message").show();
-                    }
                 }
             });
         },
         minLength: 2,
-        search: function(event, ui) {
-            $("#customer_search_message").hide();
-        },
         focus: function( event, ui ) {
             /*$( "#products" ).val( ui.item.fields.name );*/
             return false;

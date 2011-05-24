@@ -11,6 +11,15 @@ from django.db.models import Q
 from django.http import HttpResponse
 from urllib import unquote
 
+def get_name_query(term):
+    words = term.split(" ")
+    if len(words) > 1:
+        words = filter(lambda x: None or x.strip(), words)
+    word_query = Q()
+    for word in words:
+        word_query &= Q(name__istartswith = word) | Q(name__icontains = " " + word)
+    return word_query
+
 #
 #   FORNITORI
 #
@@ -18,10 +27,16 @@ from urllib import unquote
 def find_supplier(request):
     if request.is_ajax():
         term = unquote(request.GET["term"])
-        matching_suppliers = Supplier.objects.filter(name__icontains = term)
-        data = serializers.serialize("json", matching_suppliers)
-        return HttpResponse(data, 'application/javascript')
-    return render_to_response('suppliers/find.html')
+        name_query = get_name_query(term)
+        matches = Supplier.objects.filter(name_query)
+        result_list = []
+        for supp in matches:
+            result_list.append(supp.to_dict())
+        if len(result_list) == 1:
+            result_list[0]["perfect_match"] = True
+        return HttpResponse(simplejson.dumps(result_list, cls=DecimalEncoder), 'application/javascript')
+    else:
+        return render_to_response('suppliers/find.html')
 
 def add_supplier(request):
     if request.method == 'POST':
@@ -68,18 +83,6 @@ def supplier_history_tab(request, supplier_id):
 #
 
 def find_customer(request):
-    return render_to_response('customers/find.html')
-
-def get_name_query(term):
-    words = term.split(" ")
-    if len(words) > 1:
-        words = filter(lambda x: None or x.strip(), words)
-    word_query = Q()
-    for word in words:
-        word_query &= Q(name__istartswith = word) | Q(name__icontains = " " + word)
-    return word_query
-
-def ajax_find_customer(request):
     if request.is_ajax():
         term = unquote(request.GET["term"])
         name_query = get_name_query(term)
@@ -90,7 +93,8 @@ def ajax_find_customer(request):
         if len(result_list) == 1:
             result_list[0]["perfect_match"] = True
         return HttpResponse(simplejson.dumps(result_list, cls=DecimalEncoder), 'application/javascript')
-    return HttpResponse(status=400)
+    else:
+        return render_to_response('customers/find.html')
 
 def add_customer(request):
     status = 200
@@ -129,7 +133,7 @@ def add_company(request):
             new_company = form.save()
             if request.is_ajax():
                 return HttpResponse(simplejson.dumps(new_company.to_dict(), cls=DecimalEncoder), 'application/javascript')
-            return redirect(show_company, new_company.id)
+            return redirect(show_customer, new_company.id)
         else:
             status = 400
     else:

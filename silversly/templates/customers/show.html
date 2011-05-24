@@ -8,9 +8,24 @@
             $(".dialog").remove();
         }
 
+        function showMessage(content) {
+            $(".message_pane").html(content).show('fade', {}, 'fast', function() {
+                var pane = $(this);
+                setTimeout(function() {pane.hide("fade", {}, "slow")}, 500);
+            });
+        }
+
         $( "#tabset" ).tabs({'cache': true});
 
         $('#tabset').bind('tabsload', function(event, info){
+            if (info.index == 1) {
+                $("#id_pricelist").trigger('focus');
+                $("#save_commercial").attr('disabled', true);
+            }
+            else if (info.index == 0) {
+                $("#id_name").trigger('focus');
+                $("#save_customer").attr('disabled', true);
+            }
         });
 
     /*--- event bindings -------------*/
@@ -20,7 +35,7 @@
                 $( "#header>h1" ).html($("#customer_info [name=name]").get(0).value);
             });
 
-        $( "#save_customer" ).live('click', function() {
+        $( "#customer_info" ).live('submit', function() {
             $.ajax({
                 "url": "{% url customer_info_tab customer.pk %}",
                 "type": "POST",
@@ -29,14 +44,16 @@
                     $("#Dati_principali").html(xhr.responseText);
                     if (status == "success") {
                         $("#header").triggerHandler('infoUpdated');
-                        $( "#save_customer" ).attr('disabled', true);
+                        $("#save_customer").attr('disabled', true);
+                        $("#id_name").trigger('focus');
+                        showMessage("<b>Modifiche salvate!</b>");
                     };
                 }
             });
             return false;
         });
 
-        $( "#save_commercial" ).live('click', function() {
+        $( "#customer_commercial" ).live('submit', function() {
             $.ajax({
                 "url": "{% url customer_commercial_tab customer.pk %}",
                 "type": "POST",
@@ -44,20 +61,27 @@
                 "complete": function(xhr, status) {
                     $("#Commerciale").html(xhr.responseText);
                     if (status == "success") {
-                        $("#header").triggerHandler('infoUpdated');
-                        $( "#save_commercial" ).attr('disabled', true);
+                        $("#save_commercial").attr('disabled', true);
+                        $("#id_pricelist").trigger('focus');
+                        showMessage("<b>Modifiche salvate!</b>");
                     };
                 }
             });
             return false;
         });
 
-        $( "form#customer_info" ).live('change', function() {
-            $( "#save_customer" ).attr('disabled', false);
+        $( "select", "#customer_commercial" ).live('keypress', function(event) {
+            if (event.which == 13) {
+                $("#customer_commercial").trigger('submit');
+            }
         });
 
-        $( "form#customer_commercial" ).live('change', function() {
-            $( "#save_commercial" ).attr('disabled', false);
+        $( "#customer_info" ).live('change', function() {
+            $("#save_customer").attr('disabled', false);
+        });
+
+        $( "#customer_commercial" ).live('change', function() {
+            $("#save_commercial").attr('disabled', false);
         });
 
 {% endblock %}
@@ -76,5 +100,8 @@
             <li><a href="{% url customer_history_tab id %}" title="Acquisti">Acquisti</a></li>
         </ul>
         {% endwith %}
+        <div class="message_pane">
+            <b>Area messaggi</b>
+        </div>
     </div>
 {% endblock %}

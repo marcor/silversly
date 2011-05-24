@@ -7,27 +7,25 @@
         $( "#customers" ).autocomplete({
         source: function(request, response) {
             $.ajax({
-                "url": "{% url ajax_find_customer %}",
+                "url": "{% url find_customer %}",
                 "data": {'term': request.term},
                 "dataType": "json",
                 "success": function(results) {
                     response(results);
                     if (results.length == 0) {
-                        $("#customer_search_message").show();
+                        $("#search_message").show();
                     }
                 }
             });
         },
-        minLength: 2,
+        minLength: 1,
         search: function(event, ui) {
-            $("#customer_search_message").hide();
+            $("#search_message").hide();
         },
         focus: function( event, ui ) {
-            /*$( "#products" ).val( ui.item.fields.name );*/
             return false;
         },
         select: function( event, ui ) {
-            /*$( "#products" ).val( ui.item.fields.name );*/
             if (ui.item) {
                 window.location.href = ui.item.url;
             }
@@ -40,6 +38,8 @@
                 .appendTo( ul );
     };
 
+    $( "#customers" ).trigger("focus");
+
 
 {% endblock %}
 
@@ -51,6 +51,9 @@
 
     <div class="search_field">
         <input id="customers" />
+        <span id="search_message" class="autocomplete-message" style="display: none">
+            Nessun risultato
+        </span>
     </div>
 
 {% endblock %}
