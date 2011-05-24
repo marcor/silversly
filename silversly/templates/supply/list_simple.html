@@ -3,7 +3,8 @@
     <thead>
         <tr>
             <td>Fornitore</td>
-            <td>Prezzo</td>
+            <td>Prezzo 1</td>
+            <td>Prezzo 2</td>
         </tr>
     </thead>
     <tbody>
@@ -11,10 +12,11 @@
         <tr>
             <td>{{ supply.supplier.name }}</td>
             <td class="decimal">{{ supply.price }}</td>
+            <td class="decimal">{{ supply.altprice|default:"N/D" }}</td>
         </tr>
     {% endfor %}
     </tbody>
     </table>
 {% else %}
-    <p class="notice">Non hai specificato nessun fornitore per questo articolo.</p> 
+    <p class="notice">Non hai specificato nessun fornitore per questo articolo.</p>
 {% endif %}

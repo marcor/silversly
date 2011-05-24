@@ -20,12 +20,12 @@ class IncomingProductForm(ModelForm):
 class SupplyForm(ModelForm):
     class Meta:
         model = Supply
-        fields = ("supplier", "code", "price")
+        fields = ("supplier", "code", "price", "altprice")
 
 class ModifySupplyForm(ModelForm):
     class Meta:
         model = Supply
-        fields = ("price", "code")
+        fields = ("price", "altprice", "code")
 
 class BatchSupplierForm(ModelForm):
 	class Meta:
@@ -34,7 +34,7 @@ class BatchSupplierForm(ModelForm):
 
 class ModifyPriceForm(ModelForm):
     method = ChoiceField(required=True, label="Tipo di prezzo", choices=PRICE_MAKING_METHODS, initial="==", widget=RadioSelect)
-    
+
     def clean(self):
         cleaned_data = self.cleaned_data
         method = cleaned_data.get("method")
@@ -50,7 +50,7 @@ class ModifyPriceForm(ModelForm):
             if self._errors.has_key("gross"):
                 del(self._errors["gross"])
         return cleaned_data
-            
+
     class Meta:
         model = AbstractPrice
         fields = ("method", "gross", "markup")

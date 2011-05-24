@@ -24,7 +24,7 @@ class Category(models.Model):
         if (self.parent is None):
             return self.name
         return "%s > %s" % (self.parent, self.name)
-    
+
     def clean(self):
         self.name = self.name.strip().lower()
 
@@ -33,7 +33,7 @@ class Category(models.Model):
         if (self.parent is None):
             return anchor
         return "%s > %s" % (self.parent.breadcrumbs(), anchor)
-    
+
     @models.permalink
     def get_absolute_url(self):
         return ('inventory.views.list_by_category', (str(self.id),))
@@ -43,11 +43,11 @@ class Category(models.Model):
         for child in Category.objects.filter(parent=self):
             total += child.total_products()
         return total
-        
+
     class Meta:
         ordering = ['name']
         verbose_name = _("Categoria")
-        verbose_name_plural = _("Categorie") 
+        verbose_name_plural = _("Categorie")
 
 class Pricelist(models.Model):
     name = models.CharField(_("Nome"), max_length = 25, primary_key = True)
@@ -74,16 +74,16 @@ class Product(models.Model):
     suppliers = models.ManyToManyField('people.Supplier', verbose_name = _("Fornitori"), through = 'Supply', null = True)
     base_price = FixedDecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 2, default = 0)
     prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'Price', null = True)
-    
+
     catalogue = models.BooleanField(verbose_name = _("Includi nel catalogo"), default = False)
-    
+
     def is_ean_encoded(self):
         try:
             int(self.code)
             return True
         except:
             return False
-            
+
     def __unicode__(self):
         return self.name
 
@@ -99,10 +99,10 @@ class Product(models.Model):
                 return
         self.name = name
 
-    def update_base_price(self):        
+    def update_base_price(self):
         supplies = Supply.objects.filter(product = self)
         if (supplies.count() > 0):
-            supplier_prices = [supply.price for supply in supplies]
+            supplier_prices = [supply.mean_price() for supply in supplies]
             self.base_price = (sum(supplier_prices) / len(supplier_prices))
         else:
             self.base_price = 0
@@ -111,7 +111,7 @@ class Product(models.Model):
         for price in prices:
             price.update()
             price.save()
-    
+
     class Meta:
         verbose_name = _("Articolo")
         verbose_name_plural = _("Articoli")
@@ -120,9 +120,9 @@ class Product(models.Model):
 class IncomingProduct(models.Model):
     actual_product = models.ForeignKey('Product', null=True, blank=True)
     batch = models.ForeignKey('BatchLoad')
-    
+
     quantity = models.DecimalField(_(u"Quantità da aggiungere"), max_digits = 8, decimal_places = 3)
-    
+
     new_supplier_code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
     new_supplier_price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
 
@@ -132,10 +132,19 @@ class IncomingProduct(models.Model):
     def clean(self):
         supplies = Supply.objects.filter(product = self.actual_product).exclude(supplier = self.batch.supplier)
         self.new_supplier_price = self.new_supplier_price or 0
+        try:
+            this_supply = Supply.objects.filter(product = self.actual_product).get(supplier = self.batch.supplier)
+        except:
+            this_supply = Supply(product = self.actual_product, supplier = self.batch.supplier, price = self.new_supplier_price)
+        if this_supply.price != self.new_supplier_price:
+            this_supply.altprice = this_supply.price
+            this_supply.price = self.new_supplier_price
+
         if supplies:
-            self.base_price = sum([supply.price for supply in supplies], self.new_supplier_price) / (len(supplies) + 1)
+            self.base_price = sum([supply.mean_price() for supply in supplies], this_supply.mean_price()) / (len(supplies) + 1)
+
         else:
-            self.base_price = self.new_supplier_price
+            self.base_price = this_supply.mean_price()
 
     class Meta:
         unique_together = ['batch', 'actual_product']
@@ -143,21 +152,21 @@ class IncomingProduct(models.Model):
 class AbstractPrice(models.Model):
     method = models.CharField(_("Tipo di prezzo"), max_length = 2, choices = PRICE_MAKING_METHODS)
     gross = FixedDecimalField(_("Prezzo con IVA"), max_digits = 7, decimal_places = 2)
-    net = FixedDecimalField(_("Prezzo netto"), max_digits = 7, decimal_places = 2, null = True)     
+    net = FixedDecimalField(_("Prezzo netto"), max_digits = 7, decimal_places = 2, null = True)
     markup = models.PositiveSmallIntegerField(_("Percentuale ricarico"), null = True)
     pricelist = models.ForeignKey(Pricelist, verbose_name = _("Listino"))
-    
+
     def __init__(self, *args, **kwargs):
         super(AbstractPrice, self).__init__(*args, **kwargs)
         if self.pk is None:
             self.update()
-        
+
     def __unicode__(self):
         if self.method == '==':
             return unicode(self.gross)
         else:
             return u"+%s%%" % self.markup
-    
+
     def update(self, taxes=20, default_precision=Decimal(".01")):
         if self.method == "%=":
             self.gross = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000)
@@ -176,35 +185,35 @@ class AbstractPrice(models.Model):
                 module = Decimal('1')
             corrected_price = gross  + module / 2 # this guarantees that the price gets always rounded up
             self.gross = (corrected_price - corrected_price.remainder_near(module))
-        
+
         self.net = (self.gross / 6 * 5)
-    
+
     def save(self, *args, **kwargs):
-        self.update()       
-        super(AbstractPrice, self).save(*args, **kwargs)            
-    
+        self.update()
+        super(AbstractPrice, self).save(*args, **kwargs)
+
     class Meta:
         abstract = True
         verbose_name = _("Prezzo di vendita")
         verbose_name_plural = _("Prezzi di vendita")
         unique_together = ('pricelist', 'product')
-        
+
 class NewPrice(AbstractPrice):
     product = models.ForeignKey(IncomingProduct, verbose_name = _("Prodotto"))
     reset_pricelist_default = models.BooleanField(default = False)
-    
+
     def save(self, *args, **kwargs):
         if self.reset_pricelist_default:
             self.markup = self.pricelist.default_markup
             self.method = self.pricelist.default_method
-        super(NewPrice, self).save(*args, **kwargs)   
+        super(NewPrice, self).save(*args, **kwargs)
 
 class Price(AbstractPrice):
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
 
 class BatchLoad(models.Model):
     supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"), related_name="product_batch", null=True)
-    document_ref = models.CharField(_(u"Fattura n°"), max_length=5, blank=True) 
+    document_ref = models.CharField(_(u"Fattura n°"), max_length=5, blank=True)
     date = models.DateField(auto_now = True)
     loaded = models.BooleanField(default = False)
 
@@ -226,18 +235,19 @@ class Supply(models.Model):
     supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"))
     code = models.CharField(_("Codice fornitore"), max_length = 20, null = True, blank = True)
     price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3)
+    altprice = FixedDecimalField(_("Secondo prezzo"), max_digits = 8, decimal_places = 3, null=True, blank=True)
     updated = models.DateField(_("Ultimo acquisto"), auto_now = True)
 
     def __unicode__(self):
         return u"%s (fornito da %s a %s€)" % (self.product, self.supplier, self.price)
-        
+
     def save(self, *args, **kwargs):
         super(Supply, self).save(*args, **kwargs)
 
         #if (log):
         #    log_entry = LogEntry(
         #        type = 'L',
-        #        product = self.product, 
+        #        product = self.product,
         #        supplier = self.supplier,
         #        price = self.last_price,
         #        quantity = self.last_quantity)
@@ -250,6 +260,11 @@ class Supply(models.Model):
         super(Supply, self).delete(*args, **kwargs)
         # we don't update the quantity, only the price
         self.product.update_base_price()
+
+    def mean_price(self):
+        if self.altprice:
+           return (self.altprice + self.price) / 2
+        return self.price
 
     class Meta:
         verbose_name = _("Fornitura")
