@@ -6,33 +6,44 @@
 	$(".navlinks a[title='Pagina riassuntiva'] img").css("opacity", "1").addClass("current");
 {% endblock %}
 
-{% block head %} 
+{% block head %}
 <style type="text/css">
     #sidebar { display: none }
     #main { margin-left: 20px}
-    .columns > div { 
-        float: left; 
+    .columns > div {
+        float: left;
         width: 24%;
         border: 1px solid #ccc;
         padding: 1em;
         margin: 1em}
-    h2 { 
+    h2 {
         margin: 2px;
         padding: 3px;
         padding-left: 1em;
         border: 1px solid #aaa;
         border-radius: 3px;
     }
+    h3 {
+        border: 0;
+        margin-bottom: 10px;
+    }
     #vendite h2 { background-color: #fee   }
     #magazzino h2 { background-color: #eef   }
     #acquisti h2 { background-color: #efe   }
-    #outstock {
+    .pane {
         overflow-y: auto;
         width: 100%;
         max-height: 300px;
     }
-    #outstock table {
+    .pane table {
         margin-top: 0;
+        width: 100%;
+    }
+    .pane p {
+        font-style: italic;
+        color: #666;
+        font-size: .8em;
+        margin: 1px 10px;
     }
 </style>
 {% endblock %}
@@ -47,7 +58,7 @@
         <h2>Magazzino <a href="{% url print_catalogue %}" target="_blank">(stampa catalogo)</a></h2>
         <h3>Articoli sottoscorta ({{ outstock|length }})</h3>
         {% if outstock %}
-        <div id="outstock">
+        <div class="pane">
         <table >
             {% for product in outstock %}
             <tr>
@@ -69,17 +80,38 @@
     <div id="vendite">
         <h2>Vendite</h2>
         <h3>Crediti</h3>
+            <div class="pane">
+            {% if debtors %}
+                <table >
+                {% for debtor in debtors %}
+                <tr>
+                    <td><a href="{% url show_customer debtor.id %}">{{debtor}}</a></td>
+                    <td class="decimal">{{debtor.due}}&euro;</td>
+                </tr>
+                {% endfor %}
+                </table>
+            {% else %}
+                <p>Tutti i clienti sono in regola. Che bravi!</p>
+            {% endif %}
+         </div>
         <h3>Ultimi scontrini</h3>
-         <div id="outstock">
-         <table >
+         <div class="pane">
+            {% if last_receipts %}
+            <table >
             {% for scontrino in last_receipts %}
             <tr>
                 <td><a href="{% url show_receipt scontrino.id %}">{{scontrino}}</a></td>
             </tr>
             {% endfor %}
-        </table>
+            </table>
+            {% else %}
+                <p>Nessuno scontrino emesso.</p>
+            {% endif %}
          </div>
         <h3>Ultimi DDT</h3>
+            <div class="pane">
+                <p>Nessun DDT emesso.</p>
+            </div>
     </div>
 </div>
 

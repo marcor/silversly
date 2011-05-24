@@ -94,7 +94,7 @@ class Scontrino(Receipt):
     cf = models.CharField(_("Codice fiscale/P.IVA"), max_length=20, blank=True)
 
     def __unicode__(self):
-        return u"Scontrino del %s" % (self.date,)
+        return u"Scontrino del %s" % (self.date.strftime("%d/%m (%H:%M)"),)
 
     def send_to_register(self, close = False):
         filescontrino = open('c:\\scontrini\\scontrino.txt', 'w')

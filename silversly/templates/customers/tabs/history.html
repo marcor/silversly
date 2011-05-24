@@ -12,9 +12,9 @@
         {% for receipt in receipts %}
             <tr>
             {% if receipt.type == "scontrino" %}
-                <td style="background-color: #ffe">{{ receipt }}</td>
-                <td>{{ receipt.cart.discounted_total }}</td>
-                <td>{{ receipt.due }}</td>
+                <td style="background-color: #ffe"><a href="{% url show_receipt receipt.id %}">{{ receipt }}</a></td>
+                <td class="decimal">{{ receipt.cart.discounted_total }}</td>
+                <td class="decimal">{{ receipt.due }}</td>
             {% else %}
                 {% if receipt.type == "ddt" %}
                     <td style="background-color: #fee">{{ receipt }}</td>
@@ -22,7 +22,7 @@
                     <td></td>
                     {% else %}
                     <td style="background-color: #eef">{{ receipt }}</td>
-                    <td>{{ receipt.cart.discounted_total }}</td>
+                    <td class="decimal">{{ receipt.cart.discounted_total }}</td>
                     <td></td>
                 {% endif %}
             {% endif %}
