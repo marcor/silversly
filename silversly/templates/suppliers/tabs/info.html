@@ -1,9 +1,8 @@
 {% extends 'ajax_tab.html' %}
 
-{% block content %} 
+{% block content %}
     <form class="bigform" id="supplier_info" action="" method="post">
         {{ form.as_p }}
-        <input id="save_supplier" type="submit" value="Salva" disabled="disabled" />
+        <input id="save_supplier" type="submit" value="Salva" disabled="disabled" style="visibility: hidden"/>
     </form>
 {% endblock %}
-    

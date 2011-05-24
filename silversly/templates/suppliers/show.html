@@ -5,31 +5,38 @@
 {% block jquery %}
 	{{ block.super }}
         function removeDialogs() {
-            $(".dialog").remove();            
+            $(".dialog").remove();
         }
-	
+
+        function showMessage(content) {
+            $(".message_pane").html(content).show('fade', {}, 'fast', function() {
+                var pane = $(this);
+                setTimeout(function() {pane.hide("fade", {}, "slow")}, 500);
+            });
+        }
+
 	String.prototype.capitalize = function() {
 		return this.charAt(0).toUpperCase() + this.slice(1);
 	}
 
-        
+
         $( "#tabset" ).tabs({'cache': true});
-        
+
         $('#tabset').bind('tabsload', function(event, info){
             $("#id_name").trigger('focus');
         });
-        
-                
+
+
     /*--- event bindings -------------*/
-        
-        $( "#header" ).bind('infoUpdated', 
+
+        $( "#header" ).bind('infoUpdated',
             function(event) {
                 var name_field = $("#supplier_info [name=name]")
 		name_field.val(name_field.val().trim().capitalize());
                 $( "#header>h1" ).html(name_field.val());
             });
-        
-        $( "#save_supplier" ).live('click', function() {
+
+        $( "#supplier_info" ).live('submit', function() {
             $.ajax({
                 "url": "{% url supplier_info_tab supplier.pk %}",
                 "type": "POST",
@@ -39,16 +46,17 @@
                     if (status == "success") {
                         $("#header").triggerHandler('infoUpdated');
                         $( "#save_supplier" ).attr('disabled', true);
+                        showMessage("<b>Modifiche salvate!</b>");
                     };
                 }
             });
             return false;
         });
-        
+
         $( "form#supplier_info" ).live('change', function() {
             $( "#save_supplier" ).attr('disabled', false);
-        });        
-        
+        });
+
 {% endblock %}
 
 {% block header %}
@@ -57,7 +65,7 @@
 
 
 {% block content %}
-    
+
     <div id="tabset">
         {% with supplier.id as id %}
         <ul>
@@ -65,5 +73,8 @@
             <li><a href="{% url supplier_history_tab id %}" title="Forniture">Forniture</a></li>
         </ul>
         {% endwith %}
+        <div class="message_pane">
+            <b>Area messaggi</b>
+        </div>
     </div>
 {% endblock %}
