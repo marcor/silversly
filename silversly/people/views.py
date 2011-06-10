@@ -217,15 +217,5 @@ def customer_history_tab(request, customer_id):
     receipts = Receipt.objects.exclude(cart = None)
     list = []
     for receipt in receipts:
-        try:
-            r = receipt.scontrino
-            r.type = "scontrino"
-        except:
-            try:
-                r = receipt.ddt
-                r.type = "ddt"
-            except:
-                r = receipt.invoice
-                r.type = "invoice"
-        list.append(r)
+        list.append(r.child())
     return render_to_response('customers/tabs/history.html', {'customer': customer, 'receipts': list})

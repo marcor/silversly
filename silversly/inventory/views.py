@@ -3,6 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from models import *
 from forms import *
 from people.models import Supplier
+from sales.models import CartItem
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
 from django.core import serializers
@@ -477,8 +478,10 @@ def prices_tab(request, product_id):
             'can_add_supply': product.suppliers.count() < Supplier.objects.count()})
 
 def history_tab(request, product_id):
-    product = get_object_or_404(Product, pk=id)
-    return render_to_response('product/tabs/history.html', {'product': product})
+    product = get_object_or_404(Product, pk=product_id)
+    uploads = IncomingProduct.objects.select_related("batch", "batch__supplier").filter(actual_product = product, batch__loaded = True)
+    downloads = CartItem.objects.select_related("cart", "cart__customer", "cart__receipt").filter(product = product, cart__current = False)
+    return render_to_response('product/tabs/history.html', {'product': product, 'uploads': uploads, 'downloads': downloads})
 
 
 #

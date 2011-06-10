@@ -1,0 +1,54 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %}
+
+    <h3>Rifornimenti</h3>
+    {% if uploads %}
+    <div id="resupplies" style="overflow-y: auto; max-height: 100px">
+    <table style="width: 80%">
+        <thead>
+            <th>Data</th>
+            <th>Doc.</th>
+            <th>Fornitore</th>
+            <th>{{ product.unit }}</th>
+            <th>Prezzo</th>
+        </thead>
+        <tbody>
+        {% for u in uploads %}
+            <tr>
+              <td>{{ u.batch.date }}</td>
+              <td>{{ u.batch.document_ref }}</td>
+              <td><a href="{% url show_supplier u.batch.supplier.id %}">{{ u.batch.supplier }}</a></td>
+              <td class="decimal">{{ u.quantity }}</td>
+              <td class="decimal">{{ u.new_supplier_price }}&euro;</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+        <i>Ancora nessuno!</i>
+    {% endif %}
+
+    <h3>Vendite</h3>
+    {% if downloads %}
+    <table id="sales" style="width: 60%">
+        <thead>
+            <th>Documento</th>
+            <th>{{ product.unit }}</th>
+        </thead>
+        <tbody>
+        {% for d in downloads %}
+            <tr>
+                <td><a href="{% url show_receipt d.cart.receipt.id %}">{{ d.cart.receipt.child }}</a></td>
+                <td class="decimal">{{ d.quantity }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <i>Ancora nessuna!</i>
+    {% endif %}
+
+{% endblock %}

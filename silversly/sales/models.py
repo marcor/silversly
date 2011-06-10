@@ -72,6 +72,20 @@ class Cart(models.Model):
 class Receipt(models.Model):
     cart = models.OneToOneField(Cart, null=True)
 
+    def child(self):
+        try:
+            r = self.scontrino
+            r.type = "scontrino"
+        except:
+            try:
+                r = self.ddt
+                r.type = "ddt"
+            except:
+                r = self.invoice
+                r.type = "invoice"
+        return r
+
+
 def prep(decim):
     return str((decim * 1000).quantize(Decimal("1")))
 
