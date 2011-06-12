@@ -180,18 +180,21 @@ def new_batch_load(request):
 
 
 def show_batch_load(request, batch_id):
-    if request.method == "GET":
-        batch = BatchLoad.objects.get(pk=batch_id)
-        supplier_form = BatchSupplierForm(instance=batch)
+    batch = BatchLoad.objects.get(pk=batch_id)
+    if batch.loaded:
         products = IncomingProduct.objects.filter(batch=batch)
-        return render_to_response('batch_load/show.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
+        return render_to_response('batch_load/show.html',  {'products': products, 'batch': batch})
+    else:
+        if request.method == "GET":
+            supplier_form = BatchSupplierForm(instance=batch)
+            products = IncomingProduct.objects.filter(batch=batch)
+            return render_to_response('batch_load/show.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
 
-    if request.is_ajax() and request.method == "POST":
-        batch = BatchLoad.objects.get(pk=batch_id)
-        supplier_form = BatchSupplierForm(request.POST, instance = batch)
-        if supplier_form.is_valid():
-            supplier_form.save()
-            return HttpResponse(status=200)
+        if request.is_ajax() and request.method == "POST":
+            supplier_form = BatchSupplierForm(request.POST, instance = batch)
+            if supplier_form.is_valid():
+                supplier_form.save()
+                return HttpResponse(status=200)
     return HttpResponse(status=400)
 
 
