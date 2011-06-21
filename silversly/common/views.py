@@ -8,6 +8,9 @@ from inventory.models import *
 from people.models import *
 from sales.models import *
 from forms import *
+from models import *
+from django.contrib.sites.models import Site
+
 
 
 # utility functions
@@ -37,6 +40,44 @@ def homepage(request):
 
 def settings(request):
     return render_to_response("settings/show.html")
+
+def shop_tab(request):
+    try:
+        shop = Shop.objects.get(site = Site.objects.get_current())
+    except:
+        shop = Shop(site = Site.objects.get_current())
+    bad_request = False
+    if request.method == "POST":
+        form = ShopForm(request.POST, instance = shop)
+        if form.is_valid():
+            form.save()
+        else:
+            bad_request = True
+    else:
+        form = ShopForm(instance = shop)
+    response = render_to_response('settings/tabs/shop.html', {'form': form})
+    if bad_request:
+        response.status_code = 400
+    return response
+
+def other_tab(request):
+    try:
+        other_settings = Settings.objects.get(site = Site.objects.get_current())
+    except:
+        other_settings = Settings(site = Site.objects.get_current())
+    bad_request = False
+    if request.method == "POST":
+        form = OtherSettingsForm(request.POST, instance = other_settings)
+        if form.is_valid():
+            form.save()
+        else:
+            bad_request = True
+    else:
+        form = OtherSettingsForm(instance = other_settings)
+    response = render_to_response('settings/tabs/other.html', {'form': form})
+    if bad_request:
+        response.status_code = 400
+    return response
 
 def pricelists_tab(request):
     pricelists = Pricelist.objects.all()

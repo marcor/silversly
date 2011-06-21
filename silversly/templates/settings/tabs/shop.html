@@ -1,0 +1,13 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %}
+    <form class="bigform" id="shop_info_form" action="{% url shop_tab %}" method="post">
+        {{ form.as_p }}
+        <div class="actionbar">
+        <input id="save_shop_info" style="visibility: hidden" type="submit" value="Salva" />
+        </div>
+    </form>
+    <script type="text/javascript">
+        $("#id_name").trigger("focus");
+    </script>
+{% endblock %}

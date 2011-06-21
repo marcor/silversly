@@ -1,0 +1,13 @@
+<div>
+    <script type="text/javascript">
+        $(function() {
+            $("#id_factor").trigger('focus');
+        });
+    </script>
+
+        <form id="factor_form" action="{% url save_product_factor product.id %}" method="post">
+            {{ form.as_p }}
+            <input id="save_factor" type="submit" value="Salva" />
+        </form>
+</div>
+

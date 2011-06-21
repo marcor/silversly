@@ -57,8 +57,12 @@ table {
 	/*border: 1px solid #ccc;*/
 	border-spacing: 1;
 	border-collapse: collapse;
-	font-size: 0.9em;
+
 	margin: 15px 0 10px;
+}
+
+#infobox table {
+	font-size: 0.9em;
 }
 
 thead tr {
@@ -109,6 +113,10 @@ ul, ol {
 }
 
 form {
+	font-size: 17px;
+}
+
+form input, form select{
 	font-size: 17px;
 }
 

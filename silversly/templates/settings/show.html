@@ -4,25 +4,29 @@
 
 {% block jquery %}
 	{{ block.super }}
-	
+
         function removeDialogs() {
-            $(".dialog").remove();            
+            $(".dialog").remove();
         }
-        
+
         function showMessage(content) {
             $(".message_pane").html(content).show('fade', {}, 'fast', function() {
                 var pane = $(this);
                 setTimeout(function() {pane.hide("fade", {}, "slow")}, 500);
             });
         }
-        
+
         $( "#tabset" ).tabs({'cache': true});
-        
-        $('#tabset').bind('tabsload', function(event, info){d
+
+        $('#tabset').bind('tabsload', function(event, info){
+            if (info.index == 0) {
+                $("#id_name").trigger('focus');
+                $("#save_shop_info").attr('disabled', true);
+            }
         });
-        
-    /*--- event bindings -------------*/
-    
+
+    /*--- pricelists tab -------------*/
+
     $( ".edit_pricelist" ).live('click', function() {
             var modify_anchor = $(this);
             $( "#edit_pricelist_dialog" ).dialog({
@@ -33,8 +37,8 @@
             });
             return false;
         });
-    
-    $( "#save_pricelist" ).live('click', function() {
+
+        $( "#save_pricelist" ).live('click', function() {
             var form = $( "#edit_pricelist_form" );
             $.ajax({
                 "url": form.attr("action"),
@@ -43,18 +47,53 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         removeDialogs();
-                        $( "#tabset" ).tabs('load', 0);                        
+                        $( "#tabset" ).tabs('load', 1);
                     } else {
-                        $("#edit_pricelist_dialog").html(xhr.responseText);                    
+                        $("#edit_pricelist_dialog").html(xhr.responseText);
                     };
                 }
             });
             return false;
         });
-        
-        
-        
- 
+
+        /*--- shop tab -------------*/
+
+        setupForm = function(name, tabname) {
+            var formid = "#" + name + "_form";
+            $(formid).live('submit', function() {
+                var form = $(formid);
+                $.ajax({
+                    url: form.attr("action"),
+                    type: "POST",
+                    data: form.serialize(),
+                    complete: function(xhr, status) {
+                        $("#" + tabname).html(xhr.responseText);
+                        if (status == "success") {
+                            $("#save_" + name).attr('disabled', true);
+                            showMessage("<b>Modifiche salvate!</b>");
+                        };
+                    }
+                });
+                return false;
+            });
+
+            $( "select", formid ).live('keypress', function(event) {
+                if (event.which == 13)
+                    $(formid).trigger('submit');
+            });
+
+            $( formid ).live('change', function() {
+                $("#save_" + name).attr('disabled', false);
+            });
+
+            $("[type=checkbox]", formid).live('change', function() {
+                $(formid).trigger('submit');
+            });
+        }
+
+        setupForm("shop_info", "Dati_negozio");
+        setupForm("other", "Altro");
+
 {% endblock %}
 
 {% block header %}
@@ -63,19 +102,21 @@
 
 
 {% block content %}
-    
+
     <div id="tabset">
         {% with product.id as id %}
         <ul>
+            <li><a href="{% url shop_tab %}" title="Dati negozio">Dati negozio</a></li>
             <li><a href="{% url pricelists_tab %}" title="Listini">Listini</a></li>
+            <li><a href="{% url other_tab %}" title="Altro">Altro</a></li>
         </ul>
         {% endwith %}
         <div class="message_pane">
             <b>Area messaggi</b>
         </div>
     </div>
-    
+
     <div id="edit_pricelist_dialog" title="Modifica un listino" class="dialog"></div>
     <div id="add_pricelist_dialog" title="Aggiungi un listino" class="dialog"></div>
-    
+
 {% endblock %}

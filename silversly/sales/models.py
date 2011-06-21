@@ -6,6 +6,9 @@ from decimal import Decimal
 import datetime
 from django.utils.translation import ugettext_lazy as _
 from inventory.models import Pricelist
+from django.conf import settings
+
+PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
@@ -158,7 +161,7 @@ class Invoice(Receipt):
     #cart = models.OneToOneField(Cart, null = True)
     # used for fatture differite (cart(s) -> receipt(s) -> invoice)
     receipts = models.ManyToManyField(Receipt, null = True, related_name="proxy_receipt")
-    payment_method = models.CharField(_("Metodo di pagamento"), max_length = 50)
+    payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES)
     bank = models.OneToOneField('people.Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
     costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0)
 

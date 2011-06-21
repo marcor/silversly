@@ -1,0 +1,10 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %}
+    <form class="bigform" id="other_form" action="{% url other_tab %}" method="post">
+        {{ form.as_p }}
+        <div class="actionbar">
+        <input id="save_other" style="visibility: hidden" type="submit" value="Salva" />
+        </div>
+    </form>
+{% endblock %}

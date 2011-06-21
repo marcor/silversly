@@ -3,6 +3,9 @@ from django.db import models
 from common.models import FixedDecimalField
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
+from django.conf import settings
+
+PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
 
 class Bank(models.Model):
     name = models.CharField(_("Descrizione"), max_length=50)
@@ -85,7 +88,7 @@ class CompanyCustomer(Customer):
     main_address = models.TextField(verbose_name = _("Indirizzo"))
     shipping_address = models.TextField(verbose_name = _("Indirizzo di spedizione"), blank=True)
 
-    payment_method = models.CharField(_("Metodo di pagamento"), max_length = 50, default="")
+    payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES, default="30fm")
     bank = models.OneToOneField('Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
     costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0)
 
