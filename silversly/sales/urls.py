@@ -4,7 +4,7 @@ urlpatterns = patterns('sales.views',
     url(r'carrello$', 'edit_cart', name='edit_cart'),
 
     url(r'scontrino/nuovo$', 'new_receipt', name='new_receipt'),
-    #url(r'scontrino/(\d+)/$', 'edit_receipt', name='edit_receipt'),
+    url(r'scontrino/(\d+)/salda$', 'pay_due_receipt', name='pay_due_receipt'),
     url(r'archivio/scontrino/(\d+)/$', 'show_receipt', name='show_receipt'),
     #url(r'archivio/scontrino/(\d+)/salva/$', 'save_receipt', name='save_receipt'),
 

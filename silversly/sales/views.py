@@ -90,6 +90,7 @@ def new_receipt(request):
                     product = item.product
                     product.quantity -= item.quantity
                     product.save()
+                    product.sync_to_others("quantity")
             scontrino.send_to_register(close=False)
             return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
         else:
@@ -109,6 +110,11 @@ def show_receipt(request, id):
     customer = cart.customer
     return render_to_response('documents/show_receipt.html',  {'cart': cart, 'customer': customer, 'receipt': receipt})
 
+def pay_due_receipt(request, id):
+    receipt = get_object_or_404(Scontrino, pk=id)
+    if receipt.due:
+        receipt.finally_paid()
+    return HttpResponse(status = 200)
 
 def add_product_to_cart(request):
     bad_request = False

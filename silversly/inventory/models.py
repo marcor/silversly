@@ -126,7 +126,7 @@ class Product(models.Model):
         dest.sync_from_denom(*what)
 
     def sync_to_denom(self, *what):
-        self.denominator.sync_from_multiple(self, what)
+        self.denominator.sync_from_multiple(self, *what)
         self.denominator.sync_to_multiples(self.denominator.multiple_set.exclude(id__exact = self.id), *what)
 
     def sync_from_multiple(self, source, *what):
@@ -164,6 +164,7 @@ class Product(models.Model):
         if self.is_denom():
             self.sync_to_multiples(self.multiple_set.all(), *what)
         elif self.is_multiple():
+            print "lala"
             self.sync_to_denom(*what)
 
     class Meta:
@@ -270,6 +271,9 @@ class BatchLoad(models.Model):
     document_ref = models.CharField(_(u"Fattura n°"), max_length=5, blank=True)
     date = models.DateField(auto_now = True)
     loaded = models.BooleanField(default = False)
+
+    def __unicode__(self):
+        return u"Fornitura " + self.supplier.name + " del " + str(self.date)
 
 MOVEMENTS = (
     (u'L', _(u"Carico")),

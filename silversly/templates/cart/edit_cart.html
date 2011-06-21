@@ -64,6 +64,7 @@
         $("#reset_customer").button({text: false, icons: { primary: 'ui-icon-arrowreturn-1-w' }});
         update_customer(customer, false)
         close_customer_search();
+        $("#products").trigger("focus");
     };
 
     function close_customer_search() {
@@ -76,6 +77,7 @@
             $("#reset_customer").hide();
         };
         $("#open_customer_search").show();
+        $("#products").trigger("focus");
     };
 
     function update_customer(c, reload_cart) {
@@ -116,6 +118,8 @@
               $("#save").show();
         };
         $("#cart_summary").load("{% url get_cart_summary %}");
+        $("#products").val("");
+        $("#products").trigger("focus");
 
     };
 

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from inventory.models import Price
-from common.models import FixedDecimalField
+from common.models import *
 from decimal import Decimal
-import datetime
+import datetime, os
 from django.utils.translation import ugettext_lazy as _
 from inventory.models import Pricelist
 from django.conf import settings
+from django.contrib.sites.models import Site
 
 PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
 
@@ -113,8 +114,11 @@ class Scontrino(Receipt):
     def __unicode__(self):
         return u"Scontrino del %s" % (self.date.strftime("%d/%m (%H:%M)"),)
 
-    def send_to_register(self, close = False):
-        filescontrino = open('c:\\scontrini\\scontrino.txt', 'w')
+    def send_to_register(self, close = None):
+        options = Settings.objects.get(site = Site.objects.get_current())
+        if close is None:
+            close = options.close_receipts
+        filescontrino = open(os.path.join(options.receipt_folder, 'scontrino.txt'), 'w')
         items = self.cart.cartitem_set.all()
         for item in items:
             filescontrino.write(print_article(item.product.name.encode("iso-8859-1"), item.quantity, item.final_price) + "\n")
@@ -124,8 +128,20 @@ class Scontrino(Receipt):
             filescontrino.write(print_total_discount(self.cart.final_discount) + "\n")
         filescontrino.close()
 
+    def finally_paid(self):
+        if self.cart.customer:
+            self.cart.customer.due -= self.due
+            self.cart.customer.save()
+        self.payed += self.due
+        self.save()
+
     def save(self, *args, **kwargs):
-        self.due =  self.cart.discounted_total() - self.payed
+        # we assume that save is called at most twice:
+        # the second time around by finally_paid()
+        self.due = self.cart.discounted_total() - self.payed
+        if self.due and self.cart.customer:
+            self.cart.customer.due += self.due
+            self.cart.customer.save()
         super(Scontrino, self).save(*args, **kwargs)
 
 class Ddt(Receipt):

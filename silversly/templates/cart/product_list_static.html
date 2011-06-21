@@ -12,10 +12,10 @@
         {% for item in cart.cartitem_set.all %}
             <tr id="p{{ item.id }}">
 	<td><a href="{% url show_product item.product.id %}">{{ item.product.name}}</a></td>
-	<td class="decimal" style="font-size: 1.2em;">{{ item.quantity}}</td>
-    <td class="decimal" style="background-color: #ffe;font-size: 1.2em;">{{ item.final_price }}</td>
+	<td class="decimal">{{ item.quantity}}</td>
+    <td class="decimal" style="background-color: #ffe">{{ item.final_price }}</td>
 	<td class="decimal" style="color:#666">{{ item.discount }}%</td>
-    <td class="decimal" style="font-size: 1.2em; background-color: #efe">{{ item.final_value }}</td>
+    <td class="decimal" style="background-color: #efe">{{ item.final_value }}</td>
     </td>
 </tr>
         {% endfor %}
@@ -23,12 +23,17 @@
 </table>
 
 <div id="cart_summary">
-    <div style="float: left; font-size: 1.2em">
-    <p>Subtotale: <b id="total">{{ cart.final_total }}</b></p>
-    <span>Sconto:</span>{{ cart.discount }}%</span>
-</div>
+
+    <div id="due" style="float: left; font-size: 2.8em">
+        {% if receipt.due %}
+            <p style="color:red"> DOVUTO: {{receipt.due}}&euro;</p>
+        {% else %}
+            <p>PAGATO</p>
+        {% endif %}
+
+    </div>
     <div style="text-align: right">
-        <p style="font-style: italic">Totale scontato:<p>
+        <p style="font-size: 1.2em">Totale{% if cart.discount %} (+ sconto {{ cart.discount }}%){% endif %} =<p>
         <p  style="font-size: 3em; margin: 5px 5px" id="total_discounted">{{ cart.discounted_total }}&euro;</p>
     </div>
 </div>

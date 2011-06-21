@@ -1,278 +1,20 @@
 {% extends "product/main.html" %}
 
-{% block title %}Aggiungi una fornitura{% endblock %}
+{% block title %}Mostra fornitura{% endblock %}
 
 {% block header %}
-    <h1>Aggiungi una fornitura</h1>
+    <h1>{{ batch }}</h1>
 {% endblock %}
 
 {% block jquery %}
     {{block.super}}
-        var supplier_id;
 
-        check_supplier();
-
-    function prevent_supplier_choice() {
-        var supplier_field = $("#id_supplier");
-        supplier_field.hide().after("<b>" + $(":selected", supplier_field).html() + "</b>");
-    }
-
-    {% if products %}
-        prevent_supplier_choice();
-        $("#products").trigger("focus");
-    {% else %}
-          $("#id_supplier").trigger("focus");
-    {% endif %}
-
-    function check_supplier() {
-        supplier_id = $("#id_supplier").val();
-        if (supplier_id != "") {
-            $("#search_bar").show();
-            $("#products").trigger("focus");
-        }
-        else {
-            $("#search_bar").hide();
-        };
-    };
-
-    $("#id_supplier").change(function() {
-        check_supplier();
-    });
-
-    function updateList(productRow) {
-        var pid = $(productRow).attr("id");
-        var existing =  $("tr#" + pid);
-        if (existing.length > 0)
-            { existing.replaceWith(productRow) }
-        else {
-            $("#product_list>tbody").append(productRow);
-            prevent_supplier_choice();
-            $("#product_list").show();
-            $("#save").show();
-        };
-
-    };
-
-    $("#baseform").change(function() {
-        $.post("{% url show_batch_load batch.pk %}",
-            $("#baseform").serialize()
-        );
-        return false;
-    });
-
-    $("#baseform").submit(function () { return false; });
-
-    function showNothing() {
-        $("#message").show();
-    }
-
-    function addProductToList(pk) {
-        $.get("{% url add_product_to_batch batch.pk %}",
-                {'product_pk': pk},
-                function(resultForm) {
-                    $("#add_product_dialog").dialog({
-                       'draggable': false,
-                       'resizable': false,
-                       'modal': true,
-                       'open': function() { $(this).html(resultForm); }
-                    });
-                }
-        );
-        return false;
-    }
-
-    $("a.edit_product").live('click', function() {
-        $.get($(this).attr("href"),
-            {},
-            function(resultForm) {
-                $("#add_product_dialog").dialog({
-                    'draggable': false,
-                    'resizable': false,
-                    'modal': true,
-                    'open': function() { $(this).html(resultForm); $("#id_quantity", this).trigger('focus');}
-                })
-            }
-        );
-        return false;
-    });
-
-    $("a.edit_prices").live('click', function() {
-        $.get($(this).attr("href"),
-            {},
-            function(result) {
-                $("#prices_dialog").dialog({
-                    'draggable': false,
-                    'resizable': false,
-                    'modal': true,
-                    'width': 400,
-                    'open': function() {
-                        $(this).html(result);
-                    }
-                })
-            }
-        );
-        return false;
-    });
-
-    $("#suppliers").trigger("focus");
-    $( "#save,#new_product" ).button();
-
-    $( "#products" ).autocomplete({
-            source: function(request, response) {
-        if ($("#search_all").attr("checked")) {
-            var data = {'term': request.term}
-        } else {
-            var data = {'term': request.term, 'supplier':supplier_id}
-        }
-                $.ajax({
-                    "url": "{% url ajax_find_product %}",
-                    "data": data,
-                    "dataType": "json",
-                    "success": function(results) {
-                        if (results.length > 0) {
-                            response(results);
-                        } else {
-                            response(results);
-                            showNothing();
-                        }
-                    }
-                });
-            },
-            minLength: 3,
-            search: function(event, ui) {
-                $("#message").hide();
-            },
-            focus: function( event, ui ) {
-                /*$( "#products" ).val( ui.item.fields.name );*/
-                return false;
-            },
-            select: function( event, ui ) {
-                /*$( "#products" ).val( ui.item.fields.name );*/
-                if (ui.item) {
-                    addProductToList(ui.item.pk);
-                }
-                return false;
-    }
-        }).data( "autocomplete" )._renderItem = function( ul, item ) {
-            return $( "<li></li>" )
-                .data( "item.autocomplete", item )
-                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
-                .appendTo( ul );
-        };
-
-
-
-    $( "#add_product" ).live('click', function() {
-            var form = $( "#add_product_form" );
-            $.ajax({
-                "url": form.attr("action"),
-                "type": "POST",
-                "data": form.serialize(),
-                "complete": function(xhr, status) {
-                    if (status == "success") {
-                        $( "#add_product_dialog" ).dialog("close");
-             updateList(xhr.responseText);
-                    } else {
-                        $("#add_product_dialog").html(xhr.responseText);
-                    };
-                }
-            });
-            return false;
-        });
-
-     $( "#new_product" ).live('click', function() {
-            $( "#new_product_dialog" ).dialog({
-                'draggable': false,
-                'resizable': false,
-                'modal': true,
-                'open': function() { $(this).load("{% url add_product %}")}
-            });
-            return false;
-        });
-
-    $( "#save_new_product" ).live('click', function() {
-            var form = $( "#new_product_form" );
-            $.ajax({
-                "url": "{% url add_product %}",
-                "type": "POST",
-                "data": form.serialize(),
-                "complete": function(xhr, status) {
-                    if (status == "success") {
-                        $( "#new_product_dialog" ).dialog("close");
-            addProductToList(xhr.responseText);
-                    } else {
-                        $("#new_product_dialog").html(xhr.responseText);
-                    };
-                }
-            });
-            return false;
-        });
-
-    /*--- reset price link --------*/
-
-        $( ".reset_price" ).live('click', function() {
-            var remove_anchor = $(this);
-            $.ajax({
-                "url": remove_anchor.attr("href"),
-                "type": "POST",
-                "success": function(response) {
-                    $("#prices_dialog").load("{% url list_temp_prices%}?product_pk=" + $("#current_product_pk").attr("value"));
-                }
-            });
-            return false;
-        });
-
-        /*--- modify price link --------*/
-
-        $( ".open_modify_markup_dialog" ).live('click', function() {
-            var modify_anchor = $(this);
-            $( "#modify_markup_dialog" ).dialog({
-                'draggable': false,
-                'resizable': false,
-                'modal': true,
-                'open': function() { $(this).load(modify_anchor.attr('href'))}
-            });
-            return false;
-        });
-
-        /*--- modify price dialog --------*/
-
-        $( "#modify_markup" ).live('click', function() {
-            var form = $( "#modify_markup_form" );
-            $.ajax({
-                "url": form.attr("action"),
-                "type": "POST",
-                "data": form.serialize(),
-                "complete": function(xhr, status) {
-                    if (status == "success") {
-                        $("#prices_dialog").load("{% url list_temp_prices%}?product_pk=" + $("#current_product_pk").attr("value"));
-                        $("#modify_markup_dialog").dialog('close');
-                    } else {
-                        $("#modify_markup_dialog").html(xhr.responseText);
-                    };
-                }
-            });
-            return false;
-        });
 
 {% endblock %}
 
 {% block content %}
 
-    <form id="baseform" action="" method="post">
-    {{ base_form.as_p }}
-    </form>
-
     <div class="framed">
-
-    <div id="search_bar">
-    <span>Cerca:</span>
-        <input id="products" />
-    <input type="checkbox" id="search_all" title="Cerca tutti gli articoli (anche quelli forniti da altri)"/>
-    <a id="new_product" href="#" />Nuovo articolo</a>
-    </div>
-
-    <div id="message" style="display:none">Nessun risultato</div>
 
     <table id="product_list" {% if not products %}style="display:none"{% endif %}>
     <thead>
@@ -285,20 +27,11 @@
     </thead>
     <tbody>
         {% for item in products %}
-            {% include  "batch_load/product_row.html" %}
+            {% include  "batch_load/product_row_readonly.html" %}
         {% endfor %}
     </tbody>
     </table>
     </div>
-
-    <a id="save" href="{% url save_batch_load batch.id %}" {% if not products %}style="display: none"{% endif %}>Carica tutto</a>
-
-
-    <div id="add_product_dialog" title="Carica un prodotto" class="dialog"></div>
-    <div id="new_product_dialog" title="Crea un articolo" class="dialog"></div>
-    <div id="prices_dialog" title="Modifica prezzi" class="dialog"></div>
-    <div id="modify_markup_dialog" title="Personalizza un listino" class="dialog"></div>
-
 
 {% endblock %}
 

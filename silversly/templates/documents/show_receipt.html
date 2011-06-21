@@ -16,11 +16,30 @@
 {% block content %}
 
 <div class="framed">
-
+    {% if cart.customer %}
+    <h3>Cliente: <a href="{% url show_customer cart.customer.id %}">{{cart.customer.name}}</a></h3>
+    {% endif %}
     <div id="cart_display">
             {% include "cart/product_list_static.html" %}
     </div>
 
 </div>
 
+{% if receipt.due %}
+    <button id="pay_all" style="display:none">Segna come pagato</button>
+    <script type="text/javascript">
+        $("#pay_all").button().show().click(
+            function(e) {
+                $.post("{% url pay_due_receipt receipt.id %}",
+                    {},
+                    function(data, status) {
+                        $("#due").empty().html("<p>Pagato!</p>");
+                        $("#pay_all").hide();
+                    }
+                )
+            }
+        );
+
+    </script>
+{% endif %}
 {% endblock %}

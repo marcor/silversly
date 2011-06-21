@@ -1,0 +1,6 @@
+<tr id="p{{ item.id }}">
+	<td>{{ item.new_supplier_code}}</td>
+	<td><a href="{% url show_product item.actual_product.id %}">{{ item.actual_product.name}}</a></td>
+	<td class="decimal">{{ item.quantity}}</td>
+	<td class="decimal">{{ item.new_supplier_price}}</td>
+</tr>

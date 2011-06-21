@@ -190,7 +190,7 @@ def show_batch_load(request, batch_id):
         if request.method == "GET":
             supplier_form = BatchSupplierForm(instance=batch)
             products = IncomingProduct.objects.filter(batch=batch)
-            return render_to_response('batch_load/show.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
+            return render_to_response('batch_load/edit.html',  {'base_form': supplier_form, 'products': products, 'batch': batch})
 
         if request.is_ajax() and request.method == "POST":
             supplier_form = BatchSupplierForm(request.POST, instance = batch)

@@ -16,7 +16,7 @@
         <tbody>
         {% for u in uploads %}
             <tr>
-              <td>{{ u.batch.date }}</td>
+              <td><a href="{% url show_batch_load u.batch.id %}">{{ u.batch.date }}</a></td>
               <td>{{ u.batch.document_ref }}</td>
               <td><a href="{% url show_supplier u.batch.supplier.id %}">{{ u.batch.supplier }}</a></td>
               <td class="decimal">{{ u.quantity }}</td>
