@@ -1,11 +1,61 @@
 {% extends 'ajax_tab.html' %}
 
-{% block content %} 
+{% block content %}
     <form class="bigform" style="margin-top: 2em" id="extra_product_info" action="" method="post">
         {{ form.as_p }}
         <div class="actionbar">
         <input id="extra_save_product" style="visibility: hidden" type="submit" value="Salva" />
         </div>
     </form>
+
+    {% if product.factor == 1 %}
+    <!-- this is a denominator product! -->
+        <h3>Articoli collegati</h3>
+        <ul>
+        {% for mul in product.multiple_set %}
+            <li><a href="{% url show_product mul.id %}">{{ mul.name }}</a> <b>x{{ mul.factor }}</b></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+
+    <h3>Collega a un articolo sfuso</h3>
+    <div id="denom">
+        <span id="factor"></span>
+        <button id="change_denom" />
+    </div>
+
+    <script type="text/javascript">
+        update = function(denom_info) {
+            if (!denom_info) {
+                $("#factor").empty();
+                $("#change_denom").button( "option", "label", "Scegli un articolo" );
+                $("#id_denominator").attr("value", "");
+            }
+            else {
+                var factor = denom_info.factor;
+                var id = denom_info.id;
+                var name = denom_info.name;
+                $("#factor").html("(" + factor + "x)");
+                $("#change_denom").button( "option", "label", name );
+            }
+        }
+
+        $("#change_denom").button();
+
+        {% if product.denominator %}
+
+        update({'id': {{ product.denominator.id }},
+            'name': "{{ product.denominator.name|safe }}",
+            'factor': {{ product.factor }}
+        });
+
+        {% else %}
+
+        update();
+        {% endif %}
+
+    </script>
+
+    {% endif %}
+
 {% endblock %}
-    

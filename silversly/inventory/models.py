@@ -75,6 +75,12 @@ class Product(models.Model):
     base_price = FixedDecimalField(_("Prezzo base"), max_digits = 8, decimal_places = 2, default = 0)
     prices = models.ManyToManyField(Pricelist, verbose_name = _("Listini"), through = 'Price', null = True)
 
+    denominator = models.ForeignKey('self', verbose_name = _("Prodotto sfuso"), related_name = "multiple_set", null = True, blank=True)
+    # factor will be 1 for denominators, n > 1 for multiples, and None for everything else
+    # this way we can identify denominators without making additional queries when we must enforce the use of integral
+    # quantities (at every product update)
+    factor = models.PositiveSmallIntegerField(_("Sfusi per unità"), null = True)
+
     catalogue = models.BooleanField(verbose_name = _("Includi nel catalogo"), default = False)
 
     def is_ean_encoded(self):

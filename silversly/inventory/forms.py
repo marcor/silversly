@@ -1,21 +1,48 @@
-from django.forms import ModelForm, Form, BooleanField, ChoiceField, RadioSelect
+# -*- coding: utf-8 -*-
+from django.forms import ModelForm, Form, BooleanField, ChoiceField, RadioSelect, HiddenInput
 from decimal import Decimal
 from models import *
 
-class ProductForm(ModelForm):
+class QuantityForm(ModelForm):
+
+    # if we are dealing with fractioned products enforce integral quantities
+    def check_integral_quantity(product, fieldnames):
+        if product.factor:
+            for field in fieldnames:
+                quantity = self.cleaned_data.get(field)
+                if quantity and quantity.remainder_near(1):
+                    self._errors[field] = self.error_class(["Per questo prodotto usa quantità intere"])
+                    del self.cleaned_data["quantity"]
+
+class ProductForm(QuantityForm):
     class Meta:
         model = Product
         fields = ("name", "code", "category", "unit", "quantity", "min_quantity")
 
+    def clean(self):
+        cleaned_data = super(ProductForm, self).clean()
+        self.check_integral_quantity(self.instance.product, ["quantity", "min_quantity"])
+        return cleaned_data
+
 class ProductExtraForm(ModelForm):
+
     class Meta:
         model = Product
-        fields = ('catalogue',)
+        fields = ('catalogue', 'denominator')
+        widgets = {
+            'denominator': HiddenInput(),
+        }
 
 class IncomingProductForm(ModelForm):
     class Meta:
         model = IncomingProduct
         fields = ("quantity", "new_supplier_code", "new_supplier_price")
+
+    def clean(self):
+        cleaned_data = super(ProductForm, self).clean()
+        self.check_integral_quantity(self.instance.actual_product, ["quantity"])
+        return cleaned_data
+
 
 class SupplyForm(ModelForm):
     class Meta:
