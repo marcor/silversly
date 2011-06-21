@@ -4,28 +4,28 @@
 
 {% block jquery %}
 	{{ block.super }}
-	
+
         function removeDialogs() {
-            $(".dialog").remove();            
+            $(".dialog").remove();
         }
-        
+
         function showMessage(content) {
             $(".message_pane").html(content).show('fade', {}, 'fast', function() {
                 var pane = $(this);
                 setTimeout(function() {pane.hide("fade", {}, "slow")}, 500);
             });
         }
-        
+
         $( "#tabset" ).tabs({'cache': true});
-        
+
         $('#tabset').bind('tabsload', function(event, info){
             if (info.index == 1) {
                 $("#id_name").trigger('focus');
                 $("#save_product").attr('disabled', true);
             }
             else if (info.index == 0) {
-                $("#supply_list", info.panel).load("{% url list_supplies product.id %}");                
-                $("#open_add_supply_dialog").button();                
+                $("#supply_list", info.panel).load("{% url list_supplies product.id %}");
+                $("#open_add_supply_dialog").button();
                 $("#markup_list", info.panel).load("{% url list_prices product.id %}");
             }
             else if (info.index == 2) {
@@ -33,18 +33,18 @@
                 /*$("#extra_save_product").attr('disabled', true);*/
             }
         });
-        
+
     /*--- event bindings -------------*/
-        
-        $( "#header" ).bind('infoUpdated', 
+
+        $( "#header" ).bind('infoUpdated',
             function(event) {
                 $( "#header>h1" ).html($("#product_info [name=name]").val());
             });
-        
+
         $( "#product_info" ).live('submit', function() {
             var name_field = $("#product_info [name=name]");
             var name = name_field.val().trim();
-            name = name.substring(0,1).toLowerCase() + name.substring(1); 
+            name = name.substring(0,1).toLowerCase() + name.substring(1);
             name_field.val(name);
             $.ajax({
                 "url": "{% url product_tab product.pk %}",
@@ -62,26 +62,27 @@
             });
             return false;
         });
-        
+
         $( "select", "#product_info" ).live('keypress', function(event) {
             if (event.which == 13) {
                 $("#product_info").trigger('submit');
             }
         });
-        
+
         $( "#product_info" ).live('change', function() {
             $("#save_product").attr('disabled', false);
         });
-        
+
         $('#extra_product_info [type=checkbox]').live('change', function() {
             $("#extra_save_product").trigger('submit');
         });
-        
+
         $( "#extra_product_info" ).live('submit', function() {
+            var form = $(this);
             $.ajax({
-                "url": "{% url product_extra_tab product.pk %}",
+                "url": form.attr("action"),
                 "type": "POST",
-                "data": $("#extra_product_info").serialize(),
+                "data": form.serialize(),
                 "complete": function(xhr, status) {
                     $("#Altre_opzioni").html(xhr.responseText);
                     if (status == "success") {
@@ -92,9 +93,9 @@
             });
             return false;
         });
-        
+
         /*--- remove supply link --------*/
-        
+
         $( ".remove_supply" ).live('click', function() {
             var remove_anchor = $(this);
             $.ajax({
@@ -107,9 +108,9 @@
             });
             return false;
         });
-        
+
         /*--- modify supply link --------*/
-        
+
         $( ".open_modify_supply_dialog" ).live('click', function() {
             var modify_anchor = $(this);
             $( "#modify_supply_dialog" ).dialog({
@@ -120,9 +121,9 @@
             });
             return false;
         });
-        
+
         /*--- modify supply dialog --------*/
-        
+
         $( "#modify_supply" ).live('click', function() {
             var form = $( "#modify_supply_form" );
             $.ajax({
@@ -132,17 +133,17 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         removeDialogs();
-                        $( "#tabset" ).tabs('load', 0);                        
+                        $( "#tabset" ).tabs('load', 0);
                     } else {
-                        $("#modify_supply_dialog").html(xhr.responseText);                    
+                        $("#modify_supply_dialog").html(xhr.responseText);
                     };
                 }
             });
             return false;
         });
-        
+
         /*--- add supply link --------*/
-        
+
         $( "#open_add_supply_dialog" ).live('click', function() {
             $( "#add_supply_dialog" ).dialog({
                 'draggable': false,
@@ -152,9 +153,9 @@
             });
             return false;
         });
-        
+
         /*--- add supply dialog --------*/
-        
+
         $( "#add_supply" ).live('click', function() {
             $.ajax({
                 "url": "{% url add_supply product.pk %}",
@@ -163,31 +164,31 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         removeDialogs();
-                        $( "#tabset" ).tabs('load', 0);                        
+                        $( "#tabset" ).tabs('load', 0);
                     } else {
-                        $("#add_supply_dialog").html(xhr.responseText);                    
+                        $("#add_supply_dialog").html(xhr.responseText);
                     };
                 }
             });
             return false;
         });
-        
+
         /*--- reset price link --------*/
-        
+
         $( ".reset_price" ).live('click', function() {
             var remove_anchor = $(this);
             $.ajax({
                 "url": remove_anchor.attr("href"),
                 "type": "POST",
                 "success": function(response) {
-                    $("#markup_list").load("{% url list_prices product.id %}");                
+                    $("#markup_list").load("{% url list_prices product.id %}");
                 }
             });
             return false;
         });
-        
+
         /*--- modify price link --------*/
-        
+
         $( ".open_modify_markup_dialog" ).live('click', function() {
             var modify_anchor = $(this);
             $( "#modify_markup_dialog" ).dialog({
@@ -198,9 +199,9 @@
             });
             return false;
         });
-        
+
         /*--- modify price dialog --------*/
-        
+
         $( "#modify_markup" ).live('click', function() {
             var form = $( "#modify_markup_form" );
             $.ajax({
@@ -209,16 +210,16 @@
                 "data": form.serialize(),
                 "complete": function(xhr, status) {
                     if (status == "success") {
-                        $("#markup_list").load("{% url list_prices product.id %}");                
+                        $("#markup_list").load("{% url list_prices product.id %}");
                         $("#modify_markup_dialog").dialog('close');
                     } else {
-                        $("#modify_markup_dialog").html(xhr.responseText);                    
+                        $("#modify_markup_dialog").html(xhr.responseText);
                     };
                 }
             });
             return false;
         });
-        
+
         $( "#delete_product" ).live('click', function() {
             var delete_anchor = $(this);
             $( "#delete_product_dialog" ).dialog({
@@ -229,9 +230,9 @@
             });
             return false;
         });
-        
-        
- 
+
+
+
 {% endblock %}
 
 {% block header %}
@@ -241,7 +242,7 @@
 
 
 {% block content %}
-    
+
     <div id="tabset">
         {% with product.id as id %}
         <ul>
@@ -255,10 +256,10 @@
             <b>Area messaggi</b>
         </div>
     </div>
-    
+
     <div id="pic">
     </div>
-    
+
     <div id="delete_product_dialog" title="Elimina un articolo" class="dialog"></div>
-    
+
 {% endblock %}

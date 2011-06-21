@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from django.forms import ModelForm, Form, BooleanField, ChoiceField, RadioSelect, HiddenInput
+from django.forms import *
 from decimal import Decimal
 from models import *
 
 class QuantityForm(ModelForm):
 
     # if we are dealing with fractioned products enforce integral quantities
-    def check_integral_quantity(product, fieldnames):
+    def check_integral_quantity(self, product, fieldnames):
         if product.factor:
             for field in fieldnames:
                 quantity = self.cleaned_data.get(field)
@@ -21,25 +21,39 @@ class ProductForm(QuantityForm):
 
     def clean(self):
         cleaned_data = super(ProductForm, self).clean()
-        self.check_integral_quantity(self.instance.product, ["quantity", "min_quantity"])
+        self.check_integral_quantity(self.instance, ["quantity", "min_quantity"])
         return cleaned_data
 
 class ProductExtraForm(ModelForm):
 
     class Meta:
         model = Product
-        fields = ('catalogue', 'denominator')
+        fields = ('catalogue',)
+
+class ProductFactorForm(ModelForm):
+
+    factor = IntegerField(max_value = 10, min_value = 2, label= u"Unità per confezione")
+
+    class Meta:
+        model = Product
+        fields = ('denominator', 'factor')
         widgets = {
             'denominator': HiddenInput(),
         }
 
-class IncomingProductForm(ModelForm):
+    def clean(self):
+        cleaned_data = super(ProductFactorForm, self).clean()
+        if self.instance.multiple_set.exists():
+            raise ValidationError("Questo articolo è un sottomultiplo di altri")
+        return cleaned_data
+
+class IncomingProductForm(QuantityForm):
     class Meta:
         model = IncomingProduct
         fields = ("quantity", "new_supplier_code", "new_supplier_price")
 
     def clean(self):
-        cleaned_data = super(ProductForm, self).clean()
+        cleaned_data = super(IncomingProductForm, self).clean()
         self.check_integral_quantity(self.instance.actual_product, ["quantity"])
         return cleaned_data
 

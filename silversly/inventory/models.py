@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import F
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN, Context
 from common.models import FixedDecimalField
 
 PRICE_MAKING_METHODS = (
@@ -79,7 +79,7 @@ class Product(models.Model):
     # factor will be 1 for denominators, n > 1 for multiples, and None for everything else
     # this way we can identify denominators without making additional queries when we must enforce the use of integral
     # quantities (at every product update)
-    factor = models.PositiveSmallIntegerField(_("Sfusi per unità"), null = True)
+    factor = models.PositiveSmallIntegerField(_(u"Sfusi per unità"), null = True)
 
     catalogue = models.BooleanField(verbose_name = _("Includi nel catalogo"), default = False)
 
@@ -106,7 +106,7 @@ class Product(models.Model):
         self.name = name
 
     def update_base_price(self):
-        supplies = Supply.objects.filter(product = self)
+        supplies = self.supply_set.all()
         if (supplies.count() > 0):
             supplier_prices = [supply.mean_price() for supply in supplies]
             self.base_price = (sum(supplier_prices) / len(supplier_prices))
@@ -117,6 +117,54 @@ class Product(models.Model):
         for price in prices:
             price.update()
             price.save()
+
+    def sync_to_multiples(self, dests, *what):
+        for dest in dests:
+            self.sync_to_multiple(dest, *what)
+
+    def sync_to_multiple(self, dest, *what):
+        dest.sync_from_denom(*what)
+
+    def sync_to_denom(self, *what):
+        self.denominator.sync_from_multiple(self, what)
+        self.denominator.sync_to_multiples(self.denominator.multiple_set.exclude(id__exact = self.id), *what)
+
+    def sync_from_multiple(self, source, *what):
+        price = "price" in what
+        if "quantity" in what:
+            c = Context(rounding = ROUND_DOWN)
+            units = c.remainder(self.quantity, source.factor)
+            self.quantity = source.quantity * source.factor + units
+            if not price: self.save()
+        if price:
+            self.copy_supplies_from(source, Decimal(1) / source.factor)
+
+    def sync_from_denom(self, *what):
+        price = "price" in what
+        if "quantity" in what:
+            self.quantity = (self.denominator.quantity / self.factor).to_integral_value(rounding = ROUND_DOWN)
+            if not price: self.save()
+        if price: self.copy_supplies_from(self.denominator, self.factor)
+
+    def copy_supplies_from(self, source, factor):
+        for oldsupply in self.supply_set.all():
+            oldsupply.delete()
+        for supply in source.supply_set.all():
+            newsupply = supply.copy_to(Supply(product = self), factor)
+            self.supply_set.add(newsupply)
+        self.update_base_price()
+
+    def is_denom(self):
+        return self.factor == 1
+
+    def is_multiple(self):
+        return self.factor and self.factor > 1
+
+    def sync_to_others(self, *what):
+        if self.is_denom():
+            self.sync_to_multiples(self.multiple_set.all(), *what)
+        elif self.is_multiple():
+            self.sync_to_denom(*what)
 
     class Meta:
         verbose_name = _("Articolo")
@@ -271,6 +319,15 @@ class Supply(models.Model):
         if self.altprice:
            return (self.altprice + self.price) / 2
         return self.price
+
+    def copy_to(self, dest, factor):
+        dest.price = self.price * factor
+        dest.altprice = self.altprice and self.altprice * factor
+        dest.supplier = self.supplier
+        dest.code = self.code
+        dest.updated = self.updated
+        dest.save()
+        return dest
 
     class Meta:
         verbose_name = _("Fornitura")

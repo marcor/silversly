@@ -1,7 +1,7 @@
 {% extends 'ajax_tab.html' %}
 
 {% block content %}
-    <form class="bigform" style="margin-top: 2em" id="extra_product_info" action="" method="post">
+    <form class="bigform" style="margin-top: 2em" id="extra_product_info" action="{% url product_extra_tab product.pk %}" method="post">
         {{ form.as_p }}
         <div class="actionbar">
         <input id="extra_save_product" style="visibility: hidden" type="submit" value="Salva" />
@@ -11,47 +11,174 @@
     {% if product.factor == 1 %}
     <!-- this is a denominator product! -->
         <h3>Articoli collegati</h3>
-        <ul>
-        {% for mul in product.multiple_set %}
-            <li><a href="{% url show_product mul.id %}">{{ mul.name }}</a> <b>x{{ mul.factor }}</b></li>
+        <table class="naked">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Contiene</th>
+                    <th>Disponibilit&agrave;</th>
+                </tr>
+            </thead>
+            <tbody
+        {% for mul in product.multiple_set.all %}
+            <tr>
+                <td><a href="{% url show_product mul.id %}">{{ mul.name|capfirst }}</a></td>
+                <td class="decimal"><b>{{ mul.factor }} {{product.unit}}</b></td>
+                <td class="decimal">{{ mul.quantity }} {{mul.unit}}</td>
+            </tr>
         {% endfor %}
-        </ul>
+            </tbody>
+        <table>
     {% else %}
 
     <h3>Collega a un articolo sfuso</h3>
     <div id="denom">
-        <span id="factor"></span>
-        <button id="change_denom" />
+        <button id="reset">Resetta</button>
+        <button id="change_denom"></button>
+        <button id="change_factor"></button>
+
     </div>
 
+    <div id="search_product" style="position: relative; display: none">
+        <span id="product_search_message" class="autocomplete-message">
+            Nessun risultato
+        </span>
+        <span>Cerca prodotto:</span>
+        <input id="products" />
+    </div>
+
+    <div id="factor_dialog" title="Rapporto tra gli articoli" class="dialog"></div>
+
     <script type="text/javascript">
-        update = function(denom_info) {
+
+        displayDenom = function(denom_info, save) {
             if (!denom_info) {
-                $("#factor").empty();
+                $("#reset").hide();
+                $("#change_factor").hide().button( "option", "label", "x 1" );
                 $("#change_denom").button( "option", "label", "Scegli un articolo" );
-                $("#id_denominator").attr("value", "");
             }
             else {
-                var factor = denom_info.factor;
-                var id = denom_info.id;
-                var name = denom_info.name;
-                $("#factor").html("(" + factor + "x)");
-                $("#change_denom").button( "option", "label", name );
+                $("#reset").show();
+                $("#change_factor").button( "option", "label", "x " + denom_info.factor).show();
+                $("#change_denom").button( "option", "label", denom_info.name );
             }
         }
 
-        $("#change_denom").button();
+        setupDenom = function(denom_id) {
+            $.get("{% url save_product_factor product.id %}",
+                function(resultForm) {
+                    $("#factor_dialog").modal({
+                       'open': function() {
+                            $(this).html(resultForm);
+                            if (denom_id)
+                                $("#id_denominator", this).attr("value", denom_id);
+                        }
+                    });
+                }
+            );
+            return false;
+        }
+
+        $( "#save_factor" ).live('click', function() {
+            var form = $( "#factor_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        displayDenom($.parseJSON(xhr.responseText));
+                        $( "#factor_dialog" ).dialog("close");
+                        $("#tabset").tabs("load", 0);
+                    } else {
+                        $("#factor_dialog").html(xhr.responseText);
+                    };
+                }
+            });
+            return false;
+        });
+
+
+        close_product_search = function() {
+            $("#search_product").hide();
+            $("#denom").show();
+        }
+
+
+        $("#change_factor").button().click(function(e)  { setupDenom(); });
+        $("#change_denom").button().click(function(e)  {
+            $("#denom").hide();
+            $("#search_product").show();
+            $("#products").trigger("focus");
+        });
+
+        $("#reset").button({text: false, icons: { primary: 'ui-icon-arrowreturn-1-w' }}).click(
+            function(e) {
+
+                $.post("{% url save_product_factor product.id %}",
+                    {'denominator': '',
+                        'factor': 2},
+                    function(result) { displayDenom(null) }
+                )
+            }
+        );
+
+        $( "#products" ).autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    "url": "{% url ajax_find_denominator product.id %}",
+                    "data": {'term': request.term},
+                    "dataType": "json",
+                    "success": function(results) {
+                        response(results);
+                        if (results.length == 0) {
+                            $("#product_search_message").show();
+                        }
+                    }
+                });
+            },
+            minLength: 3,
+            search: function(event, ui) {
+                $("#product_search_message").hide();
+            },
+            focus: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                return false;
+            },
+            select: function( event, ui ) {
+                /*$( "#products" ).val( ui.item.fields.name );*/
+                if (ui.item) {
+                    close_product_search();
+                    setupDenom(ui.item.pk);
+                }
+                return false;
+            }
+        }).data( "autocomplete" )._renderItem = function( ul, item ) {
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( "<a>" + item.fields.name + "<br/><span class=\"searchcode\">" + item.fields.code + "</span></a>" )
+                .appendTo( ul );
+        };
+
+        // keypress does not work on chrome
+        $("#products").keyup(function(e){
+            if(e.keyCode==27){
+                close_product_search();
+            }
+        });
+
+
 
         {% if product.denominator %}
 
-        update({'id': {{ product.denominator.id }},
+        displayDenom({'id': {{ product.denominator.id }},
             'name': "{{ product.denominator.name|safe }}",
             'factor': {{ product.factor }}
         });
 
         {% else %}
 
-        update();
+        displayDenom(null);
         {% endif %}
 
     </script>

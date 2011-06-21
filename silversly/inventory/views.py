@@ -151,9 +151,11 @@ def modify_supply(request, supply_id):
     if request.method == "POST":
         form = ModifySupplyForm(request.POST, instance = supply)
         if form.is_valid():
-            if form.data["altprice"] == 0:
-                form.data["altprice"] = None
-            form.save()
+            form.save(commit = False)
+            if supply.altprice == 0:
+                supply.altprice = None
+            supply.save()
+            supply.product.sync_to_others("price")
         else:
             bad_request = True
     else:
@@ -227,6 +229,7 @@ def save_batch_load(request, batch_id):
             supply.price = item.new_supplier_price
         supply.code = item.new_supplier_code
         supply.save() # this triggers product save too
+        supply.product.sync_to_others("quantity", "price")
 
     batch.loaded = True
     batch.save()
@@ -261,7 +264,6 @@ def add_product_to_batch(request, batch_id):
             else:
                 form.save()
                 actual_prices = Price.objects.filter(product = editable_product.actual_product)
-                print actual_prices
                 for price in actual_prices:
                     newprice = NewPrice(method = price.method, gross = price.gross, markup = price.markup, product = editable_product, pricelist = price.pricelist)
                     newprice.save()
@@ -450,6 +452,7 @@ def product_tab(request, id):
         form = ProductForm(request.POST, instance = product)
         if form.is_valid():
             form.save()
+            product.sync_to_others("quantity")
         else:
             bad_request = True
     else:
@@ -488,6 +491,48 @@ def history_tab(request, product_id):
 
 
 #
+# VARIOUS DIALOG VIEWS
+#
+
+def save_product_factor(request, product_id):
+    bad_request = False
+    product = get_object_or_404(Product, pk=product_id)
+    old_denom = product.denominator
+    if request.method == "POST":
+        form = ProductFactorForm(request.POST, instance = product)
+        if form.is_valid():
+            form.save(commit = False)
+            new_denom = product.denominator
+            # sync quantities and prices
+            if new_denom:
+                # this also saves product
+                product.sync_from_denom("quantity", "price")
+            else:
+                product.factor = None
+                product.save()
+            # is old_denom still a denominator?
+            if old_denom and new_denom != old_denom:
+                if not old_denom.multiple_set.exists():
+                    old_denom.factor = None
+                    old_denom.save()
+            # new denominator
+            if new_denom and not new_denom.factor:
+                new_denom.factor = 1
+                new_denom.save()
+            data = new_denom and {'id': new_denom.id,
+                    'name': new_denom.name,
+                    'factor': product.factor} or {}
+            return HttpResponse(simplejson.dumps(data), 'application/javascript')
+        else:
+            bad_request = True
+    else:
+        form = ProductFactorForm(instance = product)
+    response = render_to_response('product/dialogs/factor.html', {'form': form, 'product': product})
+    if bad_request:
+        response.status_code = 400
+    return response
+
+#
 # SEARCHING
 #
 
@@ -523,18 +568,17 @@ def ajax_find_product(request):
         return HttpResponse(data, 'application/javascript')
     return HttpResponse(status=400)
 
-def ajax_find_product2(request):
+def ajax_find_denominator(request, product_id):
     if request.is_ajax():
-
         term = unquote(request.GET["term"])
-
         word_query = get_name_query(term)
         code_query = get_code_query(term)
 
-        #matches = Product.objects.filter(Q(name__istartswith = term) | Q(name__icontains = " " + term) | Q(code__icontains = term))
+        matches = Product.objects.filter(word_query | code_query, denominator__isnull = True).exclude(id__exact = product_id)
+
         json_serializer = serializers.get_serializer("json")()
         json_serializer.serialize(matches, ensure_ascii=False)
-        data = json_serializer.serialize(matches, fields = ("name", "code", "quantity", "min_quantity", "unit", "base_price"))
+        data = json_serializer.serialize(matches, fields = ("name", "code", "unit"))
         if matches.count() == 1:
             data = '[{"perfect_match": true, ' + data[2:]
         return HttpResponse(data, 'application/javascript')

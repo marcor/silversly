@@ -100,6 +100,10 @@ ul, ol {
 	background-color: #ffc;
 }
 
+#product_search_message {
+    position: absolute; left: 10px; top:30px; display: none;
+}
+
 .autocomplete-message, .message, #message {
 	display: inline;
 }
@@ -364,7 +368,7 @@ a:hover {
 .ui-autocomplete-input {
 	border: 1px solid #ccc;
 	-moz-border-radius: 4px;
-	font-size: 1.5em;
+	font-size: 1.5em !important;
 	color: #666;
 	/*width: 220px;*/
 	margin-left: 5px;
