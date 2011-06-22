@@ -20,3 +20,8 @@ class ReceiptForm(ModelForm):
     class Meta:
         model = Scontrino
         fields = ("payed",)
+
+class DdtForm(ModelForm):
+    class Meta:
+        model = Ddt
+        fields = ("number", "shipping_address", "boxes", "appearance")

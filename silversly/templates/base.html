@@ -22,6 +22,8 @@
 
         $(function() {
 		$(".navlinks img").css("opacity", "0.2");
+        if ($.trim($("#sidebar").html()) == "")
+                $("#sidebar").hide();
         {% block jquery %}{% endblock %}
 		$(".navlinks img").not("[class]").hover(
 			function() {
@@ -32,10 +34,6 @@
 			});
 
         });
-        $(function(){
-            if ($.trim($("#sidebar").html()) == "")
-                $("#sidebar").hide();
-        })
     </script>
 </head>
 

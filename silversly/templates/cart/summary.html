@@ -1,7 +1,4 @@
-<script type="text/javascript">
-    var discount = {{ cart.discount }};
-</script>
-
+{% load sales_tags %}
 <div id="cart_params">
     <span>Listino:</span>
         <select id='id_pricelist'>
@@ -15,11 +12,55 @@
     <span>Sconto:</span><button id="discount_button" type="submit">{{ cart.discount }}%</button>
     <input name="discount" type="text" size="3" id="discount_input" style="display: none" value="{{ cart.discount }}"/>
     <p class="message" id="discount_error" style="display:none">Inserisci un numero positivo senza virgola</p>
+
+    {% if not customer.company %}
+        <a id="toggle_rounding" href="{% url toggle_cart_rounding %}">
+        {% if cart.rounded %}
+            <img style="float: right" title="non arrotondare il totale" src="/media/img/yinyang.png" />
+        {% else %}
+            <img style="float: right" title="arrotonda il totale" src="/media/img/straight.png" />
+        {% endif %}
+        </a>
+    {% endif %}
 </div>
 
 <div id="total_values">
+{% if customer.company %}
+    {% if cart.discount %}
+    <p>subtotale: <span id="subtotal">{{ cart.final_net_total }}&euro;</span></p>
+    <p>sconto: <span id="discount">{{ cart.final_net_discount|neg }}&euro;</span></p>
+    {% endif %}
+    <p>imponibile: <span id="taxable">{{ cart.discounted_net_total }}&euro;</span></p>
+    {% with fiscal=cart.apply_vat %}
+    <p>iva: <span id="vat">{{ fiscal.1 }}&euro;</span></p>
+    <p id="total">{{ fiscal.0 }}&euro;</p>
+    {% endwith %}
+    <p>Totale (IVA inclusa)</p>
+{% else %}
     <p>subtotale: <span id="subtotal">{{ cart.final_total }}&euro;</span></p>
-    <p>sconto: <span id="discount">-{{ cart.final_discount }}&euro;</span></p>
+    {% if cart.final_discount %}
+        <p>sconto/arrot.: <span id="discount">{{ cart.final_discount|neg }}&euro;</span></p>
+    {% endif %}
     <p id="total">{{ cart.discounted_total }}&euro;</p>
     <p>Totale (IVA inclusa)</p>
+{% endif %}
 </div>
+
+<script type="text/javascript">
+    var discount = {{ cart.discount }};
+    setupButtons = function(c) {
+        {% if cart.final_total %}
+            if (c != null && c.is_company) {
+                $(".retail").hide();
+                $(".invoice").show();
+            }
+            else {
+                $(".retail").show();
+                $(".invoice").hide();
+            }
+    {% else %}
+        $(".retail, .invoice").hide();
+    {% endif %}
+    }
+    setupButtons({{ customer.json|safe }});
+</script>

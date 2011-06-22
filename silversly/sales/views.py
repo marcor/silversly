@@ -3,6 +3,8 @@ from forms import *
 from inventory.models import Product
 from people.models import *
 from django.core.urlresolvers import reverse
+from django.db.models import Max
+import datetime
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.core import serializers
@@ -18,9 +20,10 @@ def edit_cart(request):
     except:
         cart = Cart()
         cart.update_value()
+        # is this ok?
         cart.save()
 
-    customer = simplejson.dumps(cart.customer and cart.customer.to_dict() or None, cls=DecimalEncoder)
+    customer = cart.customer and cart.customer.child()
     return render_to_response('cart/edit_cart.html',  {'products': cart.cartitem_set.all(), 'cart': cart, 'customer': customer})
 
 def edit_cart_customer(request):
@@ -43,7 +46,7 @@ def edit_cart_customer(request):
             cart.discount = customer.discount
     cart.update_value()
     cart.save()
-    return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': customer})
+    return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
 def edit_cart_discount(request):
     cart = get_object_or_404(Cart, current=True)
@@ -51,7 +54,7 @@ def edit_cart_discount(request):
     if form.is_valid():
         cart.update_value()
         form.save()
-        return render_to_response('cart/summary.html', {'cart': cart})
+        return render_to_response('cart/summary.html', {'cart': cart, 'customer': cart.customer and cart.customer.child()})
     else:
         return HttpResponse(status=400)
 
@@ -65,14 +68,29 @@ def edit_cart_pricelist(request):
             item.save()
         cart.update_value()
         cart.save()
-        return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart})
+        return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
     else:
         return HttpResponse(status=400)
 
-
 def get_cart_summary(request):
     cart = get_object_or_404(Cart, current=True)
-    return render_to_response('cart/summary.html', {'cart': cart})
+    return render_to_response('cart/summary.html', {'cart': cart, 'customer': cart.customer and cart.customer.child()})
+
+def toggle_cart_rounding(request):
+    cart = get_object_or_404(Cart, current=True)
+    cart.rounded = not cart.rounded
+    if cart.rounded:
+        cart.apply_rounding()
+    else:
+        cart.update_value()
+    cart.save()
+    return render_to_response('cart/summary.html', {'cart': cart, 'customer': cart.customer and cart.customer.child()})
+
+def reload_cart(request):
+    cart = get_object_or_404(Cart, current=True)
+    cart.update_value(deep=True)
+    cart.save()
+    return redirect(edit_cart)
 
 def new_receipt(request):
     bad_request = False
@@ -107,7 +125,7 @@ def new_receipt(request):
 def show_receipt(request, id):
     receipt = get_object_or_404(Scontrino, pk=id)
     cart = receipt.cart
-    customer = cart.customer
+    customer = cart.customer and cart.customer.child()
     return render_to_response('documents/show_receipt.html',  {'cart': cart, 'customer': customer, 'receipt': receipt})
 
 def pay_due_receipt(request, id):
@@ -115,6 +133,52 @@ def pay_due_receipt(request, id):
     if receipt.due:
         receipt.finally_paid()
     return HttpResponse(status = 200)
+
+def new_invoice(request, customer_id):
+    pass
+
+def new_ddt(request):
+    bad_request = False
+    cart = get_object_or_404(Cart, current = True)
+    customer = cart.customer.child()
+    now = datetime.datetime.now()
+    year = now.year - 2000
+    last_ddt_number = Ddt.objects.filter(year = year).aggregate(Max('number'))['number__max']
+    number = last_ddt_number and last_ddt_number + 1 or 1
+    ddt = Ddt(cart = cart,
+        number = number,
+        main_address = customer.main_address,
+        shipping_address = customer.shipping_address or customer.main_address,
+        shipping_date = now)
+
+    if request.method == "POST":
+        form = DdtForm(request.POST, instance=ddt)
+        if form.is_valid():
+            form.save()
+            cart.current = False
+            cart.save()
+            for item in cart.cartitem_set.all():
+                if item.update:
+                    product = item.product
+                    product.quantity -= item.quantity
+                    product.save()
+                    product.sync_to_others("quantity")
+            return HttpResponse(reverse("show_ddt", args=(ddt.id,)), mimetype="text/plain")
+        else:
+            bad_request = True
+    else:
+        form = DdtForm(instance=ddt)
+
+    response = render_to_response('cart/dialogs/new_ddt.html',  {'form': form, 'cart': cart})
+    if bad_request:
+        response.status_code = 400
+    return response
+
+def show_ddt(request, id):
+    ddt = get_object_or_404(Ddt, pk=id)
+    cart = ddt.cart
+    customer = cart.customer.child()
+    return render_to_response('documents/show_ddt.html',  {'cart': cart, 'customer': customer, 'ddt': ddt})
 
 def add_product_to_cart(request):
     bad_request = False

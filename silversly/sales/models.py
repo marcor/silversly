@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 
 PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
+precision = Decimal(".01")
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
@@ -20,9 +21,8 @@ class CartItem(models.Model):
 
     # these values are written once the transaction is over (cart.current = False)
     # in order to generate correct invoices even after the Product prices have changed.
+    final_net_price = FixedDecimalField(_("Prezzo di vendita al netto di sconti e IVA"), max_digits = 7, decimal_places = 2, null=True)
     final_price = FixedDecimalField(_("Prezzo di vendita al netto di sconti"), max_digits = 7, decimal_places = 2, null=True)
-    final_value = FixedDecimalField(_("Valore scontato"), max_digits = 7, decimal_places = 2, null=True)
-    final_discount = FixedDecimalField(_("Sconto calcolato"), max_digits = 7, decimal_places = 2, null=True)
 
     def update_value(self, precision=Decimal(".01")):
         pricelist = self.cart.pricelist
@@ -33,12 +33,27 @@ class CartItem(models.Model):
                 product = self.product,
                 method = pricelist.default_method,
                 markup = pricelist.default_markup)
-        price.update()
-        self.final_price = price.gross # * self.quantity
-        full_value = (self.final_price * self.quantity).quantize(precision)
-        self.final_discount = (full_value * self.discount / 100).quantize(precision)
-        self.final_value = full_value - self.final_discount
+            # is this ok?
+            price.update()
 
+        self.final_net_price = price.net
+        self.final_price = price.gross
+
+    def net_total(self):
+        return self.total(net = True)
+
+    def gross_total(self):
+        return self.total(net = False)
+
+    def total(self, net=False):
+        if net:
+            price = self.final_net_price
+        else:
+            price = self.final_price
+        total = price * self.quantity
+        discount = (total * self.discount / 100).quantize(precision)
+        value = (total - discount).quantize(precision)
+        return (value, discount)
 
     def save(self, *args, **kwargs):
         self.update_value()
@@ -47,28 +62,72 @@ class CartItem(models.Model):
     def __unicode__(self):
         return "%s%s X %s" % (self.quantity, self.product.unit, self.product)
 
+    class Meta:
+        ordering = ["-id"]
+
+def rounded(value):
+    if value < 10:
+        remainder = value.remainder_near(Decimal(".1"))
+    else:
+        remainder = value.remainder_near(Decimal(".5"))
+    return remainder
+
+def apply_vat(value):
+    total = (value * Decimal("1.2")).quantize(precision)
+    # valore ivato e iva
+    return (total, total - value)
+
 class Cart(models.Model):
     current = models.BooleanField(default = True)
     customer = models.ForeignKey("people.Customer", verbose_name = _("Cliente"), null = True)
     discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
-    rounded = models.BooleanField(_("Arrotonda il totale"), default = False)
+    rounded = models.BooleanField(_("Arrotonda il totale"), default = True)
     pricelist = models.ForeignKey("inventory.Pricelist", default = "Pubblico")
 
     # same as above, even if this is not really necessary
+
+    final_net_total = FixedDecimalField(_("Totale netto"), max_digits = 7, decimal_places = 2, null=True)
+    final_net_discount = FixedDecimalField(_("Sconto netto calcolato"), max_digits = 7, decimal_places = 2, null=True)
+
     final_total = FixedDecimalField(_("Totale"), max_digits = 7, decimal_places = 2, null=True)
     final_discount = FixedDecimalField(_("Sconto calcolato"), max_digits = 7, decimal_places = 2, null=True)
 
     def discounted_total(self):
         return self.final_total - self.final_discount
 
-    def update_value(self):
-        value = Decimal()
-        #per_item_discount = Decimal()
-        for item in self.cartitem_set.all():
-            value += item.final_value
-            #per_item_discount += item.final_discount
-        self.final_total = value
+    def discounted_net_total(self):
+        return self.final_net_total - self.final_net_discount
+
+    def apply_vat(self):
+        return apply_vat(self.discounted_net_total())
+
+    def apply_rounding(self):
+            # works only to scontrini for the time being
+            round_value = rounded(self.discounted_total())
+            self.final_discount += round_value
+
+    def update_value(self, deep = False):
+        items = self.cartitem_set.all()
+        if deep:
+            for item in items:
+                item.update_value()
+                item.save()
+
+        gross_value = Decimal()
+        net_value = Decimal()
+
+        for item in items:
+            net_value += item.total(net = True)[0]
+            gross_value += item.total(net = False)[0]
+
+        self.final_total = gross_value
         self.final_discount = self.final_total * self.discount / 100
+
+        if self.rounded:
+            self.apply_rounding()
+
+        self.final_net_total = net_value
+        self.final_net_discount = self.final_net_total * self.discount / 100
 
     def pricelists(self):
         return Pricelist.objects.all()
@@ -89,11 +148,14 @@ class Receipt(models.Model):
                 r.type = "invoice"
         return r
 
+    class Meta:
+        ordering = ["-id"]
+
 
 def prep(decim):
     return str((decim * 1000).quantize(Decimal("1")))
 
-sep = "\x7f"
+sep = settings.RECEIPT_SEPARATOR
 def print_article(desc, price, quantity):
     return sep.join(("1", desc[:16], prep(quantity), prep(price), "1", sep, "1", "1")) + sep
 
@@ -121,9 +183,10 @@ class Scontrino(Receipt):
         filescontrino = open(os.path.join(options.receipt_folder, 'scontrino.txt'), 'w')
         items = self.cart.cartitem_set.all()
         for item in items:
+            total, discount = item.total(net=False)
             filescontrino.write(print_article(item.product.name.encode("iso-8859-1"), item.quantity, item.final_price) + "\n")
             if item.discount:
-                filescontrino.write(print_discount(item.final_discount, item.discount) + "\n")
+                filescontrino.write(print_discount(discount, item.discount) + "\n")
         if self.cart.discount:
             filescontrino.write(print_total_discount(self.cart.final_discount) + "\n")
         filescontrino.close()
@@ -144,42 +207,55 @@ class Scontrino(Receipt):
             self.cart.customer.save()
         super(Scontrino, self).save(*args, **kwargs)
 
+    @models.permalink
+    def get_absolute_url(self):
+        return('sales.views.show_receipt', [str(self.id)])
+
+
+
 class Ddt(Receipt):
-    year = models.PositiveSmallIntegerField(_("Anno"))
+    year = models.PositiveSmallIntegerField(_("Anno"), default = lambda: datetime.date.today().year - 2000)
     number = models.PositiveSmallIntegerField(_("Numero"))
     date = models.DateField(auto_now_add = True)
-    #cart = models.OneToOneField(Cart)
+
     main_address = models.TextField(verbose_name = _("Indirizzo"))
     shipping_address = models.TextField(verbose_name = _("Indirizzo di spedizione"), blank=True)
     shipping_date = models.DateTimeField(_("Inizio trasporto"), default = lambda: datetime.datetime.now())
 
+    boxes = models.PositiveSmallIntegerField(_(u"N° colli"), null = True, blank = True)
+    appearance = models.CharField(_(u"Aspetto"), max_length = 20, null = True, blank = True)
+
+    # used for fatture differite (cart(s) -> receipt(s) -> invoice)
+    invoice = models.ForeignKey('Invoice', verbose_name = _("Fattura"), null = True)
+
     def __unicode__(self):
-        return u"DDT %d/%d del" % (self.year,self.number, self.date)
+        return u"DDT %d/%d del %s" % (self.year,self.number, self.date.strftime("%d/%m"))
+
+    @models.permalink
+    def get_absolute_url(self):
+        return('sales.views.show_ddt', [str(self.id)])
+
 
     class Meta:
-        ordering = ['date', 'number']
-
-#class InvoiceItem(models.Model):
-#    product = models.ForeignKey('inventory.Product', verbose_name = _("Prodotto"))
-#    quantity = models.DecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
-#    price = FixedDecimalField(_("Prezzo di vendita"), max_digits = 7, decimal_places = 2)
-#    discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
-#
-#    def __unicode__(self):
-#        return "%s%s X %s" % (self.quantity, self.product.unit, self.product)
+        ordering = ['-year', '-date', '-number']
 
 class Invoice(Receipt):
-    year = models.PositiveSmallIntegerField(_("Anno"))
+    year = models.PositiveSmallIntegerField(_("Anno"), default = lambda: datetime.date.today().year - 2000)
     number = models.PositiveSmallIntegerField(_("Numero"))
-    date = models.DateField(auto_now_add = True)
+    date = models.DateField(_("Data fattura"), default = lambda: datetime.datetime.now())
     immediate = models.BooleanField(_("Fattura immediata"))
     # used for fatture immediate (cart -> invoice)
-    #cart = models.OneToOneField(Cart, null = True)
-    # used for fatture differite (cart(s) -> receipt(s) -> invoice)
-    receipts = models.ManyToManyField(Receipt, null = True, related_name="proxy_receipt")
+    # cart = models.OneToOneField(Cart, null = True)
+
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES)
-    bank = models.OneToOneField('people.Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
-    costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0)
+    costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
 
     def __unicode__(self):
-        return u"Fattura %d/%d del %s" % (self.year, self.number, self.date)
+        return u"Fattura %d/%d del %s" % (self.year, self.number, self.date.strftime("%d/%m"))
+
+    @models.permalink
+    def get_absolute_url(self):
+        return('sales.views.show_invoice', [str(self.id)])
+
+    class Meta:
+        ordering = ['-year', '-date', '-number']

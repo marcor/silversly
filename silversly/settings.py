@@ -10,6 +10,9 @@ PAYMENT_CHOICES = [
     ('ok', u'Pagato')
 ]
 
+BANK_COST = 0
+RECEIPT_SEPARATOR = "\x7f"
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

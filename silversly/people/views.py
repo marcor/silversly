@@ -214,8 +214,9 @@ def customer_commercial_tab(request, id):
 
 def customer_history_tab(request, customer_id):
     customer = get_object_or_404(Customer, pk=customer_id)
-    receipts = Receipt.objects.exclude(cart = None)
+    carts = Cart.objects.filter(customer = customer, receipt__isnull = False)
+    receipts = Receipt.objects.filter(cart__in = carts)
     list = []
-    for receipt in receipts:
+    for r in receipts:
         list.append(r.child())
-    return render_to_response('customers/tabs/history.html', {'customer': customer, 'receipts': list})
+    return render_to_response('customers/tabs/history.html', {'customer': customer.child(), 'receipts': list})

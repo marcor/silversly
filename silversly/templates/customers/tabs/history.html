@@ -2,11 +2,11 @@
 
 {% block content %}
 
-    <table id="receipts" style="width: 60%">
+    <table id="receipts" style="width: 70%">
         <thead>
             <th>Documento di vendita</th>
             <th>Totale</th>
-            <th>Ancora dovuto</th>
+            {% if customer.company %}<th>Fattura</th>{% else %}<th>Ancora dovuto</th>{% endif %}
         </thead>
         <tbody>
         {% for receipt in receipts %}
@@ -17,9 +17,9 @@
                 <td class="decimal">{{ receipt.due }}</td>
             {% else %}
                 {% if receipt.type == "ddt" %}
-                    <td style="background-color: #fee">{{ receipt }}</td>
-                    <td>{{ receipt.cart.discounted_total }}</td>
-                    <td></td>
+                    <td style="background-color: #fee"><a href="{% url show_ddt receipt.id %}">{{ receipt }}</a></td>
+                    <td class="decimal">{{ receipt.cart.discounted_total }}&euro;</td>
+                    <td>{% if receipt.invoice %}fattura{% else %}emetti{% endif %}</td>
                     {% else %}
                     <td style="background-color: #eef">{{ receipt }}</td>
                     <td class="decimal">{{ receipt.cart.discounted_total }}</td>

@@ -18,3 +18,9 @@ urlpatterns = patterns('people.views',
     url(r'cliente/(\d+)/tab/commerciale', 'customer_commercial_tab', name='customer_commercial_tab'),
     url(r'cliente/(\d+)/tab/acquisti', 'customer_history_tab', name='customer_history_tab'),
 )
+
+urlpatterns += patterns('sales.views',
+    url(r'cliente/(\d+)/nuova_fattura$', 'new_invoice', name='new_invoice'),
+)
+
+

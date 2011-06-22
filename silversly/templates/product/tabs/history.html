@@ -33,20 +33,26 @@
 
     <h3>Vendite</h3>
     {% if downloads %}
-    <table id="sales" style="width: 60%">
+    <div id="downloads" style="overflow-y: auto; max-height: 100px">
+    <table id="sales" style="width: 80%">
         <thead>
             <th>Documento</th>
             <th>{{ product.unit }}</th>
+            <th>Valore</th>
         </thead>
         <tbody>
         {% for d in downloads %}
             <tr>
-                <td><a href="{% url show_receipt d.cart.receipt.id %}">{{ d.cart.receipt.child }}</a></td>
+                {% with doc=d.cart.receipt.child %}
+                <td><a href="{{ doc.get_absolute_url }}">{{ doc }}</a></td>
                 <td class="decimal">{{ d.quantity }}</td>
+                <td class="decimal">{{ d.gross_total.0 }}</td>
+                {% endwith %}
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
         <i>Ancora nessuna!</i>
     {% endif %}

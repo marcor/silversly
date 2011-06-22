@@ -71,18 +71,19 @@
         <p>Tutto a posto!</p>
         {% endif %}
     </div>
-
+    <!--
     <div id="acquisti">
         <h2>Acquisti</h2>
         <h3>Ordini in corso</h3>
     </div>
-
+    -->
     <div id="vendite">
         <h2>Vendite</h2>
         <h3>Crediti</h3>
             <div class="pane">
             {% if debtors %}
                 <table >
+
                 {% for debtor in debtors %}
                 <tr>
                     <td><a href="{% url show_customer debtor.id %}">{{debtor}}</a></td>
@@ -90,17 +91,40 @@
                 </tr>
                 {% endfor %}
                 </table>
+            </div>
             {% else %}
                 <p>Tutti i clienti sono in regola. Che bravi!</p>
             {% endif %}
+
+            <h3>Fatture da emettere</h3>
+            <div class="pane">
+            {% if need_invoice %}
+            <table >
+            {% for customer, total in need_invoice.items %}
+            <tr>
+                <td><a href="{% url new_invoice customer.id %}">{{ customer }}</a></td>
+                <td class="decimal">{{ total }}&euro;</td>
+            </tr>
+            {% endfor %}
+            </table>
+            {% else %}
+                <p>Nessuna.</p>
+            {% endif %}
          </div>
+    </div>
+    <div id="archivio">
+        <h2>Archivio</h2>
         <h3>Ultimi scontrini</h3>
          <div class="pane">
             {% if last_receipts %}
             <table >
             {% for scontrino in last_receipts %}
             <tr>
-                <td><a href="{% url show_receipt scontrino.id %}">{{scontrino}}</a></td>
+                <td>
+                <a {% if scontrino.due %}
+                    class="important"
+                    title="{{ scontrino.cart.customer|default:'anonimo' }} ti deve {{ scontrino.due }}&euro;"
+                   {% endif %} href="{% url show_receipt scontrino.id %}">{{scontrino}}</a></td>
             </tr>
             {% endfor %}
             </table>
@@ -108,11 +132,12 @@
                 <p>Nessuno scontrino emesso.</p>
             {% endif %}
          </div>
-        <h3>Ultimi DDT</h3>
-            <div class="pane">
-                <p>Nessun DDT emesso.</p>
-            </div>
+
+
+
     </div>
+
+
 </div>
 
 {% endblock %}

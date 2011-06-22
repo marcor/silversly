@@ -16,7 +16,7 @@
             text-align: right;
             color: #999;
         }
-        #subtotal, #discount {
+        #subtotal, #discount, #vat, #taxable {
             font-size: 1.5em;
             color: #000;
             margin-left: 10px;
@@ -53,7 +53,11 @@
     {{block.super}}
 
     // object holding the current Customer
-    var customer = {{ customer|safe }};
+    {% if customer %}
+        var customer = {{ customer.json|safe }};
+    {% else %}
+            var customer = null;
+    {% endif %}
 
     initialize();
 
@@ -81,25 +85,12 @@
     };
 
     function update_customer(c, reload_cart) {
+        setupButtons(c);
         if (c != null) {
             $("#customer_name").button({label: c.name});
-            if (c.is_company) {
-                $(".retail").hide();
-                $(".invoice").show();
-            }
-            else if (c.cf != false) {
-                $(".retail, #new_invoice").show();
-                $("#new_ddt").hide();
-            }
-            else {
-                $(".retail").show();
-                $(".invoice").hide();
-            }
             data = {'customer_id': c.id};
         } else {
             $("#customer_name").button({label: "Anonimo"});
-            $(".retail").show();
-            $(".invoice").hide();
             data = {};
         }
         customer = c;
@@ -245,7 +236,7 @@
                 "complete": function(xhr, status) {
                     if (status == "success") {
                         $( "#add_product_dialog" ).dialog("close");
-             updateList(xhr.responseText);
+                        updateList(xhr.responseText);
                     } else {
                         $("#add_product_dialog").html(xhr.responseText);
                     };
@@ -287,15 +278,19 @@
             return false;
         });
 
-     $( "#new_receipt" ).live('click', function() {
-        $( "#new_receipt_dialog" ).modal({
-            'open': function() { $(this).load("{% url new_receipt %}")}
-        });
-        return false;
-    });
 
-    $( "#save_new_receipt" ).live('click', function() {
-            var form = $( "#new_receipt_form" );
+    prepare_dialog_for = function(name, dialog_url) {
+        var button_id = "#new_" + name;
+        var dialog_id = button_id + "_dialog";
+        $( button_id ).live('click', function() {
+            $( dialog_id ).modal({
+            'open': function() { $(this).load(dialog_url)}
+            });
+            return false;
+        });
+
+        $( "#save_new_" + name ).live('click', function() {
+            var form = $( button_id + "_form" );
             $.ajax({
                 "url": form.attr("action"),
                 "type": "POST",
@@ -304,12 +299,16 @@
                     if (status == "success") {
                         window.location.href = xhr.responseText;
                     } else {
-                        $("#new_receipt_dialog").html(xhr.responseText);
+                        $( dialog_id ).html(xhr.responseText);
                     };
                 }
             });
             return false;
         });
+    }
+
+    prepare_dialog_for("ddt", "{% url new_ddt %}");
+    prepare_dialog_for("receipt", "{% url new_receipt %}");
 
     $("#discount_button").live('click', function() {
         $(this).hide();
@@ -354,6 +353,17 @@
         }
     });
 
+    $("#toggle_rounding").live('click', function(e) {
+        $.post($(this).attr("href"),
+            {},
+            function (data, status) {
+                if (status == "success") {
+                    $("#cart_summary").html(data);
+                }
+            }, "html")
+        return false;
+    });
+
     $("#customer_name").live("click", function() {
         if (customer) {
             window.location.href = customer.url;
@@ -391,6 +401,7 @@
 
     <div id="add_product_dialog" title="Vendi un prodotto" class="dialog"></div>
     <div id="new_receipt_dialog" title="Emetti lo scontrino" class="dialog"></div>
+    <div id="new_ddt_dialog" title="Prepara un DDT" class="dialog"></div>
     <div id="new_customer_dialog" title="Aggiungi un cliente" class="dialog"></div>
 
 

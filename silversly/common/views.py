@@ -2,10 +2,12 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse
 
-import simplejson, decimal
+from people.models import Customer
+
+import simplejson
+import decimal
 
 from inventory.models import *
-from people.models import *
 from sales.models import *
 from forms import *
 from models import *
@@ -22,20 +24,31 @@ class DecimalEncoder(simplejson.JSONEncoder):
         return super(DecimalEncoder, self).default(o)
 
 
+
+
 # actual views
 
 def homepage(request):
     outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")
     open_batchloads = BatchLoad.objects.filter(loaded = False)
     last_receipts = Scontrino.objects.order_by("-date")[:5]
-    last_ddts = Ddt.objects.order_by("-date")[:5]
+    open_ddts = Ddt.objects.filter(invoice__isnull = True).select_related("cart", "cart__customer")
+    customers = {}
+    for ddt in open_ddts:
+        customer = ddt.cart.customer
+        if customer in customers:
+            customers[customer] += ddt.cart.discounted_total()
+        else:
+            customers[customer] = ddt.cart.discounted_total()
+
+    last_invoices = Invoice.objects.all()[:3]
     debtors = Customer.objects.raw("select * from people_customer where due > 0 collate nocase")
 
     return render_to_response("home.html",
         {'outstock': list(outstock),
         'open_batchloads': open_batchloads,
         'last_receipts': last_receipts,
-        'last_ddts': last_ddts,
+        'need_invoice': customers,
         'debtors': list(debtors)})
 
 def settings(request):

@@ -4,23 +4,31 @@
             <th></th>
             <th style="text-align: left">Articolo</th>
             <th>Q.t&agrave;</th>
-            <th>Prezzo</th>
+            <th>Prezzo{% if customer.company %} netto{% endif %}</th>
             <th>Sc.%</th>
             <th>Valore</th>
         </tr>
     </thead>
     <tbody>
-        {% for item in products %}
-            {% include  "cart/product_row.html" %}
-        {% endfor %}
+        {% if customer.company %}
+            {% for item in products %}
+                {% include  "cart/product_row_net.html" %}
+            {% endfor %}
+        {% else %}
+            {% for item in products %}
+                {% include  "cart/product_row.html" %}
+            {% endfor %}
+        {% endif %}
+
     </tbody>
 </table>
 
 <div id="summary_temp">
+
     {% include "cart/summary.html" %}
+
 </div>
 
 <script type="text/javascript">
     $("#summary_temp").replaceAll($("#cart_summary")).attr("id", "cart_summary");
-
 </script>

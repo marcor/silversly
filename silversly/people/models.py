@@ -5,6 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
+import simplejson
+
 PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
 
 class Bank(models.Model):
@@ -14,12 +16,6 @@ class Bank(models.Model):
 
     def __unicode__(self):
         return self.name
-
-#class Address(models.Model):
-#    street = models.CharField(_("Indirizzo"), max_length = 50)
-#    city = models.CharField(_(u"Città"), max_length=30)
-#    province = models.CharField(_("Provincia"), max_length=2)
-#    postcode = models.CharField(_("CAP"), max_length=5)
 
 class Supplier(models.Model):
     name = models.CharField(_("Nome"), max_length = 50, unique=True)
@@ -60,18 +56,33 @@ class Customer(models.Model):
     def __unicode__(self):
         return self.name
 
-    def to_dict(self):
-        data = {'id': self.id,
-            'name': self.name,
-            'cf': self.cf or False,
-            'due': self.due,
-            'url': self.get_absolute_url()}
+    def child(self):
         try:
-            company = self.companycustomer
-            data.update(is_company = True,
-                piva = company.piva)
+            r = self.companycustomer
+            r.company = True
         except:
-            pass
+            r = self
+            r.company = False
+        return r
+
+    def json(self):
+        from common.views import DecimalEncoder
+
+        return simplejson.dumps(self.to_dict(), cls=DecimalEncoder)
+
+    def to_dict(self):
+        try:
+            data = {'id': self.id,
+                'name': self.name,
+                'cf': self.cf or False,
+                'due': self.due,
+                'url': self.get_absolute_url(),
+                'is_company': self.company
+            }
+            if self.company:
+                data.update(piva = self.piva)
+        except:
+            data = self.child().to_dict()
         return data
 
     def get_absolute_url(self):
