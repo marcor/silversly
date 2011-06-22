@@ -14,7 +14,8 @@
 
     function prevent_supplier_choice() {
         var supplier_field = $("#id_supplier");
-        supplier_field.hide().after("<b>" + $(":selected", supplier_field).html() + "</b>");
+        if (supplier_field.css("display") != "none")
+            supplier_field.hide().after("<b>" + $(":selected", supplier_field).html() + "</b>");
     }
 
     {% if products %}
