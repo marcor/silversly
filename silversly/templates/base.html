@@ -12,13 +12,27 @@
     {% block head %} {% endblock %}
     <script type="text/javascript">
         $.fn.modal = function(options) {
-            return this.dialog(
+            var load_url = options ? options.url : null;
+            var dest = this;
+            if (load_url) {
+                $.get(load_url, function(data, status) {
+                    if (status == "success") {
+                        return dest.html(data).dialog(
+                            $.extend({
+                                'resizable': true,
+                                'modal': true
+                            }, options)
+                        );
+                    }
+                }, "html");
+            } else return dest.dialog(
                 $.extend({
                     'resizable': true,
                     'modal': true
-                    }, options)
+                }, options)
             );
         }
+
 
         $(function() {
 		$(".navlinks img").css("opacity", "0.2");

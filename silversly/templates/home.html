@@ -163,9 +163,7 @@
         var dialog_id = "#new_" + name + "_dialog";
         $( link_class ).live('click', function() {
             var href = $(this).attr("href");
-            $( dialog_id ).modal({
-            'open': function() { $(this).load(href)}
-            });
+            $( dialog_id ).modal({url: href});
             return false;
         });
 

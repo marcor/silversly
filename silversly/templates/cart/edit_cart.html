@@ -118,9 +118,7 @@
         $.get("{% url add_product_to_cart %}",
                 {'product_pk': pk},
                 function(resultForm) {
-                    $("#add_product_dialog").modal({
-                       'open': function() { $(this).html(resultForm); }
-                    });
+                    $("#add_product_dialog").html(resultForm).modal()
                 }
         );
         return false;
@@ -143,8 +141,8 @@
         $.get($(this).attr("href"),
             {},
             function(resultForm) {
-                $("#add_product_dialog").modal({
-                    'open': function() { $(this).html(resultForm); $("#id_quantity", this).trigger('focus');}
+                $("#add_product_dialog").html(resultForm).modal({
+                    'open': function() { $("#id_quantity", this).trigger('focus');}
                 })
             }
         );
@@ -246,16 +244,12 @@
         });
 
      $( "#new_retail" ).live('click', function() {
-            $( "#new_customer_dialog" ).modal({
-                'open': function() { $(this).load("{% url add_customer %}")}
-            });
+            $( "#new_customer_dialog" ).modal({url: "{% url add_customer %}"});
             return false;
     });
 
     $( "#new_company" ).live('click', function() {
-        $( "#new_customer_dialog" ).modal({
-            'open': function() { $(this).load("{% url add_company %}")}
-        });
+        $( "#new_customer_dialog" ).modal({url: "{% url add_company %}"});
         return false;
     });
 
@@ -283,9 +277,7 @@
         var button_id = "#new_" + name;
         var dialog_id = button_id + "_dialog";
         $( button_id ).live('click', function() {
-            $( dialog_id ).modal({
-            'open': function() { $(this).load(dialog_url)}
-            });
+            $( dialog_id ).modal({'url': dialog_url});
             return false;
         });
 

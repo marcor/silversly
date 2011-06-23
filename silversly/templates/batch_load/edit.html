@@ -71,12 +71,7 @@
         $.get("{% url add_product_to_batch batch.pk %}",
                 {'product_pk': pk},
                 function(resultForm) {
-                    $("#add_product_dialog").dialog({
-                       'draggable': false,
-                       'resizable': false,
-                       'modal': true,
-                       'open': function() { $(this).html(resultForm); }
-                    });
+                    $("#add_product_dialog").html(resultForm).modal();
                 }
         );
         return false;
@@ -86,11 +81,8 @@
         $.get($(this).attr("href"),
             {},
             function(resultForm) {
-                $("#add_product_dialog").dialog({
-                    'draggable': false,
-                    'resizable': false,
-                    'modal': true,
-                    'open': function() { $(this).html(resultForm); $("#id_quantity", this).trigger('focus');}
+                $("#add_product_dialog").html(resultForm).modal({
+                    'open': function() { $("#id_quantity", this).trigger('focus');}
                 })
             }
         );
@@ -101,15 +93,7 @@
         $.get($(this).attr("href"),
             {},
             function(result) {
-                $("#prices_dialog").dialog({
-                    'draggable': false,
-                    'resizable': false,
-                    'modal': true,
-                    'width': 400,
-                    'open': function() {
-                        $(this).html(result);
-                    }
-                })
+                $("#prices_dialog").html(result).modal({width: 400});
             }
         );
         return false;
@@ -182,12 +166,7 @@
         });
 
      $( "#new_product" ).live('click', function() {
-            $( "#new_product_dialog" ).dialog({
-                'draggable': false,
-                'resizable': false,
-                'modal': true,
-                'open': function() { $(this).load("{% url add_product %}")}
-            });
+            $( "#new_product_dialog" ).modal({url: "{% url add_product %}"});
             return false;
         });
 
@@ -227,12 +206,7 @@
 
         $( ".open_modify_markup_dialog" ).live('click', function() {
             var modify_anchor = $(this);
-            $( "#modify_markup_dialog" ).dialog({
-                'draggable': false,
-                'resizable': false,
-                'modal': true,
-                'open': function() { $(this).load(modify_anchor.attr('href'))}
-            });
+            $( "#modify_markup_dialog" ).modal({url: modify_anchor.attr('href')});
             return false;
         });
 
