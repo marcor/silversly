@@ -50,12 +50,7 @@
 
         $( "#sell" ).live('click', function() {
             var sell_button = $(this);
-            $( "#sell_product_dialog" ).dialog({
-                'draggable': false,
-                'resizable': false,
-                'modal': true,
-                'open': function() { $(this).load(sell_button.attr('href'))}
-            });
+            $( "#sell_product_dialog" ).modal({url: sell_button.attr('href')});
             return false;
         });
 

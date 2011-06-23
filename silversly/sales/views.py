@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from urllib import unquote
 from django.utils import simplejson
 from decimal import Decimal
+from common.models import *
 
 
 def edit_cart(request):
@@ -109,7 +110,8 @@ def new_receipt(request):
                     product.quantity -= item.quantity
                     product.save()
                     product.sync_to_others("quantity")
-            scontrino.send_to_register(close=False)
+            close = Settings.objects.get(site = Site.objects.get_current()).close_receipts
+            scontrino.send_to_register(close=close)
             return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
         else:
             bad_request = True

@@ -162,8 +162,17 @@ def print_article(desc, price, quantity):
 def print_discount(discount, markdown):
     return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto %d%%" % markdown, "1", sep)) + "-1" + sep
 
-def print_total_discount(discount):
+def print_total_discount(discount, desc="sconto cliente"):
     return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto cliente", "1", sep)) + "-1" + sep
+
+def print_rounding(tot):
+    if tot > 0:
+        return print_total_discount(tot, "arrotondamento")
+    else:
+        return print_article("arrotondamento", -tot, Decimal(1))
+
+def close_receipt():
+    return sep.join(("0","1")) + (sep * 8)
 
 class Scontrino(Receipt):
     date = models.DateTimeField(auto_now_add = True, unique = True)
@@ -189,6 +198,10 @@ class Scontrino(Receipt):
                 filescontrino.write(print_discount(discount, item.discount) + "\n")
         if self.cart.discount:
             filescontrino.write(print_total_discount(self.cart.final_discount) + "\n")
+        elif self.cart.rounded and self.cart.final_discount:
+            filescontrino.write(print_rounding(self.cart.final_discount) + "\n")
+        if close:
+            filescontrino.write(close_receipt() + "\n")
         filescontrino.close()
 
     def finally_paid(self):
