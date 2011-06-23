@@ -1,0 +1,78 @@
+{% extends "cart/main.html" %}
+
+{% block title %}Fattura {{ invoice.year}}/{{invice.number}}{% endblock %}
+
+{% block header %}
+    <h1>{{ invoice }}</h1>
+{% endblock %}
+
+{% block jquery %}
+    {{block.super}}
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}
+
+{% block content %}
+
+<div class="framed">
+    <h3>Cliente: <a href="{% url show_customer customer.id %}">{{customer.name}}</a></h3>
+
+    <div id="invoice_info">
+
+        <ul class="ddt_info" style="float: right; font-size: 1.2em">
+            {% if invoice.payment_method != "ok"%}<li>Pagamento: {{ invoice.get_payment_method_display}}</li>{% endif %}
+            <li>Stato: <span id="due">{% if invoice.payed %}PAGATA{% else %}<b>{{ invoice.total_net }} &euro;</b> da saldare{%endif %}</span></li>
+        </ul>
+        <hr class="clearfix" />
+    </div>
+
+    {% if cart %}
+    <div id="cart1">
+        {% include "cart/product_list_static.html" %}
+    </div>
+    {% else %}
+    <div id="carts">
+        {% for ddt in ddts %}
+            {% with cart=ddt.cart %}
+             <h3><a href="#">{{ ddt }}</a></h3>
+             <div id="cart{{forloop.count}}">
+            {% include "cart/product_list_static.html" %}
+             </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    <hr class="clearfix" />
+
+    <button id="pay_all" style="display:none">Segna come pagata</button>
+    <a id="print" target="_blank" href="{% url print_invoice invoice.id %}">Stampa</a>
+</div>
+
+
+
+<script type="text/javascript">
+    $("#print").button().show();
+
+{% if not invoice.payed %}
+    $("#pay_all").button().show().click(
+            function(e) {
+                $.post("{% url pay_due_invoice invoice.id %}",
+                    {},
+                    function(data, status) {
+                        $("#due").empty().html("PAGATA");
+                        $("#pay_all").hide();
+                    }
+                )
+            }
+        );
+
+{% endif %}
+{% if ddts %}
+$( "#carts" ).accordion({
+			autoHeight: false,
+		});
+{% endif %}
+</script>
+
+{% endblock %}

@@ -2,6 +2,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse
 
+from forms import *
+
 from people.models import *
 from inventory.models import *
 from sales.models import *

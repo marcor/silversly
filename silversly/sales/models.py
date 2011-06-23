@@ -255,12 +255,29 @@ class Invoice(Receipt):
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES)
     costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
 
+    total_net = FixedDecimalField(_("Imponibile"), max_digits = 8, decimal_places = 2, null = True)
+    payed = models.BooleanField(_("Pagata"), default = False)
+
     def __unicode__(self):
         return u"Fattura %d/%d del %s" % (self.year, self.number, self.date.strftime("%d/%m"))
+
+    def finally_paid(self):
+        due = self.apply_vat()[0] + self.costs
+        if self.immediate:
+            customer = self.cart.customer
+        else:
+            customer = self.ddt_set.all()[0].cart.customer
+        customer.due -= due
+        customer.save()
+        self.payed = True
+        self.save()
 
     @models.permalink
     def get_absolute_url(self):
         return('sales.views.show_invoice', [str(self.id)])
+
+    def apply_vat(self):
+        return apply_vat(self.total_net)
 
     class Meta:
         ordering = ['-year', '-date', '-number']

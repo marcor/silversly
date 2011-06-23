@@ -8,6 +8,9 @@ urlpatterns = patterns('sales.views',
     url(r'archivio/scontrino/(\d+)/$', 'show_receipt', name='show_receipt'),
     #url(r'archivio/scontrino/(\d+)/salva/$', 'save_receipt', name='save_receipt'),
 
+    url(r'fattura/(\d+)/salda$', 'pay_due_invoice', name='pay_due_invoice'),
+    url(r'carrello/(\d+)/nuova_fattura$', 'new_invoice_from_cart', name='new_invoice_from_cart'),
+
     url(r'carrello/aggiungi_articolo', 'add_product_to_cart', name='add_product_to_cart'),
     url(r'carrello/rimuovi_articolo/(\d+)', 'remove_product_from_cart', name='remove_product_from_cart'),
 
@@ -20,5 +23,7 @@ urlpatterns = patterns('sales.views',
 
     url(r'ddt/nuovo$', 'new_ddt', name='new_ddt'),
     url(r'archivio/ddt/(\d+)/stampa$', 'print_ddt', name='print_ddt'),
+    url(r'archivio/fattura/(\d+)/stampa$', 'print_invoice', name='print_invoice'),
     url(r'archivio/ddt/(\d+)/$', 'show_ddt', name='show_ddt'),
+    url(r'archivio/fattura/(\d+)/$', 'show_invoice', name='show_invoice'),
 )

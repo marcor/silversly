@@ -16,9 +16,7 @@
 {% block content %}
 
 <div class="framed">
-    {% if cart.customer %}
     <h3>Cliente: <a href="{% url show_customer cart.customer.id %}">{{cart.customer.name}}</a></h3>
-    {% endif %}
     <div id="cart_display">
         <div style="float:left; font-size: 1.1em" >Destinazione:
 <pre style="background-color: #fff; border: 1px solid #ccc; padding:8px">
@@ -27,7 +25,8 @@
         </div>
         <ul class="ddt_info" style="float: right; font-size: 1.2em">
             {% if ddt.appearance %}<li>Aspetto: {{ ddt.appearance }}</li>{% endif %}
-            {% if ddt.boxes %}<li>Aspetto: {{ ddt.boxes }}</li>{% endif %}
+            {% if ddt.boxes %}<li>N.colli: {{ ddt.boxes }}</li>{% endif %}
+            {% if ddt.invoice %}<li><a href="{% url show_invoice ddt.invoice.id %}">{{ ddt.invoice }}</a></li>{% endif %}
         </ul>
         <hr class="clearfix" />
         {% include "cart/product_list_static.html" %}
@@ -36,14 +35,47 @@
     <hr class="clearfix" />
 
     <a id="new_invoice" href="{% url new_invoice customer.id %}" style="display:none">Emetti fattura</a>
-    <a id="print" target="_blank" href="{% url print_ddt ddt.id %}" style="display:none; float:right">Stampa</a>
+    <a id="print" target="_blank" href="{% url print_ddt ddt.id %}" style="display:none">Stampa</a>
+    <div id="new_invoice_dialog" title="Emetti una fattura" class="dialog"></div>
 </div>
 
 <script type="text/javascript">
 {% if not ddt.invoice %}
+
+    prepare_dialog_for = function(name, dialog_url) {
+        var button_id = "#new_" + name;
+        var dialog_id = button_id + "_dialog";
+        $( button_id ).live('click', function() {
+            $( dialog_id ).modal({
+            'open': function() { $(this).load(dialog_url)}
+            });
+            return false;
+        });
+
+        $( "#save_new_" + name ).live('click', function() {
+            var form = $( button_id + "_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        window.location.href = xhr.responseText;
+                    } else {
+                        $( dialog_id ).html(xhr.responseText);
+                    };
+                }
+            });
+            return false;
+        });
+    }
+
+    prepare_dialog_for("invoice", "{% url new_invoice customer.id %}");
     $("#new_invoice").button().show();
+
 {% endif %}
     $("#print").button().show();
+
 </script>
 
 {% endblock %}

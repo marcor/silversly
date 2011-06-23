@@ -25,3 +25,8 @@ class DdtForm(ModelForm):
     class Meta:
         model = Ddt
         fields = ("number", "shipping_address", "boxes", "appearance")
+
+class InvoiceForm(ModelForm):
+    class Meta:
+        model = Invoice
+        fields = ("number", "payment_method", "costs")

@@ -2,9 +2,6 @@
 
 {% block title %}Silversly - Benvenuta!{% endblock %}
 
-{% block jquery %}
-	$(".navlinks a[title='Pagina riassuntiva'] img").css("opacity", "1").addClass("current");
-{% endblock %}
 
 {% block head %}
 <style type="text/css">
@@ -102,7 +99,7 @@
             <table >
             {% for customer, total in need_invoice.items %}
             <tr>
-                <td><a href="{% url new_invoice customer.id %}">{{ customer }}</a></td>
+                <td><a class="new_invoice" href="{% url new_invoice customer.id %}">{{ customer }}</a></td>
                 <td class="decimal">{{ total }}&euro;</td>
             </tr>
             {% endfor %}
@@ -133,7 +130,7 @@
             {% endif %}
          </div>
 
-         <h3>Ultimi scontrini</h3>
+         <h3>Ultimi Ddt</h3>
          <div class="pane">
             {% if last_ddts %}
             <table >
@@ -154,7 +151,42 @@
 
     </div>
 
-
+    <div id="new_invoice_dialog" title="Prepara una fattura" class="dialog" style="display: none"></div>
 </div>
+{% endblock %}
+
+{% block jquery %}
+    $(".navlinks a[title='Pagina riassuntiva'] img").css("opacity", "1").addClass("current");
+
+    prepare_dialog_for = function(name) {
+        var link_class = ".new_" + name;
+        var dialog_id = "#new_" + name + "_dialog";
+        $( link_class ).live('click', function() {
+            var href = $(this).attr("href");
+            $( dialog_id ).modal({
+            'open': function() { $(this).load(href)}
+            });
+            return false;
+        });
+
+        $( "#save_new_" + name ).live('click', function() {
+            var form = $( "#new_" + name + "_form" );
+            $.ajax({
+                "url": form.attr("action"),
+                "type": "POST",
+                "data": form.serialize(),
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        window.location.href = xhr.responseText;
+                    } else {
+                        $( dialog_id ).html(xhr.responseText);
+                    };
+                }
+            });
+            return false;
+        });
+    }
+
+    prepare_dialog_for("invoice");
 
 {% endblock %}

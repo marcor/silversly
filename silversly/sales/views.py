@@ -134,8 +134,103 @@ def pay_due_receipt(request, id):
         receipt.finally_paid()
     return HttpResponse(status = 200)
 
+def new_invoice_from_cart(request, cart_id):
+    bad_request = False
+    cart = get_object_or_404(Cart, current = True)
+    customer = cart.customer.child()
+    now = datetime.datetime.now()
+    year = now.year - 2000
+    last_invoice_number = Invoice.objects.filter(year = year).aggregate(Max('number'))['number__max']
+    number = last_invoice_number and last_invoice_number + 1 or 1
+    invoice = Invoice(number = number, immediate=True)
+
+    if request.method == "POST":
+        form = InvoiceForm(request.POST, instance=invoice)
+        if form.is_valid():
+            form.save(commit = False)
+            cart.current = False
+            cart.save()
+            for item in cart.cartitem_set.all():
+                if item.update:
+                    product = item.product
+                    product.quantity -= item.quantity
+                    product.save()
+                    product.sync_to_others("quantity")
+
+            invoice.cart = cart
+            invoice.total_net = cart.discounted_net_total()
+            if invoice.payment_method == "ok":
+                invoice.payed = True
+            else:
+                customer.due += invoice.apply_vat()[0] + invoice.costs
+                customer.save()
+            invoice.save()
+            return HttpResponse(reverse("show_invoice", args=(invoice.id,)), mimetype="text/plain")
+        else:
+            bad_request = True
+    else:
+        form = InvoiceForm(instance=invoice)
+
+    response = render_to_response('cart/dialogs/new_invoice.html',  {'form': form, 'cart': cart})
+    if bad_request:
+        response.status_code = 400
+    return response
+
 def new_invoice(request, customer_id):
-    pass
+    customer = Customer.objects.get(pk=customer_id)
+    open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
+    if not open_ddts.exists():
+        return HttpResponse(status=404)
+
+    bad_request = False
+    now = datetime.datetime.now()
+    year = now.year - 2000
+    last_invoice_number = Invoice.objects.filter(year = year).aggregate(Max('number'))['number__max']
+    number = last_invoice_number and last_invoice_number + 1 or 1
+    invoice = Invoice(number = number, immediate=False)
+
+    if request.method == "POST":
+        form = InvoiceForm(request.POST, instance=invoice)
+        if form.is_valid():
+            form.save()
+
+            for ddt in open_ddts:
+                invoice.ddt_set.add(ddt)
+            invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in open_ddts)
+            if invoice.payment_method == "ok":
+                invoice.payed = True
+            else:
+                customer.due += invoice.apply_vat()[0] + invoice.costs
+                customer.save()
+            invoice.save()
+            return HttpResponse(reverse("show_invoice", args=(invoice.id,)), mimetype="text/plain")
+        else:
+            bad_request = True
+    else:
+        form = InvoiceForm(instance=invoice)
+
+    response = render_to_response('customers/dialogs/new_invoice.html',  {'form': form, 'customer': customer.child()})
+    if bad_request:
+        response.status_code = 400
+    return response
+
+def show_invoice(request, id):
+    invoice = get_object_or_404(Invoice, pk=id)
+    cart = invoice.cart
+    ddts = invoice.ddt_set.all()
+    if cart:
+        customer = cart.customer.child()
+    else:
+        customer = ddts[0].cart.customer.child()
+    return render_to_response('documents/show_invoice.html',  {'cart': cart, 'customer': customer, 'ddts': ddts, 'invoice': invoice})
+
+
+def pay_due_invoice(request, invoice_id):
+    invoice = get_object_or_404(Invoice, pk=invoice_id)
+    if not invoice.payed:
+        invoice.finally_paid()
+    return HttpResponse(status = 200)
+
 
 def new_ddt(request):
     bad_request = False
@@ -191,6 +286,20 @@ def print_ddt(request, id):
         'shop': shop,
         'cart' : cart,
         'ddt': ddt})
+
+def print_invoice(request, id):
+    from common.views import write_pdf
+    invoice = get_object_or_404(Invoice, pk=id)
+    cart = invoice.cart
+    ddts = invoice.ddt_set.all()
+    customer = cart and cart.customer.child() or ddts[0].cart.customer.child()
+    shop = Shop.objects.get(site = Site.objects.get_current())
+    return write_pdf('pdf/invoice_a4.html',{
+        'pagesize' : 'a4',
+        'shop': shop,
+        'cart' : cart,
+        'ddts': ddts,
+        'invoice': invoice})
 
 def add_product_to_cart(request):
     bad_request = False

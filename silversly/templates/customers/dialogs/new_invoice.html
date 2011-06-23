@@ -1,0 +1,11 @@
+<div>
+    <script type="text/javascript">
+        $(function() {
+            $("#id_number").trigger('focus');
+        });
+    </script>
+    <form id="new_invoice_form" action="{% url new_invoice customer.id %}" method="post">
+        {{ form.as_p }}
+	    <input id="save_new_invoice" type="submit" value="Accetta" />
+    </form>
+<div>
