@@ -133,6 +133,23 @@
             {% endif %}
          </div>
 
+         <h3>Ultimi scontrini</h3>
+         <div class="pane">
+            {% if last_ddts %}
+            <table >
+            {% for d in last_ddts %}
+            <tr>
+                <td>
+                <a title="{{ d.cart.customer }}"
+                   href="{% url show_ddt d.id %}">{{ d }}</a></td>
+            </tr>
+            {% endfor %}
+            </table>
+            {% else %}
+                <p>Nessuno Ddt emesso.</p>
+            {% endif %}
+         </div>
+
 
 
     </div>

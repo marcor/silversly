@@ -1,9 +1,9 @@
 {% extends "cart/main.html" %}
 
-{% block title %}Scontrino{% endblock %}
+{% block title %}Documento di trasporto{% endblock %}
 
 {% block header %}
-    <h1>{{ receipt }}</h1>
+    <h1>{{ ddt }}</h1>
 {% endblock %}
 
 {% block jquery %}
@@ -20,26 +20,30 @@
     <h3>Cliente: <a href="{% url show_customer cart.customer.id %}">{{cart.customer.name}}</a></h3>
     {% endif %}
     <div id="cart_display">
-            {% include "cart/product_list_static.html" %}
-    </div>
+        <div style="float:left; font-size: 1.1em" >Destinazione:
+<pre style="background-color: #fff; border: 1px solid #ccc; padding:8px">
+{{ ddt.shipping_address }}
+</pre>
+        </div>
+        <ul class="ddt_info" style="float: right; font-size: 1.2em">
+            {% if ddt.appearance %}<li>Aspetto: {{ ddt.appearance }}</li>{% endif %}
+            {% if ddt.boxes %}<li>Aspetto: {{ ddt.boxes }}</li>{% endif %}
+        </ul>
+        <hr class="clearfix" />
+        {% include "cart/product_list_static.html" %}
 
+
+    <hr class="clearfix" />
+
+    <a id="new_invoice" href="{% url new_invoice customer.id %}" style="display:none">Emetti fattura</a>
+    <a id="print" target="_blank" href="{% url print_ddt ddt.id %}" style="display:none; float:right">Stampa</a>
 </div>
 
-{% if receipt.due %}
-    <button id="pay_all" style="display:none">Segna come pagato</button>
-    <script type="text/javascript">
-        $("#pay_all").button().show().click(
-            function(e) {
-                $.post("{% url pay_due_receipt receipt.id %}",
-                    {},
-                    function(data, status) {
-                        $("#due").empty().html("<p>Pagato!</p>");
-                        $("#pay_all").hide();
-                    }
-                )
-            }
-        );
-
-    </script>
+<script type="text/javascript">
+{% if not ddt.invoice %}
+    $("#new_invoice").button().show();
 {% endif %}
+    $("#print").button().show();
+</script>
+
 {% endblock %}

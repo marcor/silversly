@@ -3,38 +3,53 @@
         <tr style="text-align: right">
             <th style="text-align: left">Articolo</th>
             <th>Q.t&agrave;</th>
-            <th>Prezzo</th>
+            <th>Prezzo {% if customer.company %}netto{% endif %}</th>
             <th>Sc.%</th>
             <th>Valore</th>
         </tr>
     </thead>
     <tbody>
+    {% if customer.company %}
         {% for item in cart.cartitem_set.all %}
-            <tr id="p{{ item.id }}">
-	<td><a href="{% url show_product item.product.id %}">{{ item.product.name}}</a></td>
-	<td class="decimal">{{ item.quantity}}</td>
-    <td class="decimal" style="background-color: #ffe">{{ item.final_price }}</td>
-	<td class="decimal" style="color:#666">{{ item.discount }}%</td>
-    <td class="decimal" style="background-color: #efe">{{ item.final_value }}</td>
-    </td>
-</tr>
+        <tr id="p{{ item.id }}">
+            <td><a href="{% url show_product item.product.id %}">{{ item.product.name}}</a></td>
+            <td class="decimal">{{ item.quantity}}</td>
+            <td class="decimal" style="background-color: #ffe">{{ item.final_net_price }}</td>
+            <td class="decimal" style="color:#666">{{ item.discount }}%</td>
+            <td class="decimal" style="background-color: #efe">{{ item.net_total.0 }}</td>
+        </tr>
         {% endfor %}
+    {% else %}
+        {% for item in cart.cartitem_set.all %}
+        <tr id="p{{ item.id }}">
+            <td><a href="{% url show_product item.product.id %}">{{ item.product.name}}</a></td>
+            <td class="decimal">{{ item.quantity}}</td>
+            <td class="decimal" style="background-color: #ffe">{{ item.final_price }}</td>
+            <td class="decimal" style="color:#666">{{ item.discount }}%</td>
+            <td class="decimal" style="background-color: #efe">{{ item.gross_total.1 }}</td>
+        </tr>
+        {% endfor %}
+    {% endif %}
+
+
     </tbody>
 </table>
 
-<div id="cart_summary">
-
-    <div id="due" style="float: left; font-size: 2.8em">
+<div class="cart_summary">
+    {% if not customer.company %}
+    <div class="due" style="float: left; font-size: 2.8em">
         {% if receipt.due %}
             <p style="color:red"> DOVUTO: {{receipt.due}}&euro;</p>
         {% else %}
             <p>PAGATO</p>
         {% endif %}
-
     </div>
     <div style="text-align: right">
         <p style="font-size: 1.2em">Totale{% if cart.discount %} (+ sconto {{ cart.discount }}%){% endif %} =<p>
         <p  style="font-size: 3em; margin: 5px 5px" id="total_discounted">{{ cart.discounted_total }}&euro;</p>
     </div>
+
+    {% endif %}
+
 </div>
 

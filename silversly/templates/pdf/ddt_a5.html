@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<style type="text/css">
+
+body {
+    font-size: 13px;
+}
+@page {
+
+    size: a5;
+    /*-pdf-frame-border: 1;*/
+    top: 7.6cm;
+    margin-left: 1.5cm;
+    margin-right: 3cm;
+    margin-bottom: 3.3cm;
+
+    @frame top {
+        -pdf-frame-content: intestazione;
+        margin-left: 1.5cm;
+        margin-right: 0.5cm;
+        top: 4.1cm;
+    }
+    @frame top2 {
+        -pdf-frame-content: numero_e_data;
+        margin-left: 9.5cm;
+        margin-right: 0.6cm;
+        height: 3cm;
+        top: 1.9cm;
+    }
+    @frame footer {
+        -pdf-frame-content: footerblock;
+        margin-left: 1.5cm;
+        margin-right: 4.5cm;
+        height: 2.5cm;
+        bottom: 1cm;
+    }
+}
+#aspetto {
+    width:  4.3cm;
+}
+#colli {
+    width:  1.2cm;
+}
+#peso {
+    width: 1.5cm;
+}
+#data {
+    width: 3.5cm;
+}
+
+#footer_table {
+    text-align: center;
+}
+
+td {
+    padding-top: .1cm;
+    padding-left: .1cm;
+    vertical-align: bottom;
+}
+
+#numero_e_data {
+    font-size: 1.5em;
+    text-align: right;
+}
+#ddt_num {
+   width: 1.1cm;
+}
+
+#ddt_date {
+
+}
+
+pre {
+    font-family: sansserif;
+    font-size: 1.2em;
+    line-height: 200%;
+    padding-left: .5cm;
+}
+.right {
+    text-align: right
+}
+
+</style>
+</head>
+<body>
+
+<div id="intestazione">
+    <table>
+        <tr>
+            <td>
+<pre>{{ cart.customer.name }}
+Spett.le {{ ddt.main_address }}</pre>
+            </td>
+            <td style="padding-left: 0.2cm">
+            {% if ddt.shipping_address != ddt.main_address %}
+<pre>
+{{ ddt.shipping_address }}</pre>
+            {% else %}
+<pre>IDEM</pre>
+            {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="numero_e_data">
+    <table>
+        <tr>
+        <td id="ddt_num">{{ ddt.number }}</td>
+        <td id="ddt_date">{{ ddt.date_short }}</td>
+    </tr>
+    </table>
+</div>
+
+
+<table id="items">
+{% for item in cart.cartitem_set.all %}
+    <tr class="tall">
+        <td style="width: 1.5cm; padding-right: .1cm" class="right">{{ item.quantity }}{{ item.product.unit }}</td>
+        <td style="padding-left: .1cm">{{ item.product.name }}</td>
+    </tr>
+
+{% if forloop.counter|divisibleby:5 %}
+{% endif %}
+
+{% endfor %}
+</table>
+
+<div id="footerblock">
+    <table id="footer_table">
+        <tr class="tall">
+            <td id="aspetto">{{ ddt.appearance }}</td>
+            <td id="colli">{{ ddt.boxes|default:"" }}</td>
+            <td id="peso"></td>
+            <td id="porto"></td>
+        </tr>
+        <tr class="short">
+            <td colspan="2"></td>
+            <td id="data" colspan="2">{{ ddt.shipping_date_short }}</td>
+        </tr>
+    </table>
+    <pdf:pagenumber>
+</div>
+</body>
+</html>

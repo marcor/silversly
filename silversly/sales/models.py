@@ -235,6 +235,11 @@ class Ddt(Receipt):
     def get_absolute_url(self):
         return('sales.views.show_ddt', [str(self.id)])
 
+    def date_short(self):
+        return self.date.strftime("%d/%m/%y")
+
+    def shipping_date_short(self):
+        return self.shipping_date.strftime("%H:%M %d/%m/%y")
 
     class Meta:
         ordering = ['-year', '-date', '-number']

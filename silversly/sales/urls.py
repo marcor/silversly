@@ -19,8 +19,6 @@ urlpatterns = patterns('sales.views',
     url(r'carrello/ricalcola', 'reload_cart', name='reload_cart'),
 
     url(r'ddt/nuovo$', 'new_ddt', name='new_ddt'),
+    url(r'archivio/ddt/(\d+)/stampa$', 'print_ddt', name='print_ddt'),
     url(r'archivio/ddt/(\d+)/$', 'show_ddt', name='show_ddt'),
-
-
-
 )

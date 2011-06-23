@@ -11,8 +11,8 @@ from django.core import serializers
 from django.http import HttpResponse
 from urllib import unquote
 from django.utils import simplejson
-from common.views import DecimalEncoder
 from decimal import Decimal
+
 
 def edit_cart(request):
     try:
@@ -179,6 +179,18 @@ def show_ddt(request, id):
     cart = ddt.cart
     customer = cart.customer.child()
     return render_to_response('documents/show_ddt.html',  {'cart': cart, 'customer': customer, 'ddt': ddt})
+
+def print_ddt(request, id):
+    from common.views import write_pdf
+    ddt = get_object_or_404(Ddt, pk=id)
+    cart = ddt.cart
+    customer = cart.customer.child()
+    shop = Shop.objects.get(site = Site.objects.get_current())
+    return write_pdf('pdf/ddt_a5.html',{
+        'pagesize' : 'A5',
+        'shop': shop,
+        'cart' : cart,
+        'ddt': ddt})
 
 def add_product_to_cart(request):
     bad_request = False

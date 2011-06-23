@@ -2,16 +2,20 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse
 
-from people.models import Customer
+from people.models import *
+from inventory.models import *
+from sales.models import *
 
 import simplejson
 import decimal
 
-from inventory.models import *
-from sales.models import *
-from forms import *
-from models import *
-from django.contrib.sites.models import Site
+from django import http
+from django.template.loader import get_template
+from django.template import Context
+import ho.pisa as pisa
+import cStringIO as StringIO
+import cgi
+
 
 
 
@@ -24,14 +28,25 @@ class DecimalEncoder(simplejson.JSONEncoder):
         return super(DecimalEncoder, self).default(o)
 
 
-
+def write_pdf(template_src, context_dict):
+    template = get_template(template_src)
+    context = Context(context_dict)
+    html  = template.render(context)
+    result = StringIO.StringIO()
+    pdf = pisa.pisaDocument(StringIO.StringIO(
+        html.encode("iso-8859-1")), result)
+    if not pdf.err:
+        return http.HttpResponse(result.getvalue(), \
+             mimetype='application/pdf')
+    return http.HttpResponse('Errore nella generazione del pdf!\n %s' % cgi.escape(html))
 
 # actual views
 
 def homepage(request):
     outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")
-    open_batchloads = BatchLoad.objects.filter(loaded = False)
+    #open_batchloads = BatchLoad.objects.filter(loaded = False)
     last_receipts = Scontrino.objects.order_by("-date")[:5]
+    last_ddts = Ddt.objects.all()[:3]
     open_ddts = Ddt.objects.filter(invoice__isnull = True).select_related("cart", "cart__customer")
     customers = {}
     for ddt in open_ddts:
@@ -46,8 +61,9 @@ def homepage(request):
 
     return render_to_response("home.html",
         {'outstock': list(outstock),
-        'open_batchloads': open_batchloads,
+        #'open_batchloads': open_batchloads,
         'last_receipts': last_receipts,
+        'last_ddts': last_ddts,
         'need_invoice': customers,
         'debtors': list(debtors)})
 
