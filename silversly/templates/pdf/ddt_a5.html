@@ -12,30 +12,30 @@ body {
 
     size: a5;
     /*-pdf-frame-border: 1;*/
-    top: 7.6cm;
-    margin-left: 1.5cm;
+    top: 7.8cm;
+    margin-left: 1.6cm;
     margin-right: 3cm;
-    margin-bottom: 3.3cm;
+    margin-bottom: 2.8cm;
 
     @frame top {
         -pdf-frame-content: intestazione;
         margin-left: 1.5cm;
         margin-right: 0.5cm;
-        top: 4.1cm;
+        top: 4.2cm;
     }
     @frame top2 {
         -pdf-frame-content: numero_e_data;
         margin-left: 9.5cm;
         margin-right: 0.6cm;
         height: 3cm;
-        top: 1.9cm;
+        top: 2.1cm;
     }
     @frame footer {
         -pdf-frame-content: footerblock;
         margin-left: 1.5cm;
         margin-right: 4.5cm;
         height: 2.5cm;
-        bottom: 1cm;
+        bottom: .8cm;
     }
 }
 #aspetto {
@@ -59,6 +59,7 @@ td {
     padding-top: .1cm;
     padding-left: .1cm;
     vertical-align: bottom;
+    /*border: 1px solid red;*/
 }
 
 #numero_e_data {
@@ -71,6 +72,10 @@ td {
 
 #ddt_date {
 
+}
+
+#pagnum  {
+    font-size: 0.8em;
 }
 
 pre {
@@ -91,8 +96,8 @@ pre {
     <table>
         <tr>
             <td>
-<pre>{{ cart.customer.name }}
-Spett.le {{ ddt.main_address }}</pre>
+<pre>Spett.le {{ cart.customer.name }}
+{{ ddt.main_address }}</pre>
             </td>
             <td style="padding-left: 0.3cm">
             {% if ddt.shipping_address != ddt.main_address %}
@@ -118,7 +123,7 @@ Spett.le {{ ddt.main_address }}</pre>
 {% for item in cart.cartitem_set.all %}
     <tr class="tall">
         <td style="width: 1.5cm; padding-right: .1cm" class="right">{{ item.quantity }}{{ item.product.unit }}</td>
-        <td style="padding-left: .1cm">{{ item.product.name }}</td>
+        <td style="padding-left: .2cm">{{ item.product.name }}</td>
     </tr>
 
 {% if forloop.counter|divisibleby:5 %}
@@ -139,8 +144,10 @@ Spett.le {{ ddt.main_address }}</pre>
             <td colspan="2"></td>
             <td id="data" colspan="2">{{ ddt.shipping_date_short }}</td>
         </tr>
+        <tr class="short">
+            <td class="right" id="pagnum" colspan="3">pag. <pdf:pagenumber> </td>
+        </tr>
     </table>
-    <pdf:pagenumber>
 </div>
 </body>
 </html>

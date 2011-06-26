@@ -293,7 +293,7 @@ def print_invoice(request, id):
     from common.views import write_pdf
     invoice = get_object_or_404(Invoice, pk=id)
     cart = invoice.cart
-    ddts = invoice.ddt_set.all()
+    ddts = invoice.ddt_set.all().order_by("number")
     customer = cart and cart.customer.child() or ddts[0].cart.customer.child()
     shop = Shop.objects.get(site = Site.objects.get_current())
     return write_pdf('pdf/invoice_a4.html',{
@@ -301,7 +301,8 @@ def print_invoice(request, id):
         'shop': shop,
         'cart' : cart,
         'ddts': ddts,
-        'invoice': invoice})
+        'invoice': invoice,
+        'customer': customer})
 
 def add_product_to_cart(request):
     bad_request = False

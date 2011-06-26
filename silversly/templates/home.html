@@ -77,7 +77,7 @@
     <div id="vendite">
         <h2>Vendite</h2>
         <h3>Crediti</h3>
-            <div class="pane">
+        <div class="pane">
             {% if debtors %}
                 <table >
 
@@ -88,13 +88,13 @@
                 </tr>
                 {% endfor %}
                 </table>
-            </div>
             {% else %}
                 <p>Tutti i clienti sono in regola. Che bravi!</p>
             {% endif %}
-
-            <h3>Fatture da emettere</h3>
-            <div class="pane">
+        </div>
+    
+        <h3>Fatture da emettere</h3>
+        <div class="pane">
             {% if need_invoice %}
             <table >
             {% for customer, total in need_invoice.items %}
@@ -109,6 +109,7 @@
             {% endif %}
          </div>
     </div>
+    
     <div id="archivio">
         <h2>Archivio</h2>
         <h3>Ultimi scontrini</h3>
@@ -146,9 +147,6 @@
                 <p>Nessuno Ddt emesso.</p>
             {% endif %}
          </div>
-
-
-
     </div>
 
     <div id="new_invoice_dialog" title="Prepara una fattura" class="dialog" style="display: none"></div>

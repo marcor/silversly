@@ -1,3 +1,4 @@
+{% load sales_tags %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -10,77 +11,82 @@ body {
 }
 @page {
 
-    size: a5;
-    /*-pdf-frame-border: 1;*/
-    top: 7.6cm;
-    margin-left: 1.5cm;
-    margin-right: 3cm;
-    margin-bottom: 3.3cm;
-
+    size: a4;
+    top: 12.7cm;
+    margin-left: 1.1cm;
+    margin-right: 1.1cm;
+    margin-bottom: 2.7cm;
     @frame top {
         -pdf-frame-content: intestazione;
         margin-left: 1.5cm;
-        margin-right: 0.5cm;
-        top: 4.1cm;
-    }
-    @frame top2 {
-        -pdf-frame-content: numero_e_data;
-        margin-left: 9.5cm;
-        margin-right: 0.6cm;
-        height: 3cm;
-        top: 1.9cm;
+        margin-right: 1.1cm;
+        top: 8.3cm;
     }
     @frame footer {
         -pdf-frame-content: footerblock;
-        margin-left: 1.5cm;
-        margin-right: 4.5cm;
-        height: 2.5cm;
-        bottom: 1cm;
+        margin-left: 1.1cm;
+        margin-right: 1.1cm;
+        height: 1.7cm;
+        bottom: 0.9cm;
     }
-}
-#aspetto {
-    width:  4.3cm;
-}
-#colli {
-    width:  1.2cm;
-}
-#peso {
-    width: 1.5cm;
-}
-#data {
-    width: 3.5cm;
-}
-
-#footer_table {
-    text-align: center;
+    @frame address {
+    /*-pdf-frame-border: 1;*/
+        -pdf-frame-content: address;
+        margin-left: 11.5cm;
+        margin-right: 1cm;
+        height: 3cm;
+        top: 6.5cm;
+    } 
 }
 
 td {
     padding-top: .1cm;
     padding-left: .1cm;
-    vertical-align: bottom;
+    padding-right: .1cm;
+    margin-top: .1cm;
+    
 }
 
-#numero_e_data {
+#items td {
+    padding-top: .06cm;
+    
+}
+
+.grande {
     font-size: 1.5em;
-    text-align: right;
-}
-#ddt_num {
-   width: 1.1cm;
 }
 
-#ddt_date {
-
+.italic  {
+    font-style: italic;
 }
 
-pre {
-    font-family: sansserif;
-    font-size: 1.2em;
-    line-height: 200%;
-    padding-left: .5cm;
+.rif_ddt {
+   font-weight: bold;
+   padding-right: 3cm;
 }
+
 .right {
     text-align: right
+}
+
+.quantity {
+    width: 1.7cm;
+} 
+.description {
+    text-align: left;
+} 
+.price {
+    width: 2.5cm;
+} 
+.item_total {
+    width: 3.1cm;
+} 
+
+
+
+#address {
+    font-size: 1.5em;
+    font-family: sanserif;
 }
 
 </style>
@@ -88,59 +94,63 @@ pre {
 <body>
 
 <div id="intestazione">
-    <table>
+    <table class="right">
         <tr>
-            <td>
-<pre>{{ cart.customer.name }}
-Spett.le {{ ddt.main_address }}</pre>
+            <td class="grande">{{ invoice.number }}</td>
+        </tr>
+        <tr>
+            <td class="grande">{{ invoice.date }}</td>
+        </tr>
+        <tr>
+            <td colspan="3" style="text-align: left; padding-left: 1cm;">
+                 {% for ddt in ddts %}
+                    {{ ddt.number }}
+                    {% if not forloop.last %} + {% endif%} 
+                 {% endfor %}
             </td>
-            <td style="padding-left: 0.3cm">
-            {% if ddt.shipping_address != ddt.main_address %}
-<pre>
-{{ ddt.shipping_address }}</pre>
-            {% endif %}
-            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td> {{ customer.piva }} </td>
+            <td> {{ invoice.get_payment_method_display }}</td>
         </tr>
     </table>
 </div>
 
-<div id="numero_e_data">
-    <table>
-        <tr>
-        <td id="ddt_num">{{ ddt.number }}</td>
-        <td id="ddt_date">{{ ddt.date_short }}</td>
-    </tr>
-    </table>
+<div id="address">
+    <pre>Spett.le {{ customer.name }}
+{{ customer.main_address }}</pre>
 </div>
 
-
-<table id="items">
-{% for item in cart.cartitem_set.all %}
-    <tr class="tall">
-        <td style="width: 1.5cm; padding-right: .1cm" class="right">{{ item.quantity }}{{ item.product.unit }}</td>
-        <td style="padding-left: .1cm">{{ item.product.name }}</td>
-    </tr>
-
-{% if forloop.counter|divisibleby:5 %}
-{% endif %}
+<div id="items">
+{% for ddt in ddts %}
+    <table class="right">
+        <tr>
+        <td class="rif_ddt">*** Ddt n.{{ ddt.number }} del {{ ddt.date }}</td>
+        </tr>
+    </table>
+    {% include "pdf/invoice_cart.html"  with cart=ddt.cart %}
 
 {% endfor %}
-</table>
+</div>
 
 <div id="footerblock">
-    <table id="footer_table">
-        <tr class="tall">
-            <td id="aspetto">{{ ddt.appearance }}</td>
-            <td id="colli">{{ ddt.boxes|default:"" }}</td>
-            <td id="peso"></td>
-            <td id="porto"></td>
+{% with total=invoice.apply_vat %}    
+    <table id="footer_table" class="right">
+        <tr>
+            <td style="width: 3.3cm"></td>
+            <td style="width: 3.3cm">{{ invoice.costs }}&euro;</td>
+            <td style="width: 5.6cm">{{ invoice.total_net }}&euro;</td>
+            <td>20</td>
+            <td style="width: 2.5cm">{{ total.1 }}&euro;</td>
+            <td style="width: 3.1cm">{{ total.1|exactAdd:invoice.costs }}&euro;</td>
         </tr>
-        <tr class="short">
-            <td colspan="2"></td>
-            <td id="data" colspan="2">{{ ddt.shipping_date_short }}</td>
+        <tr>
+            <td colspan="5" style="text-align: left"><pdf:pagenumber /> </td>
+            <td>{{ total.0 }}&euro;</td>
         </tr>
-    </table>
-    <pdf:pagenumber>
+    </table>    
+{% endwith %}
 </div>
 </body>
 </html>
