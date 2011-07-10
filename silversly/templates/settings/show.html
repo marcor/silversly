@@ -20,6 +20,11 @@
 
         $('#tabset').bind('tabsload', function(event, info){
             if (info.index == 0) {
+                $("#backup_button").button();
+                $("#update_button").button();
+                check_updates();
+            }
+            else if (info.index == 1) {
                 $("#id_name").trigger('focus');
                 $("#save_shop_info").attr('disabled', true);
             }
@@ -106,6 +111,7 @@
     <div id="tabset">
         {% with product.id as id %}
         <ul>
+            <li><a href="{% url updates_tab %}" title="Aggiornamenti e backup">Aggiornamenti</a></li>
             <li><a href="{% url shop_tab %}" title="Dati negozio">Dati negozio</a></li>
             <li><a href="{% url pricelists_tab %}" title="Listini">Listini</a></li>
             <li><a href="{% url other_tab %}" title="Altro">Altro</a></li>

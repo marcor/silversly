@@ -1,6 +1,7 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.conf import settings
 
 from forms import *
 
@@ -69,7 +70,7 @@ def homepage(request):
         'need_invoice': customers,
         'debtors': list(debtors)})
 
-def settings(request):
+def show_settings(request):
     return render_to_response("settings/show.html")
 
 def shop_tab(request):
@@ -90,6 +91,42 @@ def shop_tab(request):
     if bad_request:
         response.status_code = 400
     return response
+
+def updates_tab(request):
+    return render_to_response('settings/tabs/updates.html')
+    
+def check_updates(request):
+    bad_request = False
+    latest_version = get_latest_version()
+    if not latest_version:
+        # service unavailable
+        return HttpResponse(status = 503)
+    if Decimal(latest_version) > Decimal(settings.VERSION):
+        # okay, there is an update
+        return HttpResponse(status = 200)
+    else:
+        # nothing new
+        return HttpResponse(status = 404)
+
+def get_latest_version():
+    try:
+        remote_file = settings.LATEST_VERSION_FILE
+    except:
+        remote_file = None
+    if remote_file:
+        import urllib2
+        return urllib2.urlopen(remote_file).read().strip()
+    else:
+        return None
+        
+def update_silversly(request):
+    program = os.path.join(settings.PROJECT_DIR, "script", "checkout.bat")
+    # supply the proper input values as strings
+    tag = get_latest_version()
+    media_dir = os.path.join(settings.PROJECT_DIR, "media")
+    import subprocess
+    subprocess.call([program, settings.REPO_DIR, settings.REPO_NAME, tag, media_dir, settings.MEDIA_ROOT, settings.WSGI_SCRIPT])
+    return HttpResponse(status = 200)
 
 def other_tab(request):
     try:

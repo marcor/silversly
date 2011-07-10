@@ -1,0 +1,37 @@
+{% extends 'ajax_tab.html' %}
+{% load common_tags %}
+
+
+{% block content %}
+    <h3>Versione corrente: {% silversly_version %}</h3>
+    <p id="update_message"></p>
+    
+    <button id="backup_button" style="display: none">Salva un backup</button>
+    <button id="update_button" style="display: none">Installa la nuova versione</button>
+        
+    <script type="text/javascript">
+        
+        check_updates = function() {
+            $.ajax({
+                url: "{% url check_updates %}",
+                complete: function(xhr, status) {
+                    var code = xhr.status;
+                    if (code == 200) {
+                        $("#update_message").html("C'&egrave; un aggiornamento!");
+                        $("#update_button").live("click", function() {
+                            $.post("{% url update_silversly %}");
+                        }).show();                        
+                        $("#backup_button").show();
+                    }
+                    else if (code == 404) {
+                        $("#update_message").html("Nessun aggiornamento disponibile.");
+                    }
+                    else {
+                        $("#update_message").html("Non riesco a contattare il server!");
+                    }
+                }
+            });
+        }
+    
+    </script>
+{% endblock %}

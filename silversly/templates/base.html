@@ -1,3 +1,4 @@
+{% load common_tags %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it" lang="it">
@@ -54,7 +55,7 @@
 <body>
 
     <div id="topbar">
-        <div id="logo">Silver Sly <span>v0.5</span></div>
+        <div id="logo">Silver Sly <span>{% silversly_version %}</span></div>
         <div class="navlinks">
         <a href="{% url find_product %}" title="Articoli"><img src="/media/img/products.png" /></a>
         <a href="{% url edit_cart %}" title="Carrello"><img src="/media/img/cart.png" /></a>
