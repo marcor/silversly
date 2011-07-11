@@ -1,0 +1,26 @@
+{% extends 'ajax_tab.html' %}
+
+{% block content %}
+    {% if batchloads %}
+    <table id="batchloads" style="width: 70%">
+        <thead>
+            <th>Rif.</th>
+            <th>Data</th>
+            <th>Articoli caricati</th>
+        </thead>
+        <tbody>
+        {% for load in batchloads %}
+            <tr>
+                <td class="decimal">{{ load.document_ref }}</td>
+                <td class="decimal"><a href="{% url show_batch_load load.id %}">{{ load.date }}</a></td>
+                <td class="decimal">{{ load.incomingproduct_set.count }}</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+        {% else %}
+        <p>Nessuna fornitura ancora caricata.</p>
+        {% endif %}
+
+
+{% endblock %}

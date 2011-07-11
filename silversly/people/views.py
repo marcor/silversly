@@ -1,6 +1,6 @@
 from models import *
 from forms import *
-#from inventory.models import Product
+from inventory.models import BatchLoad
 from sales.models import *
 from common.views import DecimalEncoder
 
@@ -74,8 +74,9 @@ def supplier_info_tab(request, id):
     return response
 
 def supplier_history_tab(request, supplier_id):
-    supplier = get_object_or_404(Costumer, pk=supplier_id)
-    return render_to_response('suppliers/tabs/history.html', {'supplier': supplier})
+    supplier = get_object_or_404(Supplier, pk=supplier_id)
+    batchloads = BatchLoad.objects.filter(supplier = supplier, loaded = True).order_by("-date")
+    return render_to_response('suppliers/tabs/history.html', {'supplier': supplier, 'batchloads': batchloads})
 
 
 #

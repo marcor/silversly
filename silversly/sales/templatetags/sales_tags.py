@@ -19,6 +19,13 @@ def exact_add(object, arg):
     except:
         return 0
 
+@register.filter(name='exactSub')
+def exact_sub(object, arg):
+    try:
+        return object - arg
+    except:
+        return 0
+
 @register.filter(name='neg')
 def negative(object):
     try:

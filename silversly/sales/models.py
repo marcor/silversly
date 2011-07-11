@@ -266,7 +266,7 @@ class Invoice(Receipt):
     # cart = models.OneToOneField(Cart, null = True)
 
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES)
-    costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
+    costs = FixedDecimalField(_("Spese incasso"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
 
     total_net = FixedDecimalField(_("Imponibile"), max_digits = 8, decimal_places = 2, null = True)
     payed = models.BooleanField(_("Pagata"), default = False)
@@ -275,7 +275,7 @@ class Invoice(Receipt):
         return u"Fattura %d/%d del %s" % (self.year, self.number, self.date.strftime("%d/%m"))
 
     def finally_paid(self):
-        due = self.apply_vat()[0] + self.costs
+        due = self.apply_vat()[0]
         if self.immediate:
             customer = self.cart.customer
         else:

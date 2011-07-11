@@ -45,6 +45,8 @@ def edit_cart_customer(request):
                 item.save()
         if cart.discount != customer.discount:
             cart.discount = customer.discount
+        if customer.child().company:
+            cart.rounded = False
     cart.update_value()
     cart.save()
     return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
@@ -160,11 +162,11 @@ def new_invoice_from_cart(request, cart_id):
                     product.sync_to_others("quantity")
 
             invoice.cart = cart
-            invoice.total_net = cart.discounted_net_total()
+            invoice.total_net = cart.discounted_net_total() + invoice.costs
             if invoice.payment_method == "ok":
                 invoice.payed = True
             else:
-                customer.due += invoice.apply_vat()[0] + invoice.costs
+                customer.due += invoice.apply_vat()[0]
                 customer.save()
             invoice.save()
             return HttpResponse(reverse("show_invoice", args=(invoice.id,)), mimetype="text/plain")
@@ -198,11 +200,11 @@ def new_invoice(request, customer_id):
 
             for ddt in open_ddts:
                 invoice.ddt_set.add(ddt)
-            invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in open_ddts)
+            invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in open_ddts) + invoice.costs
             if invoice.payment_method == "ok":
                 invoice.payed = True
             else:
-                customer.due += invoice.apply_vat()[0] + invoice.costs
+                customer.due += invoice.apply_vat()[0]
                 customer.save()
             invoice.save()
             return HttpResponse(reverse("show_invoice", args=(invoice.id,)), mimetype="text/plain")

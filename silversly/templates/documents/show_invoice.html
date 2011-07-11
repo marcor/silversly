@@ -1,6 +1,6 @@
 {% extends "cart/main.html" %}
 
-{% block title %}Fattura {{ invoice.year}}/{{invice.number}}{% endblock %}
+{% block title %}Fattura {{ invoice.year}}/{{invoice.number}}{% endblock %}
 
 {% block header %}
     <h1>{{ invoice }}</h1>
@@ -22,7 +22,8 @@
 
         <ul class="ddt_info" style="float: right; font-size: 1.2em">
             {% if invoice.payment_method != "ok"%}<li>Pagamento: {{ invoice.get_payment_method_display}}</li>{% endif %}
-            <li>Stato: <span id="due">{% if invoice.payed %}PAGATA{% else %}<b>{{ invoice.total_net }} &euro;</b> da saldare{%endif %}</span></li>
+            <li>Totale: <b>{{ invoice.apply_vat.0 }} &euro;</b></li>
+            <li>Stato: <span id="due">{% if invoice.payed %}PAGATA{% else %}<b>da saldare</b>{%endif %}</span></li>
         </ul>
         <hr class="clearfix" />
     </div>
