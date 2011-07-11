@@ -94,7 +94,7 @@ def shop_tab(request):
 
 def updates_tab(request):
     return render_to_response('settings/tabs/updates.html')
-    
+
 def check_updates(request):
     bad_request = False
     latest_version = get_latest_version()
@@ -118,14 +118,14 @@ def get_latest_version():
         return urllib2.urlopen(remote_file).read().strip()
     else:
         return None
-        
+
 def update_silversly(request):
     program = os.path.join(settings.PROJECT_DIR, "script", "checkout.bat")
     # supply the proper input values as strings
     tag = get_latest_version()
     media_dir = os.path.join(settings.PROJECT_DIR, "media")
     import subprocess
-    subprocess.call([program, settings.REPO_DIR, settings.REPO_NAME, tag, media_dir, settings.LIVE_MEDIA_ROOT, settings.WSGI_SCRIPT, settings.FOSSIL])
+    print subprocess.call([program, settings.REPO_DIR, settings.REPO_NAME, tag, media_dir, settings.LIVE_MEDIA_ROOT, settings.WSGI_SCRIPT], shell=True)
     return HttpResponse(status = 200)
 
 def other_tab(request):
