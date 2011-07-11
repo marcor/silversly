@@ -281,11 +281,8 @@ MOVEMENTS = (
 )
 
 class LogEntry(models.Model):
-    type = models.CharField(max_length = 1, choices = MOVEMENTS)
     product = models.ForeignKey(Product, verbose_name = _("Prodotto"))
-    supplier = models.ForeignKey('people.Supplier', verbose_name = _("Fornitore"), null = True)
-    price = FixedDecimalField(_("Prezzo di acquisto"), max_digits = 8, decimal_places = 3, null = True)
-    quantity = models.DecimalField(_(u"Quantità acquistata"), max_digits = 8, decimal_places = 3)
+    quantity = models.DecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3)
     date = models.DateTimeField(auto_now = True)
 
 class Supply(models.Model):

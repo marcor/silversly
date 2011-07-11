@@ -8,7 +8,7 @@
     
     <a href=" {% url backup %}" id="backup_button">Salva un backup</a>
     <button id="update_button" style="display: none">Installa la nuova versione</button>
-        
+        <h1 id="wait" style="display: none">Aspetta qualche secondo...</h1>
     <script type="text/javascript">
         
         check_updates = function() {
@@ -16,12 +16,18 @@
                 url: "{% url check_updates %}",
                 complete: function(xhr, status) {
                     var code = xhr.status;
-                    if (code == 200) {
+                    if (code == 404) {
                         $("#update_message").html("C'&egrave; un aggiornamento!");
                         $("#update_button").live("click", function() {
                             $.post("{% url update_silversly %}");
-                        }).show();                        
-                        $("#backup_button").show();
+                            $("#update_button").hide();
+                            $("#wait").fadeIn(600);
+                            setTimeout(
+                                function() {
+                                    window.location.reload();
+                                }, 10000);
+
+                        }).show();
                     }
                     else if (code == 404) {
                         $("#update_message").html("Nessun aggiornamento disponibile.");
