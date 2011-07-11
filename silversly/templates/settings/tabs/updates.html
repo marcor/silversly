@@ -16,7 +16,7 @@
                 url: "{% url check_updates %}",
                 complete: function(xhr, status) {
                     var code = xhr.status;
-                    if (code == 404) {
+                    if (code == 200) {
                         $("#update_message").html("C'&egrave; un aggiornamento!");
                         $("#update_button").live("click", function() {
                             $.post("{% url update_silversly %}");
