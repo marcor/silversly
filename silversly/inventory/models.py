@@ -81,7 +81,7 @@ class Product(models.Model):
     # quantities (at every product update)
     factor = models.PositiveSmallIntegerField(_(u"Sfusi per unità"), null = True)
 
-    catalogue = models.BooleanField(verbose_name = _("Includi nel catalogo"), default = False)
+    catalogue = models.BooleanField(verbose_name = _("Senza codice a barre"), default = False)
 
     def is_ean_encoded(self):
         try:

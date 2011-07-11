@@ -505,8 +505,12 @@ def save_product_factor(request, product_id):
             new_denom = product.denominator
             # sync quantities and prices
             if new_denom:
+                if form.cleaned_data["sync"] == "to":
+                    product.sync_to_denom("quantity", "price")
+                    product.save()
                 # this also saves product
-                product.sync_from_denom("quantity", "price")
+                else:
+                    product.sync_from_denom("quantity", "price")
             else:
                 product.factor = None
                 product.save()

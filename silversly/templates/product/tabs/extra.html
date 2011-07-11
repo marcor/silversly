@@ -116,7 +116,7 @@
             function(e) {
 
                 $.post("{% url save_product_factor product.id %}",
-                    {'denominator': '',
+                    {'denominator': '', 'sync': 'from',
                         'factor': 2},
                     function(result) { displayDenom(null) }
                 )

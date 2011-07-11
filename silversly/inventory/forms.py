@@ -32,11 +32,13 @@ class ProductExtraForm(ModelForm):
 
 class ProductFactorForm(ModelForm):
 
-    factor = IntegerField(max_value = 10, min_value = 2, label= u"Unità per confezione")
-
+    factor = IntegerField(max_value = 10, min_value = 2, label= u"Sfusi per confezione")
+    sync = ChoiceField(label = u"Aggiusta quantità e prezzi:", widget = RadioSelect, initial="to",
+        choices = (('to', 'Dell\'articolo sfuso'), ('from', "Di questo articolo")))
+    
     class Meta:
         model = Product
-        fields = ('denominator', 'factor')
+        fields = ('denominator', 'factor', 'sync')
         widgets = {
             'denominator': HiddenInput(),
         }
