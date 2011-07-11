@@ -125,7 +125,10 @@ def update_silversly(request):
     tag = get_latest_version()
     media_dir = os.path.join(settings.PROJECT_DIR, "media")
     import subprocess
-    print subprocess.call([program, settings.REPO_DIR, settings.REPO_NAME, tag, media_dir, settings.LIVE_MEDIA_ROOT, settings.WSGI_SCRIPT], shell=True)
+    subprocess.call([program, settings.REPO_DIR, settings.REPO_NAME, tag, media_dir, settings.LIVE_MEDIA_ROOT, settings.WSGI_SCRIPT], shell=True)
+    # eventually restart the apache process
+    import ctypes
+    ctypes.windll.libhttpd.ap_signal_parent(1)
     return HttpResponse(status = 200)
 
 def other_tab(request):
