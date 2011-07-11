@@ -11,6 +11,7 @@ from sales.models import *
 
 import simplejson
 import decimal
+from datetime import date
 
 from django import http
 from django.template.loader import get_template
@@ -118,6 +119,18 @@ def get_latest_version():
         return urllib2.urlopen(remote_file).read().strip()
     else:
         return None
+
+def backup(request):
+    location = settings.DATABASES["default"]["NAME"]
+    from cStringIO import StringIO
+    import zipfile
+    file = StringIO()
+    zf = zipfile.ZipFile(file, mode='w', compression=zipfile.ZIP_DEFLATED)
+    zf.write(location, os.path.basename(location))
+    zf.close()
+    response = HttpResponse(file.getvalue(), mimetype="application/zip")
+    response['Content-Disposition'] = 'attachment; filename=%s.zip' % date.today().strftime("%Y-%m-%d")
+    return response
 
 def update_silversly(request):
     program = os.path.join(settings.PROJECT_DIR, "script", "checkout.bat")

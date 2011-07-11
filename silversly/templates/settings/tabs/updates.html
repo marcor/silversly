@@ -6,7 +6,7 @@
     <h3>Versione corrente: {% silversly_version %}</h3>
     <p id="update_message"></p>
     
-    <button id="backup_button" style="display: none">Salva un backup</button>
+    <a href=" {% url backup %}" id="backup_button">Salva un backup</a>
     <button id="update_button" style="display: none">Installa la nuova versione</button>
         
     <script type="text/javascript">
@@ -32,6 +32,5 @@
                 }
             });
         }
-    
     </script>
 {% endblock %}
