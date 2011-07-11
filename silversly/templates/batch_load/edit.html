@@ -46,7 +46,7 @@
         if (existing.length > 0)
             { existing.replaceWith(productRow) }
         else {
-            $("#product_list>tbody").append(productRow);
+            $("#product_list>tbody").prepend(productRow);
             prevent_supplier_choice();
             $("#product_list").show();
             $("#save").show();
@@ -169,6 +169,13 @@
             $( "#new_product_dialog" ).modal({url: "{% url add_product %}"});
             return false;
         });
+        
+    $("#id_name").live('change', function() {
+            var name_field = $(this);
+            var name = name_field.val().trim();
+            name = name.substring(0,1).toLowerCase() + name.substring(1);
+            name_field.val(name);
+    });
 
     $( "#save_new_product" ).live('click', function() {
             var form = $( "#new_product_form" );
