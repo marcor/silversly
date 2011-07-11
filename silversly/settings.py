@@ -1,6 +1,6 @@
 import sys, os
 
-VERSION = "0.68"
+VERSION = "0.69"
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_DIR)

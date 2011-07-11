@@ -18,6 +18,13 @@ class FixedDecimalField(models.DecimalField):
             return Decimal(value).quantize(self.unit)
         except InvalidOperation:
             raise exceptions.ValidationError(self.error_messages['invalid'])
+        except TypeError: 
+            # Decimal(value) doesn't work when value is a Decimal object after 
+            # the decimal module has been reloaded. 
+            if hasattr(value, 'as_tuple'): 
+                return Decimal(value.as_tuple()) 
+            raise 
+            
 
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ["^common\.models\.FixedDecimalField"])
