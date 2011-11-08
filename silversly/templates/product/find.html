@@ -71,7 +71,7 @@
             return false;
         });
 
-		$("#products").autocomplete({source_url: "{% url ajax_find_product %}"});
+		$("#products").autocomplete({source_url: "{% url ajax_find_product %}", delay: 500});
 
 
 {% endblock %}
