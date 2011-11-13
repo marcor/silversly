@@ -36,7 +36,7 @@ body {
         margin-right: 1cm;
         height: 3cm;
         top: 6.5cm;
-    } 
+    }
 }
 
 td {
@@ -44,12 +44,12 @@ td {
     padding-left: .1cm;
     padding-right: .1cm;
     margin-top: .1cm;
-    
+
 }
 
 #items td {
     padding-top: .06cm;
-    
+
 }
 
 .grande {
@@ -71,16 +71,16 @@ td {
 
 .quantity {
     width: 1.7cm;
-} 
+}
 .description {
     text-align: left;
-} 
+}
 .price {
     width: 2.5cm;
-} 
+}
 .item_total {
     width: 3.1cm;
-} 
+}
 
 
 
@@ -105,7 +105,7 @@ td {
             <td colspan="3" style="text-align: left; padding-left: 1cm;">
                  {% for ddt in ddts %}
                     {{ ddt.number }}
-                    {% if not forloop.last %} + {% endif%} 
+                    {% if not forloop.last %} + {% endif%}
                  {% endfor %}
             </td>
         </tr>
@@ -135,18 +135,18 @@ td {
 </div>
 
 <div id="footerblock">
-{% with total=invoice.apply_vat %}    
+{% with total=invoice.apply_vat %}
     <table id="footer_table" class="right">
         <tr>
-            {% if invoice.costs %}    
+            {% if invoice.costs %}
             <td style="width: 3.3cm">{{ invoice.total_net|exactSub:invoice.costs}}&euro;</td>
             <td style="width: 3.3cm">{{ invoice.costs }}&euro;</td>
-            {% else %}    
+            {% else %}
             <td style="width: 3.3cm"></td>
             <td style="width: 3.3cm"></td>
-            {% endif %}    
+            {% endif %}
             <td style="width: 5.6cm">{{ invoice.total_net }}&euro;</td>
-            <td>20</td>
+            <td>{{ tax }}</td>
             <td style="width: 2.5cm">{{ total.1 }}&euro;</td>
             <td style="width: 3.1cm"></td>
         </tr>
@@ -154,7 +154,7 @@ td {
             <td colspan="5" style="text-align: left"><pdf:pagenumber /> </td>
             <td>{{ total.0 }}&euro;</td>
         </tr>
-    </table>    
+    </table>
 {% endwith %}
 </div>
 </body>

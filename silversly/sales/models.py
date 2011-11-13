@@ -73,7 +73,7 @@ def rounded(value):
     return remainder
 
 def apply_vat(value):
-    total = (value * Decimal("1.2")).quantize(precision)
+    total = (value * Decimal(str(100 + settings.TAX)) / 100).quantize(precision)
     # valore ivato e iva
     return (total, total - value)
 

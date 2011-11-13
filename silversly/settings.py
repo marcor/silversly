@@ -1,6 +1,6 @@
 import sys, os
 
-VERSION = "0.69"
+VERSION = "0.70"
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_DIR)
@@ -12,6 +12,7 @@ PAYMENT_CHOICES = [
     ('ok', u'Pagato')
 ]
 
+TAX = 21
 BANK_COST = 0
 RECEIPT_SEPARATOR = "\x7f"
 

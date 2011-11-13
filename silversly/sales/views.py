@@ -5,6 +5,7 @@ from people.models import *
 from django.core.urlresolvers import reverse
 from django.db.models import Max
 import datetime
+from django.conf import settings
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.core import serializers
@@ -304,7 +305,8 @@ def print_invoice(request, id):
         'cart' : cart,
         'ddts': ddts,
         'invoice': invoice,
-        'customer': customer})
+        'customer': customer,
+        'tax': settings.TAX})
 
 def add_product_to_cart(request):
     bad_request = False

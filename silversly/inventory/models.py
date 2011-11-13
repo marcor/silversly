@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models import F
 from decimal import Decimal, ROUND_DOWN, Context
 from common.models import FixedDecimalField
+from django.conf import settings
 
 PRICE_MAKING_METHODS = (
     (u'==', _(u"Fisso")),
@@ -164,7 +165,6 @@ class Product(models.Model):
         if self.is_denom():
             self.sync_to_multiples(self.multiple_set.all(), *what)
         elif self.is_multiple():
-            print "lala"
             self.sync_to_denom(*what)
 
     class Meta:
@@ -222,7 +222,7 @@ class AbstractPrice(models.Model):
         else:
             return u"+%s%%" % self.markup
 
-    def update(self, taxes=20, default_precision=Decimal(".01")):
+    def update(self, taxes=settings.TAX, default_precision=Decimal(".01")):
         if self.method == "%=":
             self.gross = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000)
         elif self.method == "%~":
@@ -241,7 +241,7 @@ class AbstractPrice(models.Model):
             corrected_price = gross  + module / 2 # this guarantees that the price gets always rounded up
             self.gross = (corrected_price - corrected_price.remainder_near(module))
 
-        self.net = (self.gross / 6 * 5)
+        self.net = self.gross / (100 + taxes) * 100
 
     def save(self, *args, **kwargs):
         self.update()
