@@ -1,0 +1,6 @@
+// Patch info
+
+code128.py 
+
+- substitutes reportlab/graphics/barcode/code128.py (ReportLab v.2.6)
+- provides support for full iso-8859-1 character set in Code 128 bar codes (as per specification)
