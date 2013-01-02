@@ -1,0 +1,12 @@
+Django==1.4.3
+PIL==1.1.7
+South==0.7.6
+html5lib==0.95
+pyPdf==1.13
+reportlab==2.6
+simplejson==2.6.2
+wsgiref==0.1.2
+xhtml2pdf==0.0.4
+xlrd==0.8.0
+xlutils==1.5.2
+xlwt==0.7.4
