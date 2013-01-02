@@ -107,6 +107,12 @@ def add_category(request, parent_id=None, formclass=None):
         template = 'category/add.html'
     return render_to_response(template, {'form': form})
 
+def products_to_pdf(request):
+	pass
+	
+def products_to_xls(request):
+	pass
+	
 #
 # FORNITURE (SUPPLIER+PRODUCT)
 #
