@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<style type="text/css">
+body {
+    font-size: 0.8em;
+    font-family: monospace;
+}
+
+table
+{
+  border-collapse:collapse;
+  margin-bottom: 0.6cm;
+}
+table,th
+{
+  border: 1px solid #ddd;
+}
+td, th { vertical-align: middle; padding: 2px 1px 0px 2px}
+td.code { width: 27% }
+td.right { text-align: right; width: 13% }
+td.value { width: 22% }
+#header { text-align: center }
+h2 {
+    font-family: verdana;
+    font-size: 1.5em;
+    font-weight: bold;
+    padding-top: 1em;
+    padding-bottom: 0;
+    padding-left: 1em;
+    margin: 0;
+}
+h2 span { font-weight: normal }
+@page {
+
+    @frame {
+        top: 1cm;
+        left: 0.5cm;
+        width: 9.8cm;
+        /*-pdf-frame-border: 1;*/
+        margin-bottom: 1cm
+    }
+    @frame {
+        top: 1cm;
+        left: 10.7cm;
+	width: 9.8cm;
+        /*-pdf-frame-border: 1;*/
+        margin-bottom: 1cm;
+  }
+  @frame footer {
+  -pdf-frame-content: footerblock;
+    height: 0.5cm;
+    bottom: 0cm;
+  }
+}
+</style>
+</head>
+<body>
+<div id="header">
+    <h1>Inventario di magazzino al _____________ </h1>
+    <h2>VALORE TOTALE: {{ total_value }} &euro; </h2>
+<div>
+{% for category in categories %}
+<div>
+    <h2>{{ category.name|upper }} <span>........ {{ category.total_value }} &euro;</span> </h2>
+    <hr/>
+    <table>
+      <thead>
+       <tr>
+         <th>Codice</th>
+	 <th>Descrizione</th>
+	 <th>Q.tà</th>
+	 <th>Valore</th>
+      </thead>
+    {% for product in category.ps %}
+     <tr>
+        <td class="code">{% if product.is_ean_encoded %}{{ product.code }}{% endif %}</td>
+	<td>{{ product.name }}</td>
+	<td class="right">{{ product.quantity }}</td>
+	<td class="right value">{{ product.total_value }}</td>
+     </tr>
+
+    {% endfor %}
+    </table>
+</div>
+{% endfor %}
+<div id="footerblock" style="text-align: center">
+{%block pager %}
+    <pdf:pagenumber>
+{%endblock%}
+</div>
+</body>
+</html>

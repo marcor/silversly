@@ -41,7 +41,7 @@ urlpatterns = patterns('inventory.views',
     url(r'^(\d+)/cerca_denom/', 'ajax_find_denominator', name='ajax_find_denominator'),
     url(r'^(\d+)/prezzi_listino/(.+)/ajax/', 'ajax_get_prices', name='ajax_get_prices'),
 
-    url(r'^categorie/', 'list_categories', name='list_categories'),
+    url(r'^categorie/$', 'list_categories', name='list_categories'),
     url(r'^categorie/pdf/', 'products_to_pdf', name='products_to_pdf'),
     url(r'^categorie/xls/', 'products_to_xls', name='products_to_xls'),
     url(r'^categoria/(\d+)', 'list_by_category', name='list_by_category'),

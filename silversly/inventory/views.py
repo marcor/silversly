@@ -108,8 +108,29 @@ def add_category(request, parent_id=None, formclass=None):
     return render_to_response(template, {'form': form})
 
 def products_to_pdf(request):
-	pass
-	
+    # works only for top categories for the time being
+    #categories = Category.objects.filter(parent = None, name__in=["fumisteria","elettroutensili"])
+    categories = Category.objects.filter(parent = None)
+    
+    cs = []
+    inventory_value = Decimal("0.00")
+    for c in categories:
+        c.total_value = Decimal("0.00")
+        ps = Product.objects.filter(category = c).order_by("name")
+        total_value = Decimal("0.00")
+        for p in ps:
+            p.total_value = p.get_total_value()
+            c.total_value += p.total_value
+        c.ps = ps
+        cs.append(c)
+        inventory_value += c.total_value      
+            
+    from common.views import write_pdf
+    return write_pdf('pdf/inventory.html',{
+        'pagesize' : 'A4',
+        'categories' : cs,
+        'total_value': inventory_value})
+
 def products_to_xls(request):
 	pass
 	
