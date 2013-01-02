@@ -90,7 +90,7 @@ class Product(models.Model):
             return True
         except:
             return False
-    
+
     def get_retail_price(self, pricelist_name = "Pubblico"):
         try:
             price = Price.objects.get(product = self, pricelist__name = pricelist_name) # todo: avoid hard-coded value
@@ -101,10 +101,16 @@ class Product(models.Model):
              method = pricelist.default_method,
              markup = pricelist.default_markup)
         return price
-    
-    def get_total_value(self):
+
+    def get_total_retail_value(self):
         if self.quantity:
             return self.get_retail_price().gross * self.quantity
+        else:
+            return 0
+
+    def get_total_value(self):
+        if self.quantity:
+            return self.base_price * self.quantity
         else:
             return 0
 

@@ -111,29 +111,34 @@ def products_to_pdf(request):
     # works only for top categories for the time being
     #categories = Category.objects.filter(parent = None, name__in=["fumisteria","elettroutensili"])
     categories = Category.objects.filter(parent = None)
-    
+
     cs = []
     inventory_value = Decimal("0.00")
+    inventory_retail_value = Decimal("0.00")
     for c in categories:
         c.total_value = Decimal("0.00")
+        c.total_retail_value = Decimal("0.00")
         ps = Product.objects.filter(category = c).order_by("name")
-        total_value = Decimal("0.00")
+
         for p in ps:
             p.total_value = p.get_total_value()
             c.total_value += p.total_value
+            c.total_retail_value += p.get_total_retail_value()
         c.ps = ps
         cs.append(c)
-        inventory_value += c.total_value      
-            
+        inventory_value += c.total_value
+        inventory_retail_value += c.total_retail_value
+
     from common.views import write_pdf
     return write_pdf('pdf/inventory.html',{
         'pagesize' : 'A4',
         'categories' : cs,
-        'total_value': inventory_value})
+        'total_value': inventory_value,
+        'total_retail_value': inventory_retail_value})
 
 def products_to_xls(request):
 	pass
-	
+
 #
 # FORNITURE (SUPPLIER+PRODUCT)
 #

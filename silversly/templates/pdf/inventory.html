@@ -5,14 +5,14 @@
 
 <style type="text/css">
 body {
-    font-size: 0.8em;
+    font-size: 0.85em;
     font-family: monospace;
 }
 
 table
 {
   border-collapse:collapse;
-  margin-bottom: 0.6cm;
+  margin-bottom: 0.5cm;
 }
 table,th
 {
@@ -60,11 +60,12 @@ h2 span { font-weight: normal }
 <body>
 <div id="header">
     <h1>Inventario di magazzino al _____________ </h1>
-    <h2>VALORE TOTALE: {{ total_value }} &euro; </h2>
+    <h2>VALORE ACQUISTO: {{ total_value }} &euro; </h2>
+    <h2>VALORE VENDITA: {{ total_retail_value }} &euro; </h2>
 </div>
 {% for category in categories %}
 <div>
-    <h2>{{ category.name|upper }} <span>........ {{ category.total_value }} &euro;</span> </h2>
+    <h2>{{ category.name|upper }} <span>........ {{ category.total_value }} &euro; / {{ category.total_retail_value }} &euro;</span> </h2>
     <hr/>
     <table>
       <thead>
