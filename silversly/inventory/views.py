@@ -25,15 +25,7 @@ def show_product(request, id):
 
 def show_infobox(request):
     product = get_object_or_404(Product, pk=request.GET["id"])
-    pricelist_name = "Pubblico"
-    try:
-        price = Price.objects.get(product = product, pricelist__name = pricelist_name)
-    except:
-        pricelist = Pricelist.objects.get(name = pricelist_name)
-        price = Price(product = product,
-            pricelist = pricelist,
-            method = pricelist.default_method,
-            markup = pricelist.default_markup)
+    price = product.get_retail_price()
     supplies = Supply.objects.filter(product = product)
     return render_to_response('product/snippets/infobox.html', {'product': product, 'price': price, 'supplies': supplies})
 
