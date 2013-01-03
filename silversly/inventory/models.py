@@ -85,11 +85,7 @@ class Product(models.Model):
     catalogue = models.BooleanField(verbose_name = _("Senza codice a barre"), default = False)
 
     def is_ean_encoded(self):
-        try:
-            int(self.code)
-            return True
-        except:
-            return False
+        return len(self.code) == 13 and self.code.isdigit()
 
     def get_retail_price(self, pricelist_name = "Pubblico"):
         try:
