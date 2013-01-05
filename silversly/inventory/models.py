@@ -65,9 +65,11 @@ class Pricelist(models.Model):
 
 class ProductManager(models.Manager):
     def get_by_natural_key(self, name):
-        return sellf.get(name=name)
+        return self.get(name=name)
         
 class Product(models.Model):
+    objects = ProductManager()
+    
     code = models.CharField(_("Codice"), max_length = 13)
     name = models.CharField(_("Nome"), max_length = 60, unique = True)
 
