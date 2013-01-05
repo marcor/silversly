@@ -5,6 +5,7 @@ from django.db.models import F
 from decimal import Decimal, ROUND_DOWN, Context
 from common.models import FixedDecimalField
 from django.conf import settings
+from datetime import date
 
 PRICE_MAKING_METHODS = (
     (u'==', _(u"Fisso")),
@@ -67,6 +68,9 @@ class Product(models.Model):
     name = models.CharField(_("Nome"), max_length = 60, unique = True)
 
     quantity = models.DecimalField(_(u"Quantità"), max_digits = 8, decimal_places = 3, default = 0)
+    __original_quantity = None
+    updated = models.DateField(_(u"Quantità aggiornata il"), auto_now_add=True, editable=False)
+    
     min_quantity = models.DecimalField(_(u"Scorta minima"), max_digits = 8, decimal_places = 3, default = 0)
     unit = models.CharField(_(u"Unità di misura"), max_length = 15)
 
@@ -83,6 +87,16 @@ class Product(models.Model):
     factor = models.PositiveSmallIntegerField(_(u"Sfusi per unità"), null = True)
 
     catalogue = models.BooleanField(verbose_name = _("Senza codice a barre"), default = False)
+
+    def __init__(self, *args, **kwargs):
+        super(Product, self).__init__(*args, **kwargs)
+        self.__original_quantity = self.quantity
+        
+    def save(self, *args, **kwargs):
+        if self.quantity != self.__original_quantity:
+            self.updated = date.today()
+            self.__original_quantity = self.quantity
+        super(Product, self).save(*args, **kwargs)        
 
     def is_ean_encoded(self):
         return len(self.code) == 13 and self.code.isdigit()
