@@ -63,6 +63,10 @@ class Pricelist(models.Model):
         verbose_name = _("Listino")
         verbose_name_plural = _("Listini")
 
+class ProductManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return sellf.get(name=name)
+        
 class Product(models.Model):
     code = models.CharField(_("Codice"), max_length = 13)
     name = models.CharField(_("Nome"), max_length = 60, unique = True)
@@ -91,13 +95,16 @@ class Product(models.Model):
     def __init__(self, *args, **kwargs):
         super(Product, self).__init__(*args, **kwargs)
         self.__original_quantity = self.quantity
-        
+    
     def save(self, *args, **kwargs):
         if self.quantity != self.__original_quantity:
             self.updated = date.today()
             self.__original_quantity = self.quantity
         super(Product, self).save(*args, **kwargs)        
 
+    def natural_key(self):
+        return (self.name,)
+    
     def is_ean_encoded(self):
         return len(self.code) == 13 and self.code.isdigit()
 
