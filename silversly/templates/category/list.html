@@ -11,6 +11,7 @@
 {% block jquery %}
 	{{ block.super }}
 	$("table").dataTable({
+		"bStateSave": true,
 		"aaSorting": [[ 0, "asc" ]],
 		"bJQueryUI": true,
 		"oLanguage": {
