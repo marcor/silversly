@@ -53,6 +53,7 @@
                                 updated = parts[0];
                                 $("#updated_on").text(parts[1]);
                                 delete cache[product.pk];
+                                $("#make_up_to_date").hide();
                             },
                             dataType: 'text'
                         });
@@ -60,7 +61,7 @@
                     },
                     {
                     }
-                );
+                ).bind("click.editable", function() {$("#infobox input").select()});
 
             };
 
@@ -98,13 +99,15 @@
 
         $( "#make_up_to_date" ).live('click', function(event) {
             event.preventDefault();
+            var link = $(this);
             $.get(
-                $(this).attr("href"),
+                link.attr("href"),
                 {},
                 function(data) {
                         $("#updated_on").text(data);
                         delete cache[chosenProduct.pk];
                         $("#products").trigger("focus");
+                        link.hide();
                 },
                 "text"
             );

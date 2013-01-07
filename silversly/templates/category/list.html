@@ -61,7 +61,36 @@
 				{ "sType": "string" },
 				{ "sType": "numeric-comma" }
 			]
-		});
+    });
+
+    $("tr").hover(
+        function() {
+            $(".delete_product", this).show();
+        },
+        function() {
+            $(".delete_product", this).hide();
+        }
+    );
+
+    $( "#delete_product" ).live('click', function() {
+        var delete_anchor = $(this);
+        $( "#delete_product_dialog" ).dialog({
+            'draggable': false,
+            'resizable': false,
+            'modal': true,
+            'open': function() { $(this).load(delete_anchor.attr('href'))}
+        });
+        return false;
+    });
+
+    product_deleted_callback = function (pk) {
+        var row = $("#p" + pk);
+        $(".delete_product", row).remove();
+        var link = $(".name a", row);
+        link.replaceWith("<i>" + link.text() + "</i>");
+        row.css("color", "#ccc");
+    };
+
 {% endblock %}
 
 {% block header %}
@@ -97,7 +126,9 @@
         <tbody>
     {% for product in products %}
         <tr id="p{{ product.id }}">
-            <td class="name"><a href="{% url show_product product.id %}">{{ product.name }}</a></td>
+            <td class="name"><a href="{% url show_product product.id %}">{{ product.name }}</a>
+                <a class="delete_product" style="float: right; display: none" id="delete_product" href="{% url delete_product product.id %}"><img src="/media/img/delete.png" width="18"/></a>
+            </td>
             <td class="code">{{ product.code}}</td>
             <td class="quantity decimal{% if product.quantity < product.min_quantity %} warning{% endif %}">{{ product.quantity}}</td>
             <td class="updated">{{ product.updated|date:"d-m-y"}}</td>
@@ -112,5 +143,6 @@
         <p class="framed">Nessun articolo in questa categoria.</a>
     {% endif %}
 
+    <div id="delete_product_dialog" title="Elimina un articolo" class="dialog"></div>
 
 {% endblock %}
