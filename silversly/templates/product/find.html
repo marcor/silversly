@@ -4,6 +4,7 @@
 
 {% block head %}
     <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.jeditable.mini.js"></script>
 {% endblock %}
 
 {% block jquery %}
@@ -12,9 +13,57 @@
         var chosenProduct;
         var cache = {};
 
+        $( "#delete_product" ).live('click', function() {
+                    var delete_anchor = $(this);
+                    $( "#delete_product_dialog" ).dialog({
+                        'draggable': false,
+                        'resizable': false,
+                        'modal': true,
+                        'open': function() { $(this).load(delete_anchor.attr('href'))}
+                    });
+                    return false;
+        });
+
+        product_deleted_callback = function (pk) {
+            $("#infobox").hide();
+            delete cache[pk];
+            $("#products").trigger("focus");
+        };
+
+
         $("#main").bind("showResult", function(e, product) {
             chosenProduct = product;
             var box = $("#infobox").hide();
+
+            var show_box = function (content) {
+                box.html(content).show();
+                $("#qty_value").editable(
+                    function (edited, settings) {
+                        var updated = 'errore';
+                        $.ajax({
+                            type: 'POST',
+                            async: false,
+                            url: "{% url quickedit %}",
+                            data: {'id': product.pk,
+                                'name': 'quantity',
+                                'value': edited,
+                            },
+                            success: function (data) {
+                                var parts = data.split("@@");
+                                updated = parts[0];
+                                $("#updated_on").text(parts[1]);
+                                delete cache[product.pk];
+                            },
+                            dataType: 'text'
+                        });
+                        return updated;
+                    },
+                    {
+                    }
+                );
+
+            };
+
             if (!product) {
                 $("#infobox").hide();
                 $("#message").show();
@@ -23,7 +72,8 @@
             $("#message").hide();
 
             if (product.pk in cache) {
-                box.html(cache[product.pk]).show();
+                /*box.html(cache[product.pk]).show();*/
+                show_box(cache[product.pk]);
                 $(".button", box).button();
                 if (product.perfect_match) {
                     $( "#sell" ).trigger("focus");
@@ -34,7 +84,8 @@
                     {'id': product.pk},
                     function(data) {
                         cache[product.pk] = data;
-                        box.html(data).show();
+                        show_box(data);
+                        /*box.html(data).show();*/
                         $(".button", box).button();
                         if (product.perfect_match) {
                             $( "#sell" ).trigger("focus");
@@ -44,9 +95,28 @@
             };
 
 
+
         });
 
         $("#products").trigger("focus");
+
+        $( "#make_up_to_date" ).live('click', function() {
+            var up_to_date_button = $(this);
+            alert(chosenProduct.pk);
+            /*$.ajax({
+                "url": $(this).attr("href"),
+                "type": "POST",
+                "data": ,
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#sell_product_dialog").dialog('close');
+                        $("#products").trigger("select");
+                    } else {
+                        $("#sell_product_dialog").html(xhr.responseText);
+                    };
+                }
+            });*/
+        });
 
         $( "#sell" ).live('click', function() {
             var sell_button = $(this);
@@ -93,5 +163,7 @@
     </div>
 
     <div id="sell_product_dialog" title="Vendi questo prodotto" class="dialog"></div>
+
+    <div id="delete_product_dialog" title="Elimina un articolo" class="dialog"></div>
 
 {% endblock %}

@@ -231,6 +231,9 @@
             return false;
         });
 
+        product_deleted_callback = function () {
+            location.href = "{% url find_product %}";
+        };
 
 
 {% endblock %}

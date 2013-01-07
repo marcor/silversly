@@ -1,9 +1,13 @@
-<div class="title">{{ product.name }}</div>
+<div class="title">{{ product.name }}
+    <a style="float: right" id="delete_product" href="{% url delete_product product.pk %}"><img src="/media/img/delete.png" width="20"/></a>
+</div>
 
 <!--<div class="code">Codice: <span></span></div>-->
 <div class="quantity">Disponibilit&agrave;:
-    {{ product.quantity }} {{ product.unit }}
-    {% if product.quantity < product.min_quantity %} <span style="color:red">(sottoscorta)</span> {% endif %}
+    <span id="qty_value"> {{ product.quantity }}</span> {{ product.unit }}
+    <span style="font-size: 0.7em">(al <span id="updated_on">{{ product.updated|date:"d/m/y" }}</span>
+    <a id="make_up_to_date" href="."><img src="/media/img/okay.png" width="15px"/></a>)</span>
+    {% if product.quantity < product.min_quantity %} <span style="color:red">(sottoscorta)</span>{% endif %}
 </div>
 <div class="price">Prezzo al pubblico: <span>{{ price.gross }}</span>&euro;</div>
 <div class="suppliers">

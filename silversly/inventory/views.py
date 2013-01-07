@@ -618,7 +618,7 @@ def ajax_find_denominator(request, product_id):
 
 def ajax_quickedit(request):
     if request.is_ajax():
-        try: 
+        try:
             p_id = request.POST["id"]
             field_name = request.POST["name"]
             p = Product.objects.get(pk=p_id)
@@ -628,16 +628,16 @@ def ajax_quickedit(request):
         try:
             new_value = unquote(request.POST["value"])
             if field_name == "code" and len(new_value) > 13:
-                new_value = new_value[:13]                
+                new_value = new_value[:13]
             setattr(p, field_name, new_value)
             p.save()
         except:
             new_value = str(current_value)
-        result = "@@".join((new_value, p.updated.strftime("%y-%m-%d")))
+        result = "@@".join((new_value, p.updated.strftime("%d-%m-%y")))
         return HttpResponse(result, 'text/plain')
     return HttpResponse(400)
 
-    
+
 def print_catalogue(request):
     from common.views import write_pdf
     products = Product.objects.filter(catalogue = True)

@@ -8,7 +8,8 @@
                 "data": {'confirm': true},
                 "complete": function(xhr, status) {
                     if (status == "success") {
-                        location.href = "{% url find_product %}";
+                        $("#delete_product_dialog").dialog('close');
+                        product_deleted_callback({{ product.id }});
                     };
                 }
             });

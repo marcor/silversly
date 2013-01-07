@@ -3,7 +3,7 @@
 {% block title %}{{ category }}{% endblock %}
 
 {% block head %}
-<link type="text/css" href="/media/css/data_tables.css" rel="Stylesheet" />	
+<link type="text/css" href="/media/css/data_tables.css" rel="Stylesheet" />
 <script type="text/javascript" language="javascript" src="/media/js/jquery.dataTables.js"></script>
 <script type="text/javascript" src="/media/js/dataTables.numericComma.js"></script>
 <script type="text/javascript" src="/media/js/jquery.jeditable.mini.js"></script>
@@ -21,12 +21,12 @@
 				function(edited, settings) {
 					var td = $(this);
 					var updated = "errore";
-					var name = td.attr('class').split(" ", 1)[0]; 
+					var name = td.attr('class').split(" ", 1)[0];
 					$.ajax({
 						type: 'POST',
 						async: false,
 						url: "{% url quickedit %}",
-						data: {'id': td.parent().attr("id").slice(1), 
+						data: {'id': td.parent().attr("id").slice(1),
 							'name': name,
 							'value': edited,
 							},
@@ -49,7 +49,7 @@
 			"sInfo": "_TOTAL_ articoli visualizzati",
 			"sInfoEmpty": "0 articoli",
 			"sInfoFiltered": "su _MAX_ totali",
-			"sSearch": "Cerca:" 
+			"sSearch": "Cerca:"
 		},
 		"bSortClasses": false,
 		"sScrollY": "380px",
@@ -80,7 +80,7 @@
     {% endfor %}
     </ul>
     {% endcomment %}
-    
+
     <!--<h2>Prodotti:</h2>-->
     {% if products %}
     <!--<div class="framed">-->
@@ -100,9 +100,9 @@
             <td class="name"><a href="{% url show_product product.id %}">{{ product.name }}</a></td>
             <td class="code">{{ product.code}}</td>
             <td class="quantity decimal{% if product.quantity < product.min_quantity %} warning{% endif %}">{{ product.quantity}}</td>
-            <td class="updated">{{ product.updated|date:"y-m-d"}}</td>
+            <td class="updated">{{ product.updated|date:"d-m-y"}}</td>
 	    <td class="decimal">{{ product.base_price}}</td>
-            
+
         </tr>
     {% endfor %}
         </tbody>
@@ -111,6 +111,6 @@
     {% else %}
         <p class="framed">Nessun articolo in questa categoria.</a>
     {% endif %}
-    
-    
+
+
 {% endblock %}
