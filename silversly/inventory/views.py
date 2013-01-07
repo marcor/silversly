@@ -612,7 +612,30 @@ def ajax_find_denominator(request, product_id):
         return HttpResponse(data, 'application/javascript')
     return HttpResponse(status=400)
 
+#
+#  QUICK EDITING
+#
 
+def ajax_quickedit(request):
+    if request.is_ajax():
+        try: 
+            p_id = request.POST["id"]
+            field_name = request.POST["name"]
+            new_value = unquote(request.POST["value"])
+            p = Product.objects.get(pk=p_id)
+            current_value = getattr(p, field_name)
+        except:
+            return HttpResponse(status=401)
+        try:
+            setattr(p, field_name, new_value)
+            p.save()
+        except:
+            new_value = current_value
+        result = "@@".join((new_value, p.updated.strftime("%y-%m-%d")))
+        return HttpResponse(result, 'text/plain')
+    return HttpResponse(400)
+
+    
 def print_catalogue(request):
     from common.views import write_pdf
     products = Product.objects.filter(catalogue = True)

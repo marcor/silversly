@@ -6,6 +6,7 @@
 <link type="text/css" href="/media/css/data_tables.css" rel="Stylesheet" />	
 <script type="text/javascript" language="javascript" src="/media/js/jquery.dataTables.js"></script>
 <script type="text/javascript" src="/media/js/dataTables.numericComma.js"></script>
+<script type="text/javascript" src="/media/js/jquery.jeditable.mini.js"></script>
 {% endblock %}
 
 {% block jquery %}
@@ -16,6 +17,30 @@
 		"bJQueryUI": true,
 		"fnDrawCallback": function () {
 			$('.dataTables_filter input').trigger('focus');
+			$('.quantity, .code').editable(
+				function(edited, settings) {
+					var td = $(this);
+					var updated = "errore";
+					var name = td.attr('class').split(" ", 1)[0]; 
+					$.ajax({
+						type: 'POST',
+						async: false,
+						url: "{% url quickedit %}",
+						data: {'id': td.parent().attr("id").slice(1), 
+							'name': name,
+							'value': edited,
+							},
+						success: function (data) {
+							var parts = data.split("@@");
+							updated = parts[0];
+							td.siblings(".updated").text(parts[1]);
+						},
+						dataType: 'text'
+					});
+					return(updated);
+				},
+				{}
+			);
 		},
 		"oLanguage": {
 			/*"sLengthMenu": "Mostra _MENU_ articoli per volta",*/
@@ -29,6 +54,7 @@
 		"sScrollY": "380px",
 		"bPaginate": false,
 		"aoColumns": [
+				null,
 				null,
 				null,
 				null,
@@ -57,22 +83,24 @@
     <!--<h2>Prodotti:</h2>-->
     {% if products %}
     <!--<div class="framed">-->
-    <table>
+    <table id="products">
     <thead>
         <tr>
             <th>Nome</th>
             <th>Codice</th>
             <th>Quantit&agrave;</th>
+	    <th>Aggiornato</th>
             <th>Prezzo base</th>
         </tr>
         </thead>
         <tbody>
     {% for product in products %}
-        <tr>
-            <td><a href="{% url show_product product.id %}">{{ product.name }}</a></td>
-            <td>{{ product.code}}</td>
-            <td class="decimal{% if product.quantity < product.min_quantity %} warning{% endif %}">{{ product.quantity}}</td>
-            <td class="decimal">{{ product.base_price}}</td>
+        <tr id="p{{ product.id }}">
+            <td class="name"><a href="{% url show_product product.id %}">{{ product.name }}</a></td>
+            <td class="code">{{ product.code}}</td>
+            <td class="quantity decimal{% if product.quantity < product.min_quantity %} warning{% endif %}">{{ product.quantity}}</td>
+            <td class="updated">{{ product.updated|date:"y-m-d"}}</td>
+	    <td class="decimal">{{ product.base_price}}</td>
             
         </tr>
     {% endfor %}

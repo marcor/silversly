@@ -48,6 +48,8 @@ urlpatterns = patterns('inventory.views',
     url(r'^categoria/aggiungi', 'add_category', name='add_category', kwargs={'formclass': CategoryForm}),
     url(r'^categoria/(\d+)/aggiungi', 'add_category', name='add_child_category', kwargs={'formclass': ChildCategoryForm}),
 
-    url(r'^catalogo$', 'print_catalogue', name='print_catalogue')
+    url(r'^catalogo$', 'print_catalogue', name='print_catalogue'),
+    
+    url(r'^quickedit', 'ajax_quickedit', name='quickedit'),
 
 )
