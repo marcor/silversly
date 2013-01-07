@@ -129,7 +129,7 @@ def products_to_pdf(request):
         'total_retail_value': inventory_retail_value})
 
 def products_to_xls(request):
-	pass
+    pass
 
 #
 # FORNITURE (SUPPLIER+PRODUCT)
@@ -621,16 +621,18 @@ def ajax_quickedit(request):
         try: 
             p_id = request.POST["id"]
             field_name = request.POST["name"]
-            new_value = unquote(request.POST["value"])
             p = Product.objects.get(pk=p_id)
             current_value = getattr(p, field_name)
         except:
-            return HttpResponse(status=401)
+            return HttpResponse(status=400)
         try:
+            new_value = unquote(request.POST["value"])
+            if field_name == "code" and len(new_value) > 13:
+                new_value = new_value[:13]                
             setattr(p, field_name, new_value)
             p.save()
         except:
-            new_value = current_value
+            new_value = str(current_value)
         result = "@@".join((new_value, p.updated.strftime("%y-%m-%d")))
         return HttpResponse(result, 'text/plain')
     return HttpResponse(400)
