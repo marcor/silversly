@@ -14,6 +14,9 @@
 		"bStateSave": true,
 		"aaSorting": [[ 0, "asc" ]],
 		"bJQueryUI": true,
+		"fnDrawCallback": function () {
+			$('.dataTables_filter input').trigger('focus');
+		},
 		"oLanguage": {
 			/*"sLengthMenu": "Mostra _MENU_ articoli per volta",*/
 			"sZeroRecords": "Nessun articolo trovato",
