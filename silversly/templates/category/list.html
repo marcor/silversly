@@ -11,7 +11,7 @@
 
 {% block jquery %}
 	{{ block.super }}
-	$("table").dataTable({
+	var oTable = $("table").dataTable({
 		"bStateSave": true,
 		"aaSorting": [[ 0, "asc" ]],
 		"bJQueryUI": true,
@@ -37,6 +37,7 @@
 						},
 						dataType: 'text'
 					});
+					oTable.fnDraw();
 					return(updated);
 				},
 				{}
