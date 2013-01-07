@@ -72,7 +72,6 @@
             $("#message").hide();
 
             if (product.pk in cache) {
-                /*box.html(cache[product.pk]).show();*/
                 show_box(cache[product.pk]);
                 $(".button", box).button();
                 if (product.perfect_match) {
@@ -85,7 +84,6 @@
                     function(data) {
                         cache[product.pk] = data;
                         show_box(data);
-                        /*box.html(data).show();*/
                         $(".button", box).button();
                         if (product.perfect_match) {
                             $( "#sell" ).trigger("focus");
@@ -94,28 +92,22 @@
                 );
             };
 
-
-
         });
 
         $("#products").trigger("focus");
 
-        $( "#make_up_to_date" ).live('click', function() {
-            var up_to_date_button = $(this);
-            alert(chosenProduct.pk);
-            /*$.ajax({
-                "url": $(this).attr("href"),
-                "type": "POST",
-                "data": ,
-                "complete": function(xhr, status) {
-                    if (status == "success") {
-                        $("#sell_product_dialog").dialog('close');
-                        $("#products").trigger("select");
-                    } else {
-                        $("#sell_product_dialog").html(xhr.responseText);
-                    };
-                }
-            });*/
+        $( "#make_up_to_date" ).live('click', function(event) {
+            event.preventDefault();
+            $.get(
+                $(this).attr("href"),
+                {},
+                function(data) {
+                        $("#updated_on").text(data);
+                        delete cache[chosenProduct.pk];
+                        $("#products").trigger("focus");
+                },
+                "text"
+            );
         });
 
         $( "#sell" ).live('click', function() {

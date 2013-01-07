@@ -10,6 +10,7 @@ from django.core import serializers
 from django.http import HttpResponse
 from urllib import unquote
 from django.utils import simplejson
+from datetime import date
 
 #
 # ARTICOLI
@@ -637,6 +638,17 @@ def ajax_quickedit(request):
         return HttpResponse(result, 'text/plain')
     return HttpResponse(400)
 
+def ajax_mark_up_to_date(request, pk):
+    if request.is_ajax():
+        try:
+            p = Product.objects.get(pk=pk)
+            p.updated = date.today()
+            p.save()
+        except:
+            return HttpResponse(status=400)
+        result = p.updated.strftime("%d-%m-%y")
+        return HttpResponse(result, 'text/plain')
+    return HttpResponse(status=400)
 
 def print_catalogue(request):
     from common.views import write_pdf
