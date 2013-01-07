@@ -41,7 +41,7 @@
 					return(updated);
 				},
 				{}
-			);
+			).bind("click.editable", function() {$("input", $(this).parent()).select() });
 		},
 		"oLanguage": {
 			/*"sLengthMenu": "Mostra _MENU_ articoli per volta",*/
