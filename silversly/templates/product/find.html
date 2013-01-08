@@ -54,6 +54,7 @@
                                 $("#updated_on").text(parts[1]);
                                 delete cache[product.pk];
                                 $("#make_up_to_date").hide();
+                                $("#products").trigger("focus");
                             },
                             dataType: 'text'
                         });
