@@ -3,6 +3,8 @@
 {% block title %}Carrello{% endblock %}
 
 {% block head %}
+    <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.jeditable.mini.js"></script>
     <style type="text/css">
         #cart_params, #cart_summary {
             display: inline
@@ -68,7 +70,7 @@
         $("#reset_customer").button({text: false, icons: { primary: 'ui-icon-arrowreturn-1-w' }});
         update_customer(customer, false)
         close_customer_search();
-        $("#products").trigger("focus");
+        $("#new_receipt a").trigger("focus");
     };
 
     function close_customer_search() {
@@ -111,7 +113,6 @@
         $("#cart_summary").load("{% url get_cart_summary %}");
         $("#products").val("");
         $("#products").trigger("focus");
-
     };
 
     function addProductToList(pk) {
