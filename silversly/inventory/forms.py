@@ -32,7 +32,7 @@ class ProductExtraForm(ModelForm):
 
 class ProductFactorForm(ModelForm):
 
-    factor = IntegerField(max_value = 10, min_value = 2, label= u"Sfusi per confezione")
+    factor = IntegerField(max_value = 1000, min_value = 2, label= u"Sfusi per confezione")
     sync = ChoiceField(label = u"Aggiusta quantità e prezzi:", widget = RadioSelect, initial="to",
         choices = (('to', 'Dell\'articolo sfuso'), ('from', "Di questo articolo")))
     
