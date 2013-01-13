@@ -7,5 +7,10 @@
         <input id="save_product" style="visibility: hidden" type="submit" value="Salva" />
         </div>
     </form>
+    
+    <script type="text/javascript">
+	var test = $("input#id_quantity");
+	test.after('<span id="updated_on" style="font-size: 0.9em">{{ product.updated|date:"d/m/y" }}</span>{% if not product.is_up_to_date %}<a id="make_up_to_date" href="{% url ajax_mark_up_to_date product.pk %}"><img src="/media/img/okay.png" width="17px"/></a>{% endif %}');
+    </script>
 {% endblock %}
     
