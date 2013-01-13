@@ -152,12 +152,12 @@ class Receipt(models.Model):
         ordering = ["-id"]
 
 
-def prep(decim):
-    return str((decim * 1000).quantize(Decimal("1")))
+def prep(decim, factor=100):
+    return str((decim * factor).quantize(Decimal("1")))
 
 sep = settings.RECEIPT_SEPARATOR
 def print_article(desc, price, quantity):
-    return sep.join(("1", desc[:16], prep(quantity), prep(price), "1", sep, "1", "1")) + sep
+    return sep.join(("1", desc[:16], prep(quantity, 1000), prep(price), "1", sep, "1", "1")) + sep
 
 def print_discount(discount, markdown):
     return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto %d%%" % markdown, "1", sep)) + "-1" + sep
@@ -193,7 +193,7 @@ class Scontrino(Receipt):
         items = self.cart.cartitem_set.all()
         for item in items:
             total, discount = item.total(net=False)
-            filescontrino.write(print_article(item.product.name.encode("iso-8859-1"), item.quantity, item.final_price) + "\n")
+            filescontrino.write(print_article(item.product.name.encode("iso-8859-1"), item.final_price, item.quantity) + "\n")
             if item.discount:
                 filescontrino.write(print_discount(discount, item.discount) + "\n")
         if self.cart.discount:
