@@ -81,7 +81,7 @@ class Cart(models.Model):
     current = models.BooleanField(default = True)
     customer = models.ForeignKey("people.Customer", verbose_name = _("Cliente"), null = True)
     discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
-    rounded = models.BooleanField(_("Arrotonda il totale"), default = True)
+    rounded = models.BooleanField(_("Arrotonda il totale"), default = False)
     pricelist = models.ForeignKey("inventory.Pricelist", default = "Pubblico")
 
     # same as above, even if this is not really necessary
