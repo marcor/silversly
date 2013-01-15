@@ -115,7 +115,8 @@ def new_receipt(request):
                     product.sync_to_others("quantity")
             close = Settings.objects.get(site = Site.objects.get_current()).close_receipts
             scontrino.send_to_register(close=close)
-            return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
+            #return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
+            return HttpResponse(reverse("find_product"), mimetype="text/plain")
         else:
             bad_request = True
     else:
