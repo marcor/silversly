@@ -40,10 +40,12 @@
                                         $("#cart_items", cartbox).text(items);
                                         $("#cart_total", cartbox).html(data[0].fields.final_total + " &euro;");
                                         cartbox.slideDown();
+                                } else {
+                                        cartbox.slideUp();
                                 }
                         },
                         error: function() {
-                                cartbox.hide();
+                                cartbox.fadeOut();
                         },
                         dataType: "json"
                 });
