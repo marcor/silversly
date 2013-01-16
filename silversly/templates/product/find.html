@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block jquery %}
-	{{ block.super }}
+        {{ block.super }}
 
         var chosenProduct;
         var cache = {};
@@ -28,6 +28,26 @@
             $("#infobox").hide();
             delete cache[pk];
             $("#products").trigger("focus");
+        };
+        
+        update_cart_info = function () {
+                var cartbox = $("#cartbox");
+                $.ajax({
+                        url: "{% url get_json_cart_summary %}",
+                        success: function(data) { 
+                                var items = data[0].number_of_items;
+                                if (items > 0) {
+                                        $("#cart_items", cartbox).text(items);
+                                        $("#cart_total", cartbox).html(data[0].fields.final_total + " &euro;");
+                                        cartbox.slideDown();
+                                }
+                        },
+                        error: function() {
+                                cartbox.hide();
+                        },
+                        dataType: "json"
+                });
+                return cartbox;
         };
 
 
@@ -127,6 +147,10 @@
                 "data": $(this).serialize(),
                 "complete": function(xhr, status) {
                     if (status == "success") {
+                        update_cart_info().animate({ backgroundColor:'#ffffcc'}, 
+                                200, 'linear', function(){
+                                        $(this).animate({ backgroundColor: 'white' });
+                        });;
                         $("#sell_product_dialog").dialog('close');
                         $("#products").trigger("select");
                     } else {
@@ -137,9 +161,11 @@
             return false;
         });
 
-		$("#products").autocomplete({source_url: "{% url ajax_find_product %}", delay: 500});
-
-
+        $("#products").autocomplete({source_url: "{% url ajax_find_product %}", delay: 500});
+        
+        $("#cartbox a").button();
+        update_cart_info();
+        
 {% endblock %}
 
 {% block header %}
@@ -156,6 +182,12 @@
     <div id="message" style="display:none">Nessun risultato</div>
 
     <div id="infobox" class="framed" style="display: none">
+    </div>
+    
+    <div id="cartbox" class="framed">
+        <a href="{% url edit_cart %}"><img src="/media/img/cart.png" /></a>
+        <p>Articoli: <span id="cart_items"></span></p>
+        <p>TOT: <span id="cart_total"></span></p>
     </div>
 
     <div id="sell_product_dialog" title="Vendi questo prodotto" class="dialog"></div>

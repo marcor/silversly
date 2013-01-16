@@ -302,6 +302,27 @@ a:hover {
 	padding-left: 1em;
 }
 
+#cartbox {
+	position: fixed;
+	bottom: 20px;
+	width: 230px;
+	right: -40px;
+	display: none;
+}
+
+#cartbox a {
+	float: left;
+	margin-right: 7px;
+}
+
+#cartbox p {
+	margin: 5px 2px;
+}
+
+#cartbox p span {
+	font-size: 1.2em;
+}
+
 .pricelist_box {
 	border: 1px solid #ccc;
 	float: left;
@@ -396,6 +417,7 @@ a:hover {
 #categories, .framed {
 	border: 1px solid #ccc;
 	-moz-border-radius: 4px;
+	border-radius: 4px;
 	background-color: #fcfcfc;
 	margin: 0 300px 10px 0;
 	padding: 1em;
