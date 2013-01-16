@@ -76,8 +76,13 @@ def edit_cart_pricelist(request):
     else:
         return HttpResponse(status=400)
 
-def get_cart_summary(request):
+def get_cart_summary(request, json=False):
     cart = get_object_or_404(Cart, current=True)
+    if json:
+        json_serializer = serializers.get_serializer("json")()
+        data = json_serializer.serialize((cart,), fields = ("final_total", "final_discount"))
+        data = '[{"number_of_items": %d, ' % cart.cartitem_set.count() + data[2:]
+        return HttpResponse(data, 'application/javascript')
     return render_to_response('cart/summary.html', {'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
 def toggle_cart_rounding(request):
