@@ -33,7 +33,7 @@
                 $.post("{% url pay_due_receipt receipt.id %}",
                     {},
                     function(data, status) {
-                        $("#due").empty().html("<p>Pagato!</p>");
+                        $(".due").empty().html("<p>PAGATO</p>");
                         $("#pay_all").hide();
                     }
                 )
