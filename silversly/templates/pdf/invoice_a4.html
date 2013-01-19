@@ -71,7 +71,7 @@ td {
 }
 
 .quantity {
-    width: 2.5cm;
+    width: 2.7cm;
     font-size: 0.8em;
 }
 .description {
@@ -142,20 +142,20 @@ td {
     <table id="footer_table" class="right">
         <tr>
             {% if invoice.costs %}
-            <td style="width: 9.5cm">{{ invoice.total_net|exactSub:invoice.costs}}&euro;</td>
-            <td style="width: 9.5cm">{{ invoice.costs }}&euro;</td>
+            <td style="width: 9.5cm">{{ invoice.total_net|exactSub:invoice.costs}} &euro;</td>
+            <td style="width: 9.5cm">{{ invoice.costs }} &euro;</td>
             {% else %}
             <td style="width: 9.5cm"></td>
             <td style="width: 9.5cm"></td>
             {% endif %}
-            <td style="width: 15cm; padding-right: 0.5cm">{{ invoice.total_net }}&euro;</td>
+            <td style="width: 15cm; padding-right: 0.5cm">{{ invoice.total_net }} &euro;</td>
             <td style="width: 2.2cm">{{ tax }}</td>
-            <td style="width: 5.5cm">{{ total.1 }}&euro;</td>
+            <td style="width: 5.5cm">{{ total.1 }} &euro;</td>
             <td style="width: 9.5cm"></td>
         </tr>
         <tr>
             <td colspan="5" style="text-align: left"><pdf:pagenumber /> </td>
-            <td>{{ total.0 }}&euro;</td>
+            <td>{{ total.0 }} &euro;</td>
         </tr>
     </table>
 {% endwith %}
