@@ -70,7 +70,8 @@ td {
 }
 
 .quantity {
-    width: 1.7cm;
+    width: 2cm;
+    font-size: 0.8em;
 }
 .description {
     text-align: left;
@@ -96,7 +97,7 @@ td {
 <div id="intestazione">
     <table class="right">
         <tr>
-            <td class="grande">{{ invoice.number }}</td>
+            <td class="grande">{{ invoice.number }} / {{invoice.date.year }}</td>
         </tr>
         <tr>
             <td class="grande">{{ invoice.date }}</td>
@@ -130,7 +131,8 @@ td {
         </tr>
     </table>
     {% include "pdf/invoice_cart.html"  with cart=ddt.cart %}
-
+{% empty %}
+    {% include "pdf/invoice_cart.html"  with cart=invoice.cart %}
 {% endfor %}
 </div>
 
