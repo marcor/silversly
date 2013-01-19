@@ -1,5 +1,7 @@
 <div class="title">{{ product.name }}
     <a style="float: right" id="delete_product" href="{% url delete_product product.pk %}"><img src="/media/img/delete.png" width="20"/></a>
+    <br />
+    <a style="font-size: 0.7em" href="{% url list_by_category product.category.id %}">{{ product.category }}</a>
 </div>
 
 <!--<div class="code">Codice: <span></span></div>-->
