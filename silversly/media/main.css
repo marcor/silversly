@@ -279,8 +279,8 @@ a:hover {
 #infobox {
 	position: absolute;
 	top: 0px;
-	right: -70px;
-	width: 470px;
+	right: -90px;
+	width: 475px;
 	font-size: 1.2em;
 }
 
@@ -399,7 +399,6 @@ a:hover {
 	-moz-border-radius: 4px;
 	font-size: 1.5em !important;
 	color: #666;
-	/*width: 220px;*/
 	margin-left: 5px;
 }
 
@@ -464,12 +463,13 @@ a:hover {
 
 .ui-autocomplete {
 	max-height: 480px;
-	max-width: 400px;
+	max-width: 420px;
 	overflow-y: auto;
 	/* prevent horizontal scrollbar */
 	overflow-x: hidden;
 	/* add padding to account for vertical scrollbar */
 	padding-right: 20px;
+	width: 600px;
 }
 
 .ui-autocomplete .ui-menu-item {
