@@ -44,6 +44,7 @@ td {
     padding-left: .1cm;
     padding-right: .1cm;
     margin-top: .1cm;
+    /*border: 1px solid green;*/
 
 }
 
@@ -70,17 +71,17 @@ td {
 }
 
 .quantity {
-    width: 2cm;
+    width: 2.5cm;
     font-size: 0.8em;
 }
 .description {
     text-align: left;
 }
 .price {
-    width: 2.5cm;
+    width: 4.5cm;
 }
 .item_total {
-    width: 3.1cm;
+    width: 5cm;
 }
 
 
@@ -141,16 +142,16 @@ td {
     <table id="footer_table" class="right">
         <tr>
             {% if invoice.costs %}
-            <td style="width: 3.3cm">{{ invoice.total_net|exactSub:invoice.costs}}&euro;</td>
-            <td style="width: 3.3cm">{{ invoice.costs }}&euro;</td>
+            <td style="width: 9.5cm">{{ invoice.total_net|exactSub:invoice.costs}}&euro;</td>
+            <td style="width: 9.5cm">{{ invoice.costs }}&euro;</td>
             {% else %}
-            <td style="width: 3.3cm"></td>
-            <td style="width: 3.3cm"></td>
+            <td style="width: 9.5cm"></td>
+            <td style="width: 9.5cm"></td>
             {% endif %}
-            <td style="width: 5.6cm">{{ invoice.total_net }}&euro;</td>
-            <td>{{ tax }}</td>
-            <td style="width: 2.5cm">{{ total.1 }}&euro;</td>
-            <td style="width: 3.1cm"></td>
+            <td style="width: 15cm; padding-right: 0.5cm">{{ invoice.total_net }}&euro;</td>
+            <td style="width: 2.2cm">{{ tax }}</td>
+            <td style="width: 5.5cm">{{ total.1 }}&euro;</td>
+            <td style="width: 9.5cm"></td>
         </tr>
         <tr>
             <td colspan="5" style="text-align: left"><pdf:pagenumber /> </td>
