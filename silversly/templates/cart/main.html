@@ -7,7 +7,7 @@
 {% block sidebar %}
         <ul>
             <li>
-                <a href="{% url reload_cart %}" title="Ricalcola i prezzi">
+                <a href="{% url reload_cart cart.id %}" title="Ricalcola i prezzi">
                 <img src="/media/img/reload.png" />
                 </a>
             </li>

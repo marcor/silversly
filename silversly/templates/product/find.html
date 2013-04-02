@@ -33,7 +33,7 @@
         update_cart_info = function () {
                 var cartbox = $("#cartbox");
                 $.ajax({
-                        url: "{% url get_json_cart_summary %}",
+                        url: "{% url get_current_cart_json_summary %}",
                         success: function(data) { 
                                 var items = data[0].number_of_items;
                                 if (items > 0) {

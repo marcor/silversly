@@ -14,7 +14,7 @@
     <p class="message" id="discount_error" style="display:none">Inserisci un numero positivo senza virgola</p>
 
     {% if not customer.company %}
-        <a id="toggle_rounding" href="{% url toggle_cart_rounding %}">
+        <a id="toggle_rounding" href="{% url toggle_cart_rounding cart.id %}">
         {% if cart.rounded %}
             <img style="float: right" title="non arrotondare il totale" src="/media/img/yinyang.png" />
         {% else %}

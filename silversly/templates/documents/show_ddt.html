@@ -36,6 +36,7 @@
 
     <a id="new_invoice" href="{% url new_invoice customer.id %}" style="display:none">Emetti fattura</a>
     <a id="print" target="_blank" href="{% url print_ddt ddt.id %}" style="display:none">Stampa</a>
+    <a id="revise" href="{% url revise_cart ddt.cart.id %}" style="display:none; float: right">Correggi</a>
     <div id="new_invoice_dialog" title="Emetti una fattura" class="dialog"></div>
 </div>
 
@@ -72,7 +73,8 @@
 
     prepare_dialog_for("invoice", "{% url new_invoice customer.id %}");
     $("#new_invoice").button().show();
-
+    $("#revise").button().show();
+    
 {% endif %}
     $("#print").button().show();
 

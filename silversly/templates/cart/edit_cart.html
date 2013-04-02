@@ -2,6 +2,18 @@
 
 {% block title %}Carrello{% endblock %}
 
+{% if not cart.current %}
+{% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url reload_cart cart.id %}" title="Ricalcola i prezzi">
+                <img src="/media/img/reload.png" />
+                </a>
+            </li>
+        </ul>
+{% endblock %}
+{% endif %}
+
 {% block head %}
     <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
     <script type="text/javascript" src="/media/js/jquery.jeditable.mini.js"></script>
@@ -34,6 +46,9 @@
 {% endblock %}
 
 {% block header %}
+
+    {% if cart.current %}
+
     <h1>Carrello di
     <span id="customer_choice">
         <button id="customer_name" style="font-weight: bold">Nome cliente</button>
@@ -47,7 +62,26 @@
         </span>
     </span>
     </h1>
-
+    
+    {% else %}
+        <h1 style="display:none">Carrello di
+    <span id="customer_choice">
+        <button id="customer_name" style="font-weight: bold">Nome cliente</button>
+        <button id="open_customer_search">Cerca</button>
+        <button id="reset_customer">Resetta</button>
+        <input id="customers" />
+        <span id="new_customer">
+            Nuovo cliente:
+            <button id="new_retail" type="button" >Privato</button>
+            <button id="new_company" type="button" >Azienda</button>
+        </span>
+    </span>
+    </h1>
+        
+        {% with cart.receipt.child as ddt %}
+	<h1>Stai correggendo il carrello relativo al <a href="{% url show_ddt ddt.id %}"> DdT n. {{ ddt.number }}</a></h1>
+	{% endwith %}
+    {% endif %}
 
 {% endblock %}
 
@@ -97,7 +131,7 @@
         }
         customer = c;
         if (reload_cart != false)
-            $.post("{% url edit_cart_customer %}", data, function(html, status) {$("#cart_display").html(html)}, "html");
+            $.post("{% url edit_cart_customer cart.id %}", data, function(html, status) {$("#cart_display").html(html)}, "html");
     };
 
     function updateList(productRow) {
@@ -110,13 +144,13 @@
               $("#product_list").show();
               $("#save").show();
         };
-        $("#cart_summary").load("{% url get_cart_summary %}");
+        $("#cart_summary").load("{% url get_cart_summary cart.id%}");
         $("#products").val("");
         $("#products").trigger("focus");
     };
 
     function addProductToList(pk) {
-        $.get("{% url add_product_to_cart %}",
+        $.get("{% url add_product_to_cart cart.id %}",
                 {'product_pk': pk},
                 function(resultForm) {
                     $("#add_product_dialog").html(resultForm).modal()
@@ -311,7 +345,7 @@
 
     $("#id_pricelist").live('change', function(e){
             $.ajax({
-                "url": "{% url edit_cart_pricelist %}",
+                "url": "{% url edit_cart_pricelist cart.id %}",
                 "type": "POST",
                 "data": {'pricelist': $(this).val()},
                 "complete": function(xhr, status) {
@@ -332,7 +366,7 @@
         }
         else if (e.keyCode==13) {
             $.ajax({
-                "url": "{% url edit_cart_discount %}",
+                "url": "{% url edit_cart_discount cart.id %}",
                 "type": "POST",
                 "data": {'discount': $(this).val().trim()},
                 "complete": function(xhr, status) {

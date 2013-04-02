@@ -8,6 +8,7 @@ sys.path.append(PROJECT_DIR)
 PAYMENT_CHOICES = [
     ('rmd', u'Rimessa diretta ric. fat.'),
     ('30rb', u'Ri.Ba. 30gg f.m.'),
+    ('60rb', u'Ri.Ba. 60gg d.f.'),
     ('30fm', u'Bonifico 30gg f.m.'),
     ('60fm', u'Bonifico 60gg f.m.'),
     ('ok', u'Pagato')

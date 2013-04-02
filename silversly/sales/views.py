@@ -16,24 +16,26 @@ from decimal import Decimal
 from common.models import *
 
 
-def edit_cart(request):
-    try:
-        cart = get_object_or_404(Cart, current=True)
-    except:
-        cart = Cart()
-        cart.update_value()
-        # is this ok?
-        cart.save()
-
+def edit_cart(request, cart_id=None):
+    if cart_id:
+        cart = get_object_or_404(Cart, pk=cart_id)
+    else:               
+        try:
+            cart = get_object_or_404(Cart, current=True)
+        except:
+            cart = Cart()
+            cart.update_value()
+            # is this ok?
+            cart.save()
     customer = cart.customer and cart.customer.child()
     return render_to_response('cart/edit_cart.html',  {'products': cart.cartitem_set.all(), 'cart': cart, 'customer': customer})
 
-def edit_cart_customer(request):
+def edit_cart_customer(request, cart_id):
     try:
         customer = Customer.objects.get(pk=request.POST["customer_id"])
     except:
         customer = None
-    cart = get_object_or_404(Cart, current=True)
+    cart = get_object_or_404(Cart, pk=cart_id)
     items = cart.cartitem_set.all()
     old_customer = cart.customer
     cart.customer = customer
@@ -52,8 +54,8 @@ def edit_cart_customer(request):
     cart.save()
     return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
-def edit_cart_discount(request):
-    cart = get_object_or_404(Cart, current=True)
+def edit_cart_discount(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
     form = EditDiscountForm(request.POST, instance=cart)
     if form.is_valid():
         cart.update_value()
@@ -62,8 +64,8 @@ def edit_cart_discount(request):
     else:
         return HttpResponse(status=400)
 
-def edit_cart_pricelist(request):
-    cart = get_object_or_404(Cart, current=True)
+def edit_cart_pricelist(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
     form = EditPricelistForm(request.POST, instance=cart)
     if form.is_valid():
         form.save()
@@ -76,8 +78,11 @@ def edit_cart_pricelist(request):
     else:
         return HttpResponse(status=400)
 
-def get_cart_summary(request, json=False):
-    cart = get_object_or_404(Cart, current=True)
+def get_cart_summary(request, cart_id=None, json=False):
+    if cart_id:
+        cart = get_object_or_404(Cart, pk=cart_id)
+    else:
+        cart = get_object_or_404(Cart, current=True)
     if json:
         json_serializer = serializers.get_serializer("json")()
         data = json_serializer.serialize((cart,), fields = ("final_total", "final_discount"))
@@ -85,8 +90,8 @@ def get_cart_summary(request, json=False):
         return HttpResponse(data, 'application/javascript')
     return render_to_response('cart/summary.html', {'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
-def toggle_cart_rounding(request):
-    cart = get_object_or_404(Cart, current=True)
+def toggle_cart_rounding(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
     cart.rounded = not cart.rounded
     if cart.rounded:
         cart.apply_rounding()
@@ -95,11 +100,11 @@ def toggle_cart_rounding(request):
     cart.save()
     return render_to_response('cart/summary.html', {'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
-def reload_cart(request):
-    cart = get_object_or_404(Cart, current=True)
+def reload_cart(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
     cart.update_value(deep=True)
     cart.save()
-    return redirect(edit_cart)
+    return redirect(edit_cart, cart_id)
 
 def new_receipt(request):
     bad_request = False
@@ -314,10 +319,10 @@ def print_invoice(request, id):
         'customer': customer,
         'tax': settings.TAX})
 
-def add_product_to_cart(request):
+def add_product_to_cart(request, cart_id):
     bad_request = False
     try:
-        cart = Cart.objects.get(current=True)
+        cart = Cart.objects.get(pk=cart_id)
     except:
         cart = Cart()
         cart.update_value()
@@ -356,6 +361,6 @@ def remove_product_from_cart(request, item_id):
         item.delete()
         cart.update_value()
         cart.save()
-        return redirect(edit_cart)
+        return redirect(edit_cart, cart.id)
     except:
         return HttpResponse(status=400)
