@@ -29,4 +29,4 @@ class DdtForm(ModelForm):
 class InvoiceForm(ModelForm):
     class Meta:
         model = Invoice
-        fields = ("number", "payment_method", "costs")
+        fields = ("number", "date", "payment_method", "costs")
