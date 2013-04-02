@@ -319,14 +319,18 @@ def print_invoice(request, id):
         'customer': customer,
         'tax': settings.TAX})
 
-def add_product_to_cart(request, cart_id):
+def add_product_to_cart(request, cart_id=None):
     bad_request = False
-    try:
+    if not cart_id:
+        try:
+            cart = Cart.objects.get(current = True)
+        except:
+            cart = Cart()
+            cart.update_value()
+            cart.save()
+    else:
         cart = Cart.objects.get(pk=cart_id)
-    except:
-        cart = Cart()
-        cart.update_value()
-        cart.save()
+        
     try:
         product = Product.objects.get(pk=request.GET["product_pk"])
     except:
