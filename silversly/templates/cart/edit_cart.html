@@ -2,18 +2,6 @@
 
 {% block title %}Carrello{% endblock %}
 
-{% if not cart.current %}
-{% block sidebar %}
-        <ul>
-            <li>
-                <a href="{% url reload_cart cart.id %}" title="Ricalcola i prezzi">
-                <img src="/media/img/reload.png" />
-                </a>
-            </li>
-        </ul>
-{% endblock %}
-{% endif %}
-
 {% block head %}
     <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
     <script type="text/javascript" src="/media/js/jquery.jeditable.mini.js"></script>

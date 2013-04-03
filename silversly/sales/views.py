@@ -310,6 +310,9 @@ def print_invoice(request, id):
     ddts = invoice.ddt_set.all().order_by("number")
     customer = cart and cart.customer.child() or ddts[0].cart.customer.child()
     shop = Shop.objects.get(site = Site.objects.get_current())
+    lines = cart and cart.cartitem_set.count() or 0
+    for ddt in ddts:
+        lines = lines + 1 + ddt.cart.cartitem_set.count()
     return write_pdf('pdf/invoice_a4.html',{
         'pagesize' : 'a4',
         'shop': shop,
@@ -317,6 +320,7 @@ def print_invoice(request, id):
         'ddts': ddts,
         'invoice': invoice,
         'customer': customer,
+        'lines': lines,
         'tax': settings.TAX})
 
 def add_product_to_cart(request, cart_id=None):

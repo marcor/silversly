@@ -16,7 +16,7 @@
         <td class="quantity"></td>
         <td class="description italic">sconto art. {{ item.discount }}%</td>
          <td class="price"></td>
-        <td class="item_total">-{{ total.1 }}&euro;</td>
+        <td class="item_total">-{{ total.1 }}</td>
     </tr>
     </table>
     {% endif %}    
@@ -28,7 +28,7 @@
         <td class="quantity"></td>
         <td class="description italic">sconto cliente {{ cart.discount }}%</td>
          <td class="price"></td>
-        <td class="item_total">-{{ cart.final_net_discount }}&euro;</td>
+        <td class="item_total">-{{ cart.final_net_discount }}</td>
     </tr>
     </table>
     {% endif %}
