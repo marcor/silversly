@@ -1,12 +1,14 @@
 import sys, os
 
-VERSION = "0.91"
+VERSION = "0.92"
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_DIR)
 
 PAYMENT_CHOICES = [
     ('rmd', u'Rimessa diretta ric. fat.'),
+    ('rd30', u'Rimessa diretta 30gg f.m.'),
+    ('rd60', u'Rimessa diretta 60gg f.m.'),
     ('30rb', u'Ri.Ba. 30gg f.m.'),
     ('60rb', u'Ri.Ba. 60gg f.m.'),
     ('30fm', u'Bonifico 30gg f.m.'),
