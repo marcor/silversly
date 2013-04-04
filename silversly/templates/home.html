@@ -99,8 +99,8 @@
             <table >
             {% for customer, total in need_invoice.items %}
             <tr>
-                <td><a class="new_invoice" href="{% url new_invoice customer.id %}">{{ customer }}</a></td>
-                <td class="decimal">{{ total }}&euro;</td>
+                <td><a href="{% url show_customer customer.id %}">{{ customer }}</a></td>
+                <td class="decimal"><a class="new_invoice" href="{% url new_invoice customer.id %}" title="emetti fattura">{{ total }}&euro;</a></td>
             </tr>
             {% endfor %}
             </table>
