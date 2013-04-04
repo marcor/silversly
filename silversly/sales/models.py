@@ -242,7 +242,7 @@ class Ddt(Receipt):
     invoice = models.ForeignKey('Invoice', verbose_name = _("Fattura"), null = True)
 
     def __unicode__(self):
-        return u"DDT %d/%d del %s" % (self.year,self.number, self.date.strftime("%d/%m"))
+        return u"DDT %02d del %s" % (self.number, self.date.strftime("%d-%m"))
 
     @models.permalink
     def get_absolute_url(self):
@@ -272,7 +272,7 @@ class Invoice(Receipt):
     payed = models.BooleanField(_("Pagata"), default = False)
 
     def __unicode__(self):
-        return u"Fattura %d/%d del %s" % (self.year, self.number, self.date.strftime("%d/%m"))
+        return u"Fattura %02d del %s" % (self.number, self.date.strftime("%d-%m"))
 
     def finally_paid(self):
         due = self.apply_vat()[0]
