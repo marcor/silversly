@@ -20,7 +20,7 @@
                     <td style="background-color: #fee"><a href="{% url show_ddt receipt.id %}">{{ receipt }}</a></td>
                     <td class="decimal">{{ receipt.cart.discounted_total }}&euro;</td>
                     <td class="decimal">{% if receipt.invoice %}
-                    <a href="{% url show_invoice receipt.invoice.id %}">
+                    <a href="{% url show_invoice receipt.invoice.id %}" title="{{ receipt.invoice }}">
                     {% if receipt.invoice.payed %}
                         Pagata
                     {% else %}

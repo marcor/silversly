@@ -144,7 +144,24 @@
             {% endfor %}
             </table>
             {% else %}
-                <p>Nessuno Ddt emesso.</p>
+                <p>Nessun Ddt emesso.</p>
+            {% endif %}
+         </div>
+	 
+	 <h3>Ultime fatture</h3>
+         <div class="pane">
+            {% if last_invoices %}
+            <table >
+            {% for i in last_invoices %}
+            <tr>
+                <td>
+                <a title="{{ i.cart.customer }}"
+                   href="{% url show_invoice i.id %}">{{ i }}</a></td>
+            </tr>
+            {% endfor %}
+            </table>
+            {% else %}
+                <p>Nessuna fattura emessa.</p>
             {% endif %}
          </div>
     </div>

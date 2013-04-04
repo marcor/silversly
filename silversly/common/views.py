@@ -69,6 +69,7 @@ def homepage(request):
         'last_receipts': last_receipts,
         'last_ddts': last_ddts,
         'need_invoice': customers,
+        'last_invoices': last_invoices,
         'debtors': list(debtors)})
 
 def show_settings(request):
