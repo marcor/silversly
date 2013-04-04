@@ -158,7 +158,7 @@ def new_invoice_from_cart(request, cart_id):
     year = now.year - 2000
     last_invoice_number = Invoice.objects.filter(year = year).aggregate(Max('number'))['number__max']
     number = last_invoice_number and last_invoice_number + 1 or 1
-    invoice = Invoice(number = number, immediate=True)
+    invoice = Invoice(number = number, immediate=True, payment_method=customer.payment_method)
 
     if request.method == "POST":
         form = InvoiceForm(request.POST, instance=invoice)
@@ -193,7 +193,7 @@ def new_invoice_from_cart(request, cart_id):
     return response
 
 def new_invoice(request, customer_id):
-    customer = Customer.objects.get(pk=customer_id)
+    customer = Customer.objects.get(pk=customer_id).child()
     open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
     if not open_ddts.exists():
         return HttpResponse(status=404)
@@ -203,7 +203,7 @@ def new_invoice(request, customer_id):
     year = now.year - 2000
     last_invoice_number = Invoice.objects.filter(year = year).aggregate(Max('number'))['number__max']
     number = last_invoice_number and last_invoice_number + 1 or 1
-    invoice = Invoice(number = number, immediate=False)
+    invoice = Invoice(number = number, immediate=False, payment_method=customer.payment_method)
 
     if request.method == "POST":
         form = InvoiceForm(request.POST, instance=invoice)
