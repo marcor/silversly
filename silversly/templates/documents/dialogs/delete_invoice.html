@@ -1,0 +1,27 @@
+<div>
+    <script type="text/javascript">
+    $(function() {
+        $( "#confirm_delete" ).live('click', function() {
+            $.ajax({
+                "url": "{% url delete_last_invoice %}",
+                "type": "POST",
+                "data": {'confirm': true},
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#delete_invoice_dialog").dialog('close');
+			document.location.reload();
+                    };
+                }
+            });
+            return false;
+        });
+	$( "#cancel_delete" ).live('click', function() {
+	    $("#delete_invoice_dialog").dialog('close');
+	    return false;
+        });
+    });
+    </script>
+    <p>Vuoi davvero annullare la <b>{{ invoice }}</b>?</p>
+    <a id="confirm_delete" href="#" title="S&igrave;'"><img src="/media/img/okay.png" /></a>
+    <a id="cancel_delete" href="#" title="No, ho cambiato idea" style="float:right"><img src="/media/img/cancel.png" /></a>
+<div>

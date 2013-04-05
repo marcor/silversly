@@ -14,6 +14,7 @@ from urllib import unquote
 from django.utils import simplejson
 from decimal import Decimal
 from common.models import *
+from common.views import homepage
 
 
 def edit_cart(request, cart_id=None):
@@ -244,6 +245,21 @@ def show_invoice(request, id):
         customer = ddts[0].cart.customer.child()
     return render_to_response('documents/show_invoice.html',  {'cart': cart, 'customer': customer, 'ddts': ddts, 'invoice': invoice})
 
+def delete_invoice(request):
+    try:
+        invoice = Invoice.objects.latest('date')
+    except:
+        return HttpResponse(404)
+    if request.is_ajax():
+        if request.method == "POST" and request.POST["confirm"]:
+            if not invoice.payed:
+                invoice.finally_paid()
+            invoice.delete()
+            return HttpResponse(status=200)
+        else:
+            return render_to_response("documents/dialogs/delete_invoice.html", {'invoice': invoice})
+    else:
+        return redirect(homepage)
 
 def pay_due_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)

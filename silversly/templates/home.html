@@ -156,7 +156,12 @@
             <tr>
                 <td>
                 <a title="{{ i.cart.customer }}"
-                   href="{% url show_invoice i.id %}">{{ i }}</a></td>
+                   href="{% url show_invoice i.id %}">{{ i }}</a>
+		{% if forloop.first %}
+		<a id="delete_last_invoice" title="cancella l'ultima fattura emessa"
+                   href="{% url delete_last_invoice %}"><img src="/media/img/cancel.png" width="16"/></a>
+		{% endif %}
+		</td>
             </tr>
             {% endfor %}
             </table>
@@ -167,6 +172,8 @@
     </div>
 
     <div id="new_invoice_dialog" title="Prepara una fattura" class="dialog" style="display: none"></div>
+    <div id="delete_invoice_dialog" title="Annulla fattura" class="dialog" style="display: none"></div>
+    
 </div>
 {% endblock %}
 
@@ -201,5 +208,17 @@
     }
 
     prepare_dialog_for("invoice");
+    
+    $( "#delete_last_invoice" ).live('click', function() {
+        var delete_anchor = $(this);
+        $( "#delete_invoice_dialog" ).dialog({
+                        'draggable': false,
+                        'resizable': false,
+                        'modal': true,
+                        'open': function() { $(this).load(delete_anchor.attr('href'))}
+        });
+        return false;
+    });
+
 
 {% endblock %}
