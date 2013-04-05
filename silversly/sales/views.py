@@ -157,12 +157,17 @@ def new_invoice_from_cart(request, cart_id):
     customer = cart.customer.child()
     now = datetime.datetime.now()
     year = now.year - 2000
-    last_invoice_number = Invoice.objects.filter(year = year).aggregate(Max('number'))['number__max']
-    number = last_invoice_number and last_invoice_number + 1 or 1
+    try:
+        last_invoice = Invoice.objects.latest('date')
+        number = (last_invoice.year == year) and last_invoice.number + 1 or 1
+    except:
+        last_invoice = None
+        number = 1
     invoice = Invoice(number = number, immediate=True, payment_method=customer.payment_method)
 
     if request.method == "POST":
         form = InvoiceForm(request.POST, instance=invoice)
+        form.prev_invoice = last_invoice
         if form.is_valid():
             form.save(commit = False)
             cart.current = False
@@ -195,9 +200,9 @@ def new_invoice_from_cart(request, cart_id):
 
 def new_invoice(request, customer_id):
     customer = Customer.objects.get(pk=customer_id).child()
-    open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
-    if not open_ddts.exists():
-        return HttpResponse(status=404)
+    #open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
+    #if not open_ddts.exists():
+     #   return HttpResponse(status=404)
 
     bad_request = False
     now = datetime.datetime.now()
@@ -213,11 +218,12 @@ def new_invoice(request, customer_id):
     if request.method == "POST":
         form = InvoiceForm(request.POST, instance=invoice)
         form.prev_invoice = last_invoice
+        form.open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
         if form.is_valid():
             form.save()
-            for ddt in open_ddts:
+            for ddt in form.open_ddts:
                 invoice.ddt_set.add(ddt)
-            invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in open_ddts) + invoice.costs
+            invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in form.open_ddts) + invoice.costs
             if invoice.payment_method == "ok":
                 invoice.payed = True
             else:

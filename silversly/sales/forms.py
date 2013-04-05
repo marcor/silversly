@@ -44,6 +44,10 @@ class InvoiceForm(ModelForm):
                 raise ValidationError("L'ultima fattura è del %s!" % (self.prev_invoice.date.strftime("%d/%m/%Y"),))
         if date.year > datetime.date.today().year:
                 raise ValidationError("Ma in che anno siamo!? Devo aver dormito troppo.")
+        if getattr(self, "open_ddts", False):
+                self.open_ddts = self.open_ddts.exclude(date__gt = date)
+                if not self.open_ddts.exists():
+                        raise ValidationError("Nessun DDT fino a questa data")
         return date
     
  
