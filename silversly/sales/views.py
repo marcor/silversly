@@ -158,7 +158,7 @@ def new_invoice_from_cart(request, cart_id):
     now = datetime.datetime.now()
     year = now.year - 2000
     try:
-        last_invoice = Invoice.objects.latest('date')
+        last_invoice = Invoice.objects.order_by('pk')[0]
         number = (last_invoice.year == year) and last_invoice.number + 1 or 1
     except:
         last_invoice = None
@@ -208,7 +208,7 @@ def new_invoice(request, customer_id):
     now = datetime.datetime.now()
     year = now.year - 2000
     try:
-        last_invoice = Invoice.objects.latest('date')
+        last_invoice = Invoice.objects.order_by('pk')[0]
         number = (last_invoice.year == year) and last_invoice.number + 1 or 1
     except:
         last_invoice = None
@@ -253,7 +253,7 @@ def show_invoice(request, id):
 
 def delete_invoice(request):
     try:
-        invoice = Invoice.objects.latest('date')
+        invoice = Invoice.objects.order_by('pk')[0]
     except:
         return HttpResponse(404)
     if request.is_ajax():
