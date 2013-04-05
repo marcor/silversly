@@ -239,7 +239,7 @@ class Ddt(Receipt):
     appearance = models.CharField(_(u"Aspetto"), max_length = 20, null = True, blank = True)
 
     # used for fatture differite (cart(s) -> receipt(s) -> invoice)
-    invoice = models.ForeignKey('Invoice', verbose_name = _("Fattura"), null = True)
+    invoice = models.ForeignKey('Invoice', verbose_name = _("Fattura"), null = True, on_delete=models.SET_NULL)
 
     def __unicode__(self):
         return u"DDT %02d del %s" % (self.number, self.date.strftime("%d-%m"))
