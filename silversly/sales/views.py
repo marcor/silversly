@@ -201,15 +201,19 @@ def new_invoice(request, customer_id):
     bad_request = False
     now = datetime.datetime.now()
     year = now.year - 2000
-    last_invoice_number = Invoice.objects.filter(year = year).aggregate(Max('number'))['number__max']
-    number = last_invoice_number and last_invoice_number + 1 or 1
+    try:
+        last_invoice = Invoice.objects.latest('date')
+        number = (last_invoice.year == year) and last_invoice.number + 1 or 1
+    except:
+        last_invoice = None
+        number = 1
     invoice = Invoice(number = number, immediate=False, payment_method=customer.payment_method)
-
+    
     if request.method == "POST":
         form = InvoiceForm(request.POST, instance=invoice)
+        form.prev_invoice = last_invoice
         if form.is_valid():
             form.save()
-
             for ddt in open_ddts:
                 invoice.ddt_set.add(ddt)
             invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in open_ddts) + invoice.costs
