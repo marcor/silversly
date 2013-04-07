@@ -16,7 +16,9 @@ from decimal import Decimal
 from common.models import *
 from common.views import homepage
 
-
+def cart_overview(request):
+	pass
+	
 def edit_cart(request, cart_id=None):
     if cart_id:
         cart = get_object_or_404(Cart, pk=cart_id)

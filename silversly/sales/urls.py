@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('sales.views',
+    url(r'carrelli$', 'cart_overview', name='cart_overview'),
     url(r'carrello$', 'edit_cart', name='edit_cart'),
     url(r'carrello/(\d+)/$', 'edit_cart', name='revise_cart'),
     
