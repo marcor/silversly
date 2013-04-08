@@ -1,0 +1,228 @@
+{% load common_tags %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<style type="text/css">
+
+body {
+    font-size: 13px;
+}
+
+table {
+    width: 15cm;
+}
+
+tr {
+  border: 1px solid #ddd;
+  border-right: 0;
+  border-left: 0;
+  -pdf-keep-with-next: false;
+}
+
+#top_frame tr.desc, #footer_table tr.desc { 
+   font-size: 0.7em;
+   border-bottom: 0; 
+}
+
+.items tr.desc {
+   font-weight: bold;
+}
+
+tr.first {
+  border-top: 0;
+}
+
+tr.last {
+  border-bottom: 0;
+}
+
+tr.dark { background-color: #eee }
+
+
+@page {
+
+    size: a4;
+    /*-pdf-frame-border: 1;*/
+    top: 8cm;
+    margin-left: 1.5cm;
+    margin-right: 1.5cm;
+    margin-bottom: 1cm;
+
+    @frame top {
+        -pdf-frame-content: top_frame;
+        margin-left: 1cm;
+        margin-right: 1cm;
+        top: 1.5cm;
+    }
+}
+
+#footer_table {
+    text-align: center;
+    margin-top: 2cm;
+}
+
+#header {
+    font-size: 1.2em;
+}
+
+#footer_table .desc { border-top: 0;}
+#footer_table .desc td { padding-top: 0.3cm }
+
+td {
+    padding-top: .1cm;
+    padding-left: .1cm;
+    vertical-align: bottom;
+}
+
+#top_frame .first td {
+    vertical-align: top;
+    padding-top: 0.2cm;
+}
+
+tr.spacer {
+    border-color: #fff;
+}
+
+td.item_qty {
+  width: 3cm; 
+  padding-right: .1cm
+}
+
+td.item_desc {
+  border-left: 1px solid #ddd; 
+  padding-left: 0.2cm;
+}
+
+#aspetto, #colli, #data { 
+  border-left: 1px solid #ddd;
+}
+
+pre {
+    font-family: sansserif;
+    line-height: 150%;
+    margin: 0;
+    padding: 0;
+}
+p {margin-bottom: 0; padding: 0 }
+.right { text-align: right }
+.center { text-align: center }
+.box { border-width: 1px }
+
+#address_table p, #address_table pre {
+    margin-left: 0.5cm;
+    font-size: 1.1em;    
+}
+
+</style>
+</head>
+<body>
+
+<div id="top_frame">
+
+<table id="header_table">
+    <tr class="desc">
+       <td>CEDENTE</td>
+        <td></td>       
+    </tr>
+    <tr class="first">
+	<td id="seller-stamp">
+	  <pdf:spacer height="60" />
+	</td>
+        <td id="header">
+	<b>DOCUMENTO DI TRASPORTO (D.d.t.)</b><br/>
+	n. <b id="ddt_num">{{ ddt.number }}</b> del <b id="ddt_date">{{ ddt.date|date:"d/m/Y" }}</b>
+        </td>
+    </tr>
+</table>
+
+
+<table id="address_table">
+    <tr class="desc">
+       <td>CESSIONARIO</td>
+        <td>LUOGO DI DESTINAZIONE</td>       
+    </tr>
+    <tr class="first">
+        <td>
+	    <p>Spett.le <b>{{ cart.customer.name }}</b></p>
+<pre>{{ ddt.main_address }}</pre>
+	</td>
+        <td>
+            {% if ddt.shipping_address != ddt.main_address %}
+<pre>
+{{ ddt.shipping_address }}</pre>
+             {% else %}<p>IDEM</p>
+            {% endif %}
+            </td>
+        </tr>
+</table>
+
+</div>
+
+
+{% for i in 2|times %}
+
+<table class="items">
+    <tr class="desc dark"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
+{% for item in cart.cartitem_set.all %}
+    <tr class="tall">
+        <td  class="right item_qty">{{ item.quantity }}{{ item.product.unit }}</td>
+        <td class="item_desc">{{ item.product.name }}</td>
+    </tr>
+
+  {% if forloop.last %}
+    {% for i in forloop.counter|linepad:19|times %}
+     <tr class="spacer">
+     <td></td>
+     <td>&nbsp;</td>
+      </tr>     
+    {% endfor %}
+     <tr class="last"><td class="center" colspan="2">Pagina {{ forloop.counter0|divide:19|add:1 }}</td></tr>     
+  {% else %}
+    {% if forloop.counter|divisibleby:19 %}
+        <tr class="last"><td class="center" colspan="2">Pagina {{ forloop.counter|divide:19 }} <br/><pdf:spacer height="10" /> CONTINUA --></td></tr>
+</table>
+<table class="items">
+    <tr class="desc dark"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
+	 <pdf:nextpage />
+     {% else %}
+    {% endif %}
+  {% endif %}
+
+{% endfor %}
+</table>
+
+<pdf:spacer height="20" />	
+
+<table id="footer_table">
+        <tr class="desc">
+	  <td>CAUSALE TRASPORTO</td>
+	  <td>ASPETTO DEI BENI</td>
+	  <td>N. COLLI</td>
+	  <td>ORA E DATA DEL RITIRO</td>
+	</tr>
+        <tr>
+            <td id="causale">VENDITA</td>
+	    <td id="aspetto">{{ ddt.appearance|default:"-" }}</td>
+            <td id="colli">{{ ddt.boxes|default:"-" }}</td>
+            <td id="data">{{ ddt.shipping_date|date:"H:i - d/m/Y"  }}</td>
+        </tr>
+	<tr class="desc">
+	  <td colspan="2">FIRMA DEL CONDUCENTE</td>
+	  <td colspan="2">FIRMA DEL CESSIONARIO</td>
+	</tr>
+	<tr>
+	   <td colspan="2" class="box"><pdf:spacer height="55" /></td>
+           <td colspan="2" class="box">&nbsp;</td>
+	</tr>
+</table>
+
+{% if forloop.first %}
+   <pdf:nextpage />
+{% endif %}
+  
+{% endfor %}
+
+</body>
+</html>
