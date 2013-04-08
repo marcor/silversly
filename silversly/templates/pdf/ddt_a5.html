@@ -1,3 +1,4 @@
+{% load common_tags %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -8,51 +9,57 @@
 body {
     font-size: 13px;
 }
+
+table {
+    width: 15cm;
+}
+
+tr {
+  border: 1px solid #ddd;
+  border-right: 0;
+  border-left: 0;
+  -pdf-keep-with-next: false;
+}
+
+#header tr.desc, #footer_table tr.desc { 
+   font-size: 0.5em;
+   border-bottom: 0; 
+}
+
+.items tr.desc {
+   font-weight: bold;
+}
+
+tr.first {
+  border-top: 0;
+}
+
+tr.dark { background-color: #eee }
+
+#seller_stamp pre {
+    height: 8cm;
+  }
+
 @page {
 
     size: a5;
     /*-pdf-frame-border: 1;*/
-    top: 7.8cm;
-    margin-left: 1.6cm;
-    margin-right: 3cm;
-    margin-bottom: 2.8cm;
+    top: 7cm;
+    margin-left: 0.8cm;
+    margin-right: 0.8cm;
+    margin-bottom: 1cm;
 
     @frame top {
-        -pdf-frame-content: intestazione;
-        margin-left: 1.5cm;
-        margin-right: 0.5cm;
-        top: 4.2cm;
+        -pdf-frame-content: header;
+        margin-left: 0.8cm;
+        margin-right: 0.8cm;
+        top: 1cm;
     }
-    @frame top2 {
-        -pdf-frame-content: numero_e_data;
-        margin-left: 9.5cm;
-        margin-right: 0.6cm;
-        height: 3cm;
-        top: 2.1cm;
-    }
-    @frame footer {
-        -pdf-frame-content: footerblock;
-        margin-left: 1.5cm;
-        margin-right: 4.5cm;
-        height: 2.5cm;
-        bottom: .8cm;
-    }
-}
-#aspetto {
-    width:  4.3cm;
-}
-#colli {
-    width:  1.2cm;
-}
-#peso {
-    width: 1.5cm;
-}
-#data {
-    width: 3.5cm;
 }
 
 #footer_table {
     text-align: center;
+    margin-top: 2cm;
 }
 
 td {
@@ -62,92 +69,136 @@ td {
     /*border: 1px solid red;*/
 }
 
-#numero_e_data {
-    font-size: 1.5em;
-    text-align: right;
-}
-#ddt_num {
-   width: 1.1cm;
+td.item_qty {
+  width: 2.5cm; 
+  padding-right: .1cm
 }
 
-#ddt_date {
-
+td.item_desc {
+  border-left: 1px solid #ddd; 
+  padding-left: 0.2cm;
 }
 
-#pagnum  {
-    font-size: 0.8em;
+#ddt_num {}
+
+#aspetto, #colli, #data { 
+  border-left: 1px solid #ddd;
 }
 
 pre {
     font-family: sansserif;
-    font-size: 1.2em;
-    line-height: 200%;
+    font-size: 1.1em;
+    line-height: 150%;
     padding-left: .5cm;
 }
-.right {
-    text-align: right
-}
+.right { text-align: right }
+.box { border-width: 1px }
 
 </style>
 </head>
 <body>
 
-<div id="intestazione">
-    <table>
-        <tr>
-            <td>
-<pre>Spett.le {{ cart.customer.name }}
+<div id="header">
+
+<table id="header_table">
+    <tr class="desc">
+       <td>CEDENTE</td>
+        <td></td>       
+    </tr>
+    <tr class="first">
+	<td id="seller-stamp">
+	  <pre></pre>
+	</td>
+        <td>
+	<span>DOCUMENTO DI TRASPORTO (D.d.t.)</span>
+	N. <span id="ddt_num">{{ ddt.number }}</span> del <span id="ddt_date">{{ ddt.date_short }}</span>
+        </td>
+    </tr>
+</table>
+
+
+<table id="address_table">
+    <tr class="desc">
+       <td>CESSIONARIO</td>
+        <td>LUOGO DI DESTINAZIONE</td>       
+    </tr>
+    <tr class="first">
+        <td>
+	    <pre>Spett.le {{ cart.customer.name }}
 {{ ddt.main_address }}</pre>
-            </td>
-            <td style="padding-left: 0.3cm">
+	</td>
+        <td>
             {% if ddt.shipping_address != ddt.main_address %}
 <pre>
 {{ ddt.shipping_address }}</pre>
             {% endif %}
             </td>
         </tr>
-    </table>
-</div>
+</table>
 
-<div id="numero_e_data">
-    <table>
-        <tr>
-        <td id="ddt_num">{{ ddt.number }}</td>
-        <td id="ddt_date">{{ ddt.date_short }}</td>
-    </tr>
-    </table>
 </div>
 
 
-<table id="items">
+{% for i in 2|times %}
+
+<table class="items">
+    <tr class="desc dark"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
 {% for item in cart.cartitem_set.all %}
     <tr class="tall">
-        <td style="width: 1.5cm; padding-right: .1cm" class="right">{{ item.quantity }}{{ item.product.unit }}</td>
-        <td style="padding-left: .2cm">{{ item.product.name }}</td>
+        <td  class="right item_qty">{{ item.quantity }}{{ item.product.unit }}</td>
+        <td class="item_desc">{{ item.product.name }}</td>
     </tr>
 
-{% if forloop.counter|divisibleby:5 %}
-{% endif %}
+  {% if forloop.last %}
+    {% for i in forloop.counter|linepad:12|add:1|times %}
+     <tr>
+     <td class="item_qty"></td>
+     <td class="item_desc">&nbsp;</td>
+      </tr>     
+    {% endfor %}
+     
+  {% else %}
+    {% if forloop.counter|divisibleby:12 %}
+        <tr><td class="right" colspan="2">CONTINUA A PAGINA  {{ forloop.counter|divide:12|add:1 }} --></td></tr>
+</table>
+<table class="items">
+    <tr class="desc"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
+	 <pdf:nextpage />
+     {% else %}
+    {% endif %}
+  {% endif %}
 
 {% endfor %}
 </table>
 
-<div id="footerblock">
-    <table id="footer_table">
-        <tr class="tall">
-            <td id="aspetto">{{ ddt.appearance }}</td>
-            <td id="colli">{{ ddt.boxes|default:"" }}</td>
-            <td id="peso"></td>
-            <td id="porto"></td>
+<table id="footer_table">
+        <tr class="desc">
+	  <td>CAUSALE TRASPORTO</td>
+	  <td>ASPETTO DEI BENI</td>
+	  <td>N. COLLI</td>
+	  <td>ORA E DATA DEL RITIRO</td>
+	</tr>
+        <tr>
+            <td id="causale">VENDITA</td>
+	    <td id="aspetto">{{ ddt.appearance|default:"-" }}</td>
+            <td id="colli">{{ ddt.boxes|default:"-" }}</td>
+            <td id="data">{{ ddt.shipping_date|date:"H:i - d/m/Y"  }}</td>
         </tr>
-        <tr class="short">
-            <td colspan="2"></td>
-            <td id="data" colspan="2">{{ ddt.shipping_date_short }}</td>
-        </tr>
-        <tr class="short">
-            <td class="right" id="pagnum" colspan="3">pag. <pdf:pagenumber> </td>
-        </tr>
-    </table>
-</div>
+	<tr class="desc">
+	  <td colspan="2">Firma del conducente</td>
+	  <td colspan="2">Firma del cessionario</td>
+	</tr>
+	<tr>
+	   <td colspan="2" class="box">&nbsp;<br/></td>
+           <td colspan="2" class="box">&nbsp;</td>
+	</tr>
+</table>
+
+{% if forloop.first %}
+   <pdf:nextpage />
+{% endif %}
+  
+{% endfor %}
+
 </body>
 </html>

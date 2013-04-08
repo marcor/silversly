@@ -6,6 +6,26 @@ register = template.Library()
 
 from django.conf import settings
 
+@register.filter
+def modulo(num, val):
+    return num % val
+    
+@register.filter
+def divide(num, val):
+    return num // val
+
+@register.filter(name='times') 
+def times(number):
+    return range(number)
+
+@register.filter(name='linepad') 
+def linepad(total_lines, available_lines_per_page):
+    lines_on_last_page = total_lines % available_lines_per_page
+    if modulo == 0:
+        return 0
+    else:
+        return available_lines_per_page - lines_on_last_page
+    
 @register.simple_tag()
 def silversly_version():
     version = settings.VERSION
