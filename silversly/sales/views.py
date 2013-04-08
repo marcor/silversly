@@ -329,7 +329,7 @@ def print_ddt(request, id):
         'cart' : cart,
         'ddt': ddt})
 
-def print_invoice(request, id):
+def print_invoice(request, id, reference_ddts=True):
     from common.views import write_pdf
     invoice = get_object_or_404(Invoice, pk=id)
     cart = invoice.cart
@@ -337,13 +337,19 @@ def print_invoice(request, id):
     customer = cart and cart.customer.child() or ddts[0].cart.customer.child()
     shop = Shop.objects.get(site = Site.objects.get_current())
     lines = cart and cart.cartitem_set.count() or 0
-    for ddt in ddts:
-        lines = lines + 1 + ddt.cart.cartitem_set.count()
+    if reference_ddts:
+        for ddt in ddts:
+            lines = lines + 1 + ddt.cart.cartitem_set.count()
+    else:
+        for ddt in ddts:
+            lines += ddt.cart.cartitem_set.count()
+        
     return write_pdf('pdf/invoice_a4.html',{
         'pagesize' : 'a4',
         'shop': shop,
         'cart' : cart,
         'ddts': ddts,
+        'reference_ddts': reference_ddts,
         'invoice': invoice,
         'customer': customer,
         'lines': lines,

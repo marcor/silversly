@@ -139,10 +139,14 @@ td {
         </tr>
         <tr>
             <td colspan="3" style="text-align: left; padding-left: 1cm;">
-                 {% for ddt in ddts %}
+                 {% if reference_ddts %}
+		 {% for ddt in ddts %}
                     {{ ddt.number }}
                     {% if not forloop.last %}, {% endif%}
                  {% endfor %}
+		 {% else %}
+		   &nbsp;
+		 {% endif %}
             </td>
         </tr>
         <tr>
@@ -161,11 +165,13 @@ td {
 
 <div id="items">
 {% for ddt in ddts %}
+    {% if reference_ddts %}
     <table class="right">
         <tr>
         <td class="rif_ddt">*** Ddt n.{{ ddt.number }} del {{ ddt.date }}</td>
         </tr>
     </table>
+    {% endif %}		 
     {% include "pdf/invoice_cart.html"  with cart=ddt.cart %}
 {% empty %}
     {% include "pdf/invoice_cart.html"  with cart=invoice.cart %}
