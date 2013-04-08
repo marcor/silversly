@@ -21,7 +21,7 @@ def times(number):
 @register.filter(name='linepad') 
 def linepad(total_lines, available_lines_per_page):
     lines_on_last_page = total_lines % available_lines_per_page
-    if modulo == 0:
+    if  lines_on_last_page == 0:
         return 0
     else:
         return available_lines_per_page - lines_on_last_page

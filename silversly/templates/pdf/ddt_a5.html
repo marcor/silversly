@@ -34,6 +34,11 @@ tr.first {
   border-top: 0;
 }
 
+tr.last {
+  border-bottom: 0;
+}
+
+
 tr.dark { background-color: #eee }
 
 #seller_stamp pre {
@@ -44,10 +49,10 @@ tr.dark { background-color: #eee }
 
     size: a5;
     /*-pdf-frame-border: 1;*/
-    top: 7cm;
+    top: 6.5cm;
     margin-left: 0.8cm;
     margin-right: 0.8cm;
-    margin-bottom: 1cm;
+    margin-bottom: 0.5cm;
 
     @frame top {
         -pdf-frame-content: header;
@@ -59,7 +64,6 @@ tr.dark { background-color: #eee }
 
 #footer_table {
     text-align: center;
-    margin-top: 2cm;
 }
 
 td {
@@ -87,10 +91,11 @@ td.item_desc {
 
 pre {
     font-family: sansserif;
-    font-size: 1.1em;
     line-height: 150%;
-    padding-left: .5cm;
+    margin: 0;
+    padding: 0;
 }
+p {margin-bottom: 0; padding: 0 }
 .right { text-align: right }
 .box { border-width: 1px }
 
@@ -107,11 +112,11 @@ pre {
     </tr>
     <tr class="first">
 	<td id="seller-stamp">
-	  <pre></pre>
+	  <br/>&nbsp;<br/>&nbsp;
 	</td>
         <td>
-	<span>DOCUMENTO DI TRASPORTO (D.d.t.)</span>
-	N. <span id="ddt_num">{{ ddt.number }}</span> del <span id="ddt_date">{{ ddt.date_short }}</span>
+	<b>DOCUMENTO DI TRASPORTO (D.d.t.)</b>
+	N. <b id="ddt_num">{{ ddt.number }}</b> del <b id="ddt_date">{{ ddt.date_short }}</b>
         </td>
     </tr>
 </table>
@@ -124,13 +129,14 @@ pre {
     </tr>
     <tr class="first">
         <td>
-	    <pre>Spett.le {{ cart.customer.name }}
-{{ ddt.main_address }}</pre>
+	    <p>{{ cart.customer.name }}</p>
+<pre>{{ ddt.main_address }}</pre>
 	</td>
         <td>
             {% if ddt.shipping_address != ddt.main_address %}
 <pre>
 {{ ddt.shipping_address }}</pre>
+             {% else %}IDEM
             {% endif %}
             </td>
         </tr>
@@ -150,19 +156,19 @@ pre {
     </tr>
 
   {% if forloop.last %}
-    {% for i in forloop.counter|linepad:12|add:1|times %}
+    {% for i in forloop.counter|linepad:13|times %}
      <tr>
      <td class="item_qty"></td>
      <td class="item_desc">&nbsp;</td>
       </tr>     
     {% endfor %}
-     
+     <tr class="last"><td class="right" colspan="2">PAG. {{ forloop.counter0|divide:13|add:1 }}</td></tr>     
   {% else %}
-    {% if forloop.counter|divisibleby:12 %}
-        <tr><td class="right" colspan="2">CONTINUA A PAGINA  {{ forloop.counter|divide:12|add:1 }} --></td></tr>
+    {% if forloop.counter|divisibleby:13 %}
+        <tr class="last"><td class="right" colspan="2">PAG. {{ forloop.counter|divide:13 }} - CONTINUA --></td></tr>
 </table>
 <table class="items">
-    <tr class="desc"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
+    <tr class="desc dark"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
 	 <pdf:nextpage />
      {% else %}
     {% endif %}
@@ -185,8 +191,8 @@ pre {
             <td id="data">{{ ddt.shipping_date|date:"H:i - d/m/Y"  }}</td>
         </tr>
 	<tr class="desc">
-	  <td colspan="2">Firma del conducente</td>
-	  <td colspan="2">Firma del cessionario</td>
+	  <td colspan="2">FIRMA DEL CONDUCENTE</td>
+	  <td colspan="2">FIRMA DEL CESSIONARIO</td>
 	</tr>
 	<tr>
 	   <td colspan="2" class="box">&nbsp;<br/></td>
