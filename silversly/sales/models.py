@@ -157,7 +157,7 @@ def prep(decim, factor=100):
 
 sep = settings.RECEIPT_SEPARATOR
 def print_article(desc, price, quantity):
-    return sep.join(("1", desc[:16], prep(quantity, 1000), prep(price), "1", sep, "1", "1")) + sep
+    return sep.join(("1", desc[:16], "0" + prep(quantity, 1000), prep(price), "1", sep, "1", "1")) + sep
 
 def print_discount(discount, markdown):
     return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto %d%%" % markdown, "1", sep)) + "-1" + sep
