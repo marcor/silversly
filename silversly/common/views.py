@@ -129,8 +129,10 @@ def backup(request):
     zf = zipfile.ZipFile(file, mode='w', compression=zipfile.ZIP_DEFLATED)
     zf.write(location, os.path.basename(location))
     zf.close()
-    response = HttpResponse(file.getvalue(), mimetype="application/zip")
+    content = file.getvalue()
+    response = HttpResponse(content, mimetype="application/zip")
     response['Content-Disposition'] = 'attachment; filename=%s.zip' % date.today().strftime("%Y-%m-%d")
+    response['Content-Length'] = len(content)
     return response
 
 def update_silversly(request):
