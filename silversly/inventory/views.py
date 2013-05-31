@@ -54,7 +54,7 @@ def delete_product(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     if request.is_ajax():
         if request.method == "POST" and request.POST["confirm"]:
-            #product.delete()
+            product.delete()
             return HttpResponse(status=200)
         else:
             return render_to_response("product/dialogs/delete.html", {'product': product})
