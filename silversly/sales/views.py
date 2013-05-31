@@ -375,7 +375,7 @@ def add_product_to_cart(request, cart_id=None):
     try:
         cart_item = CartItem.objects.get(product=product, cart=cart)
     except:
-        cart_item = CartItem(product=product, cart=cart)
+        cart_item = CartItem(product=product, desc=product.name, cart=cart)
         #cart_item.update_value()
 
     if request.method == "POST":

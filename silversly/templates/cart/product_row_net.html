@@ -1,6 +1,12 @@
 <tr id="p{{ item.id }}">
     <td><input type="checkbox" disabled="disabled" {% if item.update %}checked="checked"{% endif %}" /></td>
-	<td><a href="{% url show_product item.product.id %}">{{ item.product.name}}</a></td>
+	<td>
+	{% if item.product %}
+	<a href="{% url show_product item.product.id %}">{{ item.desc}}</a>
+	{% else %}
+	{{ item.desc}}
+	{% endif %}
+	</td>
 	<td class="decimal">{{ item.quantity}}</td>
     <td class="decimal" style="background-color: #ffe">{{ item.final_net_price }}</td>
 	<td class="decimal" style="color:#666">{{ item.discount }}%</td>
