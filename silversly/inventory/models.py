@@ -100,9 +100,11 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if self.quantity != self.__original_quantity:
-            self.updated = date.today()
+            #self.updated = date.today()
             self.__original_quantity = self.quantity
-        super(Product, self).save(*args, **kwargs)
+            super(Product, self).save(*args, **kwargs)
+        else:
+             return
 
     def natural_key(self):
         return (self.name,)

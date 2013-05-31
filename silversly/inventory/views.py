@@ -111,14 +111,15 @@ def products_to_pdf(request):
     for c in categories:
         c.total_value = Decimal("0.00")
         c.total_retail_value = Decimal("0.00")
-        ps = Product.objects.filter(category = c).order_by("name")
+        ps = Product.objects.filter(category = c, quantity__gt = 0).order_by("name")
 
         for p in ps:
             p.total_value = p.get_total_value()
             c.total_value += p.total_value
             c.total_retail_value += p.get_total_retail_value()
         c.ps = ps
-        cs.append(c)
+        if c.total_retail_value > 0:
+            cs.append(c)
         inventory_value += c.total_value
         inventory_retail_value += c.total_retail_value
 
