@@ -14,7 +14,7 @@ precision = Decimal(".01")
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
-    product = models.ForeignKey('inventory.Product', verbose_name = _("Prodotto"))
+    product = models.ForeignKey('inventory.Product', verbose_name = _("Prodotto"), null=True, on_delete=models.SET_NULL)
     desc = models.CharField(_("Descrizione"), max_length = 60)
     quantity = models.DecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
     discount = models.PositiveSmallIntegerField(_("Sconto %"), default = 0)
