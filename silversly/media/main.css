@@ -299,7 +299,15 @@ a:hover {
 }
 
 #infobox div {
-	padding-left: 1em;
+	padding-left: 10px;
+}
+
+#infobox .price {
+    font-size: 2em;
+}
+
+#infobox #qty_value {
+    font-size: 1.8em;
 }
 
 #cartbox {

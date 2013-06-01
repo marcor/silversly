@@ -5,17 +5,18 @@
 </div>
 
 <!--<div class="code">Codice: <span></span></div>-->
-<div class="quantity">Disponibilit&agrave;:
-    <span id="qty_value"> {{ product.quantity }}</span> {{ product.unit }}
-    <span style="font-size: 0.7em">(al <span id="updated_on">{{ product.updated|date:"d/m/y" }}</span>
+<div class="quantity">
+    <span id="qty_value" {% if product.quantity < product.min_quantity %} style="color: red"{% endif %}>{{ product.quantity }} </span><span style="font-size: 1.2em">{{ product.unit }} </span>
+    <span style="font-size: 0.7em; padding-left: 5px;">al <span id="updated_on">{{ product.updated|date:"d/m/y" }}</span>
     {% if not product.is_up_to_date %}
     <a id="make_up_to_date" href="{% url ajax_mark_up_to_date product.pk %}"><img src="/media/img/okay.png" width="15px"/></a>
     {% endif %}
-    )</span>
-    {% if product.quantity < product.min_quantity %} <span style="color:red">(sottoscorta)</span>{% endif %}
+    </span>
+    
 </div>
-<div class="price">Prezzo al pubblico: <span>{{ price.gross }}</span>&euro;</div>
-<div class="suppliers">
+<hr style="margin: 5px"/>
+<div class="price">{{ price.gross }} <span style="font-size: 0.75em">&euro;</span></div>
+<div class="suppliers" style="font-size: 0.8em">
     {% include "supply/list_simple.html" %}
 </div>
 
