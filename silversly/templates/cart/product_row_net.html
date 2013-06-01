@@ -12,7 +12,9 @@
 	<td class="decimal" style="color:#666">{{ item.discount }}%</td>
     <td class="decimal" style="background-color: #efe">{{ item.net_total.0 }}</td>
     <td class="actions" style="border: None">
+	       {% if item.product %}
 		<a class="edit_product" href="{% url add_product_to_cart cart.id %}?product_pk={{ item.product.id}}" title="Modifica"><img src="/media/img/edit-small.png"/></a>
+	      {% endif %}
 		<a class="delete_product" href="{% url remove_product_from_cart item.id %}" title="Togli questo articolo"><img src="/media/img/cancel-small.png"/></a>
     </td>
 </tr>

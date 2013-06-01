@@ -55,7 +55,33 @@ class CartItem(models.Model):
         discount = (total * self.discount / 100).quantize(precision)
         value = (total - discount).quantize(precision)
         return (value, discount)
-
+    
+    def update_inventory(self):
+        if self.update and self.product:
+            p = self.product
+            p.quantity -= self.quantity
+            p.save()
+            p.sync_to_others("quantity")
+    
+    def restore_inventory(self):
+        if self.update and self.product:
+            p = self.product
+            p.quantity += self.quantity
+            p.save()
+            p.sync_to_others("quantity")
+    
+    def correct_inventory(self, relative_to):
+        product = self.product
+        old_item = relative_to
+        value = 0
+        if old_item.update:
+            value += old_item.quantity
+        if self.update:
+            value -= self.quantity
+        if value:
+            product.quantity += value
+            product.save()
+    
     def save(self, *args, **kwargs):
         self.update_value()
         super(CartItem, self).save(*args, **kwargs)

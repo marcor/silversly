@@ -5,6 +5,7 @@ from people.models import *
 from django.core.urlresolvers import reverse
 from django.db.models import Max
 import datetime
+from copy import deepcopy
 from django.conf import settings
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -119,11 +120,7 @@ def new_receipt(request):
             cart.current = False
             cart.save()
             for item in cart.cartitem_set.all():
-                if item.update:
-                    product = item.product
-                    product.quantity -= item.quantity
-                    product.save()
-                    product.sync_to_others("quantity")
+                item.update_inventory()
             close = Settings.objects.get(site = Site.objects.get_current()).close_receipts
             scontrino.send_to_register(close=close)
             #return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
@@ -173,12 +170,7 @@ def new_invoice_from_cart(request, cart_id):
             cart.current = False
             cart.save()
             for item in cart.cartitem_set.all():
-                if item.update:
-                    product = item.product
-                    product.quantity -= item.quantity
-                    product.save()
-                    product.sync_to_others("quantity")
-
+                item.update_inventory()
             invoice.cart = cart
             invoice.total_net = cart.discounted_net_total() + invoice.costs
             if invoice.payment_method == "ok":
@@ -295,11 +287,7 @@ def new_ddt(request):
             cart.current = False
             cart.save()
             for item in cart.cartitem_set.all():
-                if item.update:
-                    product = item.product
-                    product.quantity -= item.quantity
-                    product.save()
-                    product.sync_to_others("quantity")
+                item.update_inventory()
             return HttpResponse(reverse("show_ddt", args=(ddt.id,)), mimetype="text/plain")
         else:
             bad_request = True
@@ -375,15 +363,21 @@ def add_product_to_cart(request, cart_id=None):
     try:
         cart_item = CartItem.objects.get(product=product, cart=cart)
     except:
-        cart_item = CartItem(product=product, desc=product.name, cart=cart)
+        cart_item = CartItem(product=product, desc=product.name, cart=cart, quantity=0)
         #cart_item.update_value()
-
+    old_cart_item = deepcopy(cart_item)
+    
     if request.method == "POST":
         form = SellProductForm(request.POST, instance=cart_item)
         if form.is_valid():
             form.save()
             cart.update_value()
             cart.save()
+            # if the cart content has already been removed from the inventory...
+            if cart.receipt:
+                cart_item.correct_inventory(relative_to=old_cart_item)
+                # this gives a consistent result for ddts only, as of now
+                # todo: call an "amend" method for invoices and cash register receipts?
             return render_to_response('cart/product_row.html',  {'cart': cart, 'item':  cart_item})
         else:
             bad_request = True
@@ -398,6 +392,9 @@ def remove_product_from_cart(request, item_id):
     try:
         item = CartItem.objects.get(pk = item_id)
         cart = item.cart
+        # if the cart content has already been removed from the inventory...
+        if cart.receipt:
+            item.restore_inventory()
         item.delete()
         cart.update_value()
         cart.save()
