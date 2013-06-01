@@ -306,6 +306,10 @@ a:hover {
     font-size: 2em;
 }
 
+#infobox .quantity {
+    float: right;
+}
+
 #infobox #qty_value {
     font-size: 1.8em;
 }
