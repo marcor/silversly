@@ -11,11 +11,13 @@
                 <img src="/media/img/reload.png" />
                 </a>
             </li>
+{% if not cart.receipt %}
             <li id="suspend" >
                 <a href="{% url suspend_cart cart.id %}" title="Metti in sospeso">
                 <img src="/media/img/save.png" />
                 </a>
             </li>
+{% endif %}
 {% if cart.current %}
             <li class="retail" id="new_receipt">
                 <a href="#" title="Emetti uno scontrino">
