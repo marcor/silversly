@@ -16,7 +16,7 @@ from django.utils import simplejson
 from decimal import Decimal
 from common.models import *
 from common.views import homepage
-
+from inventory.views import find_product
 
 def edit_cart(request, cart_id=None):
     if cart_id:
@@ -54,6 +54,7 @@ def edit_cart_customer(request, cart_id):
             cart.rounded = False
     cart.update_value()
     cart.save()
+    
     return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
 def edit_cart_discount(request, cart_id):
@@ -107,6 +108,36 @@ def reload_cart(request, cart_id):
     cart.update_value(deep=True)
     cart.save()
     return redirect(edit_cart, cart_id)
+
+def merge_carts(source, dest):
+	for item in source.cartitem_set.all():
+		item.cart = dest
+		item.save()
+	dest.update_value()
+	return dest
+
+def suspend_cart(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
+    suspended_cart = cart.get_suspended()
+    if suspended_cart:
+        merge_carts(cart, suspended_cart)
+        suspended_cart.save() 
+        cart.delete()
+        return redirect(edit_cart, suspended_cart.id)
+    else:
+        cart.suspended = True
+        cart.current = False
+        cart.save()
+        return redirect(edit_cart, cart_id)
+    
+def merge_suspended(request, cart_id):
+     cart = get_object_or_404(Cart, pk=cart_id)
+     suspended_cart = get_object_or_404(Cart, customer=cart.customer, suspended = True)
+     merge_carts(suspended_cart, cart)
+     cart.save()
+     suspended_cart.delete()
+     cart.suspended_cart = None
+     return redirect(edit_cart, cart.id) 
 
 def new_receipt(request):
     bad_request = False
@@ -374,7 +405,11 @@ def add_product_to_cart(request, cart_id=None):
             cart.update_value()
             cart.save()
             # if the cart content has already been removed from the inventory...
-            if cart.receipt:
+            try:
+                receipt = cart.receipt
+            except:
+                receipt = None
+            if receipt:
                 cart_item.correct_inventory(relative_to=old_cart_item)
                 # this gives a consistent result for ddts only, as of now
                 # todo: call an "amend" method for invoices and cash register receipts?
@@ -393,9 +428,16 @@ def remove_product_from_cart(request, item_id):
         item = CartItem.objects.get(pk = item_id)
         cart = item.cart
         # if the cart content has already been removed from the inventory...
-        if cart.receipt:
+        try:
+            receipt = cart.receipt
+        except:
+                receipt = None
+        if receipt:
             item.restore_inventory()
         item.delete()
+        if cart.suspended and cart.is_empty():
+            cart.delete()
+            return redirect(find_product)
         cart.update_value()
         cart.save()
         return redirect(edit_cart, cart.id)

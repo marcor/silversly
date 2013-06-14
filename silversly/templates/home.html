@@ -93,6 +93,24 @@
             {% endif %}
         </div>
     
+        <h3>Acquisti in sospeso</h3>
+        <div class="pane">
+            {% if suspended_carts %}
+                <table >
+
+                {% for cart in suspended_carts %}
+                <tr>
+                    <td><a href="{% url revise_cart cart.id %}">{{cart.customer.name}}</a></td>
+                    <td class="decimal">{{cart.discounted_total}}&euro;</td>
+                </tr>
+                {% endfor %}
+                </table>
+            {% else %}
+                <p>Nessuno.</p>
+            {% endif %}
+        
+	</div>
+	
         <h3>Fatture da emettere</h3>
         <div class="pane">
             {% if need_invoice %}

@@ -11,7 +11,11 @@
                 <img src="/media/img/reload.png" />
                 </a>
             </li>
-
+            <li id="suspend" >
+                <a href="{% url suspend_cart cart.id %}" title="Metti in sospeso">
+                <img src="/media/img/save.png" />
+                </a>
+            </li>
 {% if cart.current %}
             <li class="retail" id="new_receipt">
                 <a href="#" title="Emetti uno scontrino">
@@ -26,6 +30,13 @@
             <li class="invoice" id="new_invoice">
                 <a href="#" title="Fattura immediata">
                 <img src="/media/img/invoice.png" />
+                </a>
+            </li>
+{% endif %}
+{% if cart.suspended %}
+            <li id="put_suspended_in_cart">
+                <a href="#" title="Aggiungi tutto al carrello">
+                <img src="/media/img/cart_insert.png" />
                 </a>
             </li>
 {% endif %}

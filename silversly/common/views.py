@@ -52,6 +52,7 @@ def homepage(request):
     last_receipts = Scontrino.objects.order_by("-date")[:5]
     last_ddts = Ddt.objects.all()[:3]
     open_ddts = Ddt.objects.filter(invoice__isnull = True).select_related("cart", "cart__customer")
+    suspended_carts = Cart.objects.select_related("customer").filter(suspended=True)
     customers = {}
     for ddt in open_ddts:
         customer = ddt.cart.customer
@@ -70,6 +71,7 @@ def homepage(request):
         'last_ddts': last_ddts,
         'need_invoice': customers,
         'last_invoices': last_invoices,
+        'suspended_carts': suspended_carts,
         'debtors': list(debtors)})
 
 def show_settings(request):
