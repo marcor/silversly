@@ -314,6 +314,11 @@ a:hover {
     font-size: 1.8em;
 }
 
+#infobox #sell_in_new_cart {
+	float: right;
+	border: 2px solid green;
+}
+
 #carts {
 	position: fixed;
 	bottom: 20px;
