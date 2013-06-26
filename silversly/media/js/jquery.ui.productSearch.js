@@ -54,7 +54,7 @@ $.extend($.ui.autocomplete.prototype.options,
                     "success": function(results) {
                         if (results.length > 0) { 
                             if (results[0].perfect_match) {
-                                widget.element.trigger("showResult", results[0]);
+                                widget.element.trigger("showResult", [results[0], true]);
                                 response([])
                             } else {
                                 response(results);
@@ -77,9 +77,9 @@ $.extend($.ui.autocomplete.prototype.options,
                     return false;
             },
             select: function( event, ui ) {
-                    /*$( "#products" ).val( ui.item.fields.name );*/
                     if (ui.item) {
-                        $(this).trigger("showResult", ui.item);
+			/* true indicates that the item has been selected */
+                        $(this).trigger("showResult", [ui.item, true]);
                     }
                     return false;
             }

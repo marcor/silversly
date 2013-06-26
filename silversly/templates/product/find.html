@@ -84,13 +84,19 @@
         };
 
 
-        $("#main").bind("showResult", function(e, product) {
+        $("#main").bind("showResult", function(e, product, confirmed) {
             chosenProduct = product;
             var box = $("#infobox").hide();
-
+	
             var show_box = function (content) {
                 box.html(content).show();
-                $("#qty_value").editable(
+                $(".button", box).button();
+		if (confirmed) {
+                    /* product focused and selected, or perfect match */		
+		    $( "#sell", box).trigger("focus");
+		}
+		
+		$("#qty_value").editable(
                     function (edited, settings) {
                         var updated = 'errore';
                         $.ajax({
@@ -125,13 +131,9 @@
                 return;
             }
             $("#message").hide();
-
+		
             if (product.pk in cache) {
                 show_box(cache[product.pk]);
-                $(".button", box).button();
-                if (product.perfect_match) {
-                    $( "#sell" ).trigger("focus");
-                }
             }
             else {
                 $.get("{% url show_infobox %}",
@@ -139,10 +141,6 @@
                     function(data) {
                         cache[product.pk] = data;
                         show_box(data);
-                        $(".button", box).button();
-                        if (product.perfect_match) {
-                            $( "#sell" ).trigger("focus");
-                        }
                     }
                 );
             };
