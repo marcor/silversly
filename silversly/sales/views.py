@@ -150,8 +150,6 @@ def new_receipt(request):
             form.save()
             cart.current = False
             cart.save()
-            for item in cart.cartitem_set.all():
-                item.update_inventory()
             close = Settings.objects.get(site = Site.objects.get_current()).close_receipts
             scontrino.send_to_register(close=close)
             #return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
@@ -200,8 +198,6 @@ def new_invoice_from_cart(request, cart_id):
             form.save(commit = False)
             cart.current = False
             cart.save()
-            for item in cart.cartitem_set.all():
-                item.update_inventory()
             invoice.cart = cart
             invoice.total_net = cart.discounted_net_total() + invoice.costs
             if invoice.payment_method == "ok":
@@ -317,8 +313,6 @@ def new_ddt(request):
             form.save()
             cart.current = False
             cart.save()
-            for item in cart.cartitem_set.all():
-                item.update_inventory()
             return HttpResponse(reverse("show_ddt", args=(ddt.id,)), mimetype="text/plain")
         else:
             bad_request = True
@@ -406,15 +400,7 @@ def add_product_to_cart(request, cart_id=None):
             form.save()
             cart.update_value()
             cart.save()
-            # if the cart content has already been removed from the inventory...
-            try:
-                receipt = cart.receipt
-            except:
-                receipt = None
-            if receipt:
-                cart_item.correct_inventory(relative_to=old_cart_item)
-                # this gives a consistent result for ddts only, as of now
-                # todo: call an "amend" method for invoices and cash register receipts?
+            cart_item.correct_inventory(relative_to=old_cart_item)
             return render_to_response('cart/product_row.html',  {'cart': cart, 'item':  cart_item})
         else:
             bad_request = True
@@ -429,13 +415,7 @@ def remove_product_from_cart(request, item_id):
     try:
         item = CartItem.objects.get(pk = item_id)
         cart = item.cart
-        # if the cart content has already been removed from the inventory...
-        try:
-            receipt = cart.receipt
-        except:
-                receipt = None
-        if receipt:
-            item.restore_inventory()
+        item.restore_inventory()
         item.delete()
         open_carts = Cart.objects.filter(current = True)
         if (cart.suspended or open_carts.count() > 1) and cart.is_empty():

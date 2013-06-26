@@ -317,12 +317,12 @@ a:hover {
 #carts {
 	position: fixed;
 	bottom: 20px;
-	right: -40px;
+	right: 40px;
 }
 
 .cartbox {
 	width: 230px;
-	display: none;
+	
 	float: left;
 }
 
