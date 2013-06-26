@@ -49,7 +49,25 @@
 <script type="text/javascript">
     var discount = {{ cart.discount }};
     setupButtons = function(c) {
-        {% if cart.final_total %}
+        {% if cart.suspended %}
+        $("#suspend").hide();
+     {% else %}
+	if (c != null) {
+	     $("#suspend").show();
+        }
+	else {
+	     $("#suspend").hide();
+        }
+	{% if cart.get_suspended %}
+	   $("#import_suspended").html("C'&egrave; una <a href=\"{% url revise_cart cart.suspended_cart.id %}\">lista in sospeso</a> per questo cliente. <a href=\"{% url merge_suspended cart.id %}\">Aggiungila al carrello.</a>").show();
+	{% else %}
+           $("#import_suspended").hide();
+	{% endif %}
+     {% endif %}
+    
+	
+	
+	{% if cart.final_total %}
             if (c != null && c.is_company) {
                 $(".retail").hide();
                 $(".invoice").show();
@@ -59,8 +77,9 @@
                 $(".invoice").hide();
             }
     {% else %}
-        $(".retail, .invoice").hide();
+        $(".retail, .invoice, #suspend").hide();
     {% endif %}
+    
     }
     setupButtons({{ customer.json|safe }});
 </script>

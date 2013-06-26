@@ -29,6 +29,8 @@ urlpatterns = patterns('sales.views',
     url(r'carrello/(\d+)/totali/json', 'get_cart_summary', name='get_cart_json_summary', kwargs={'json': True }),
     
     url(r'carrello/(\d+)/ricalcola', 'reload_cart', name='reload_cart'),
+    url(r'carrello/(\d+)/sospendi', 'suspend_cart', name='suspend_cart'),
+    url(r'carrello/(\d+)/aggiungi_sospesi', 'merge_suspended', name='merge_suspended'),
 
     url(r'ddt/nuovo$', 'new_ddt', name='new_ddt'),
     url(r'archivio/ddt/(\d+)/stampa$', 'print_ddt', name='print_ddt'),

@@ -168,7 +168,7 @@ p {margin-bottom: 0; padding: 0 }
 {% for item in cart.cartitem_set.all %}
     <tr class="tall">
         <td  class="right item_qty">{{ item.quantity }}{{ item.product.unit }}</td>
-        <td class="item_desc">{{ item.product.name }}</td>
+        <td class="item_desc">{{ item.desc }}</td>
     </tr>
 
   {% if forloop.last %}

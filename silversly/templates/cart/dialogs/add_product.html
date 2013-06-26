@@ -2,6 +2,14 @@
     <script type="text/javascript">
         $(function() {
             $("#id_quantity").trigger('focus');
+	    
+	    {% if new_cart %}
+	    
+	      var cart = $('{% filter escapejs %}{% include "product/snippets/cartbox.html" %}{% endfilter %}').appendTo($("#carts"));
+	      $("a", cart).button();
+	      chosenCart = {{ cart.pk }};
+	      set_current_cart(cart);
+	    {% endif %}
         });
     </script>    
     <form id="add_product_to_cart_form" action="{% url add_product_to_cart cart.id %}" method="post">

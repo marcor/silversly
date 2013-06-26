@@ -12,11 +12,11 @@
 
     {% block head %} {% endblock %}
     <script type="text/javascript">
-        $.fn.modal = function(options) {
+        $.fn.modal = function(options, params) {
             var load_url = options ? options.url : null;
-            var dest = this;
+	    var dest = this;
             if (load_url) {
-                $.get(load_url, function(data, status) {
+                $.get(load_url, params, function(data, status) {
                     if (status == "success") {
                         return dest.html(data).dialog(
                             $.extend({
@@ -33,7 +33,8 @@
                 }, options)
             );
         }
-
+	
+	{% block globalvars %}{% endblock %}
 
         $(function() {
 		$(".navlinks img").css("opacity", "0.2");
@@ -103,11 +104,11 @@
         </div>
     </div>
     
-    {% value_from_settings "DEBUG" as debug %}
+    <!--{% value_from_settings "DEBUG" as debug %}
     {% if  debug %}
         <div style="padding: 10px;font-size: 2em; text-align: center; position: absolute;width: 90%;margin: 10px 30px; border: 2px solid green; background-color: #cfc; bottom: 10px;">Archivio di prova!</div>
     {% endif %}
-    
+    -->
 
 
 </body>

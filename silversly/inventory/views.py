@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from models import *
 from forms import *
 from people.models import Supplier
-from sales.models import CartItem
+from sales.models import CartItem, Cart
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
 from django.core import serializers
@@ -18,7 +18,12 @@ from datetime import date
 
 def find_product(request):
     # just shows a minimalistic search form (by name and code)
-    return render_to_response('product/find.html')
+    carts = Cart.objects.filter(current=True)
+    if len(carts) == 0:
+        new_cart = Cart()
+        new_cart.save()
+        carts = [new_cart]
+    return render_to_response('product/find.html', {'carts': carts})
 
 def show_product(request, id):
     product = get_object_or_404(Product, pk=id)
@@ -54,7 +59,7 @@ def delete_product(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     if request.is_ajax():
         if request.method == "POST" and request.POST["confirm"]:
-            #product.delete()
+            product.delete()
             return HttpResponse(status=200)
         else:
             return render_to_response("product/dialogs/delete.html", {'product': product})

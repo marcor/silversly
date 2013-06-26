@@ -5,6 +5,7 @@ from people.models import *
 from django.core.urlresolvers import reverse
 from django.db.models import Max
 import datetime
+from copy import deepcopy
 from django.conf import settings
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -15,7 +16,7 @@ from django.utils import simplejson
 from decimal import Decimal
 from common.models import *
 from common.views import homepage
-
+from inventory.views import find_product
 
 def edit_cart(request, cart_id=None):
     if cart_id:
@@ -53,6 +54,7 @@ def edit_cart_customer(request, cart_id):
             cart.rounded = False
     cart.update_value()
     cart.save()
+    
     return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
 def edit_cart_discount(request, cart_id):
@@ -83,7 +85,7 @@ def get_cart_summary(request, cart_id=None, json=False):
     if cart_id:
         cart = get_object_or_404(Cart, pk=cart_id)
     else:
-        cart = get_object_or_404(Cart, current=True)
+        cart = get_object_or_404(Cart, pk=request.GET["cart_pk"])
     if json:
         json_serializer = serializers.get_serializer("json")()
         data = json_serializer.serialize((cart,), fields = ("final_total", "final_discount"))
@@ -107,6 +109,36 @@ def reload_cart(request, cart_id):
     cart.save()
     return redirect(edit_cart, cart_id)
 
+def merge_carts(source, dest):
+	for item in source.cartitem_set.all():
+		item.cart = dest
+		item.save()
+	dest.update_value()
+	return dest
+
+def suspend_cart(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
+    suspended_cart = cart.get_suspended()
+    if suspended_cart:
+        merge_carts(cart, suspended_cart)
+        suspended_cart.save() 
+        cart.delete()
+        return redirect(edit_cart, suspended_cart.id)
+    else:
+        cart.suspended = True
+        cart.current = False
+        cart.save()
+        return redirect(edit_cart, cart_id)
+    
+def merge_suspended(request, cart_id):
+     cart = get_object_or_404(Cart, pk=cart_id)
+     suspended_cart = get_object_or_404(Cart, customer=cart.customer, suspended = True)
+     merge_carts(suspended_cart, cart)
+     cart.save()
+     suspended_cart.delete()
+     cart.suspended_cart = None
+     return redirect(edit_cart, cart.id) 
+
 def new_receipt(request):
     bad_request = False
     cart = get_object_or_404(Cart, current = True)
@@ -119,11 +151,7 @@ def new_receipt(request):
             cart.current = False
             cart.save()
             for item in cart.cartitem_set.all():
-                if item.update:
-                    product = item.product
-                    product.quantity -= item.quantity
-                    product.save()
-                    product.sync_to_others("quantity")
+                item.update_inventory()
             close = Settings.objects.get(site = Site.objects.get_current()).close_receipts
             scontrino.send_to_register(close=close)
             #return HttpResponse(reverse("show_receipt", args=(scontrino.id,)), mimetype="text/plain")
@@ -173,12 +201,7 @@ def new_invoice_from_cart(request, cart_id):
             cart.current = False
             cart.save()
             for item in cart.cartitem_set.all():
-                if item.update:
-                    product = item.product
-                    product.quantity -= item.quantity
-                    product.save()
-                    product.sync_to_others("quantity")
-
+                item.update_inventory()
             invoice.cart = cart
             invoice.total_net = cart.discounted_net_total() + invoice.costs
             if invoice.payment_method == "ok":
@@ -295,11 +318,7 @@ def new_ddt(request):
             cart.current = False
             cart.save()
             for item in cart.cartitem_set.all():
-                if item.update:
-                    product = item.product
-                    product.quantity -= item.quantity
-                    product.save()
-                    product.sync_to_others("quantity")
+                item.update_inventory()
             return HttpResponse(reverse("show_ddt", args=(ddt.id,)), mimetype="text/plain")
         else:
             bad_request = True
@@ -357,13 +376,15 @@ def print_invoice(request, id, reference_ddts=True):
 
 def add_product_to_cart(request, cart_id=None):
     bad_request = False
+    new_cart = False
     if not cart_id:
         try:
-            cart = Cart.objects.get(current = True)
+            cart = Cart.objects.get(pk = request.GET["cart_pk"])
         except:
             cart = Cart()
             cart.update_value()
             cart.save()
+            new_cart = True
     else:
         cart = Cart.objects.get(pk=cart_id)
         
@@ -375,21 +396,31 @@ def add_product_to_cart(request, cart_id=None):
     try:
         cart_item = CartItem.objects.get(product=product, cart=cart)
     except:
-        cart_item = CartItem(product=product, cart=cart)
+        cart_item = CartItem(product=product, desc=product.name, cart=cart, quantity=0)
         #cart_item.update_value()
-
+    old_cart_item = deepcopy(cart_item)
+    
     if request.method == "POST":
         form = SellProductForm(request.POST, instance=cart_item)
         if form.is_valid():
             form.save()
             cart.update_value()
             cart.save()
+            # if the cart content has already been removed from the inventory...
+            try:
+                receipt = cart.receipt
+            except:
+                receipt = None
+            if receipt:
+                cart_item.correct_inventory(relative_to=old_cart_item)
+                # this gives a consistent result for ddts only, as of now
+                # todo: call an "amend" method for invoices and cash register receipts?
             return render_to_response('cart/product_row.html',  {'cart': cart, 'item':  cart_item})
         else:
             bad_request = True
     else:
         form = SellProductForm(instance=cart_item)
-    response = render_to_response('cart/dialogs/add_product.html',  {'form': form, 'cart': cart, 'item': cart_item})
+    response = render_to_response('cart/dialogs/add_product.html',  {'form': form, 'cart': cart, 'item': cart_item, 'new_cart': new_cart})
     if bad_request:
         response.status_code = 400
     return response
@@ -398,7 +429,18 @@ def remove_product_from_cart(request, item_id):
     try:
         item = CartItem.objects.get(pk = item_id)
         cart = item.cart
+        # if the cart content has already been removed from the inventory...
+        try:
+            receipt = cart.receipt
+        except:
+                receipt = None
+        if receipt:
+            item.restore_inventory()
         item.delete()
+        open_carts = Cart.objects.filter(current = True)
+        if (cart.suspended or open_carts.count() > 1) and cart.is_empty():
+            cart.delete()
+            return redirect(find_product)
         cart.update_value()
         cart.save()
         return redirect(edit_cart, cart.id)

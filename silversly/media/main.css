@@ -299,27 +299,48 @@ a:hover {
 }
 
 #infobox div {
-	padding-left: 1em;
+	padding-left: 10px;
 }
 
-#cartbox {
+#infobox .price {
+    font-size: 2em;
+}
+
+#infobox .quantity {
+    float: right;
+}
+
+#infobox #qty_value {
+    font-size: 1.8em;
+}
+
+#carts {
 	position: fixed;
 	bottom: 20px;
-	width: 230px;
 	right: -40px;
-	display: none;
 }
 
-#cartbox a {
+.cartbox {
+	width: 230px;
+	display: none;
+	float: left;
+}
+
+.cartbox.current a {
+	border-color: red;
+	border-width: 2px;
+}
+
+.cartbox a {
 	float: left;
 	margin-right: 7px;
 }
 
-#cartbox p {
+.cartbox p {
 	margin: 5px 2px;
 }
 
-#cartbox p span {
+.cartbox p span {
 	font-size: 1.2em;
 }
 

@@ -1,6 +1,12 @@
 {% extends "cart/main.html" %}
 
-{% block title %}Carrello{% endblock %}
+{% block title %}
+   {% if cart.suspended %}
+	Lista in sospeso
+   {% else %}
+        Carrello
+    {% endif %}	
+{% endblock %}
 
 {% block head %}
     <script type="text/javascript" src="/media/js/jquery.ui.productSearch.js"></script>
@@ -51,6 +57,8 @@
     </span>
     </h1>
     
+    <div id="import_suspended" style="display: none; color: red">C'&egrave; una lista in sospeso per questo cliente. <a href="{% url merge_suspended cart.id %}">Aggiungila al carrello.</a><br/></div>
+    
     {% else %}
         <h1 style="display:none">Carrello di
     <span id="customer_choice">
@@ -66,9 +74,13 @@
     </span>
     </h1>
         
-        {% with cart.receipt.child as ddt %}
-	<h1>Stai correggendo il carrello relativo al <a href="{% url show_ddt ddt.id %}"> DdT n. {{ ddt.number }}</a></h1>
-	{% endwith %}
+	{% if cart.receipt.child.type == "ddt" %}
+          {% with cart.receipt.child as ddt %}
+	      <h1>Carrello di {{ cart.customer.name }} relativo al <a href="{% url show_ddt ddt.id %}"> DdT n. {{ ddt.number }}</a></h1>
+	  {% endwith %}
+	{% elif cart.suspended %}
+	      <h1>Lista in sospeso di <a href="{% url show_customer cart.customer.id %}">{{ cart.customer.name }}</a></h1>
+	{% endif %}
     {% endif %}
 
 {% endblock %}
@@ -90,7 +102,7 @@
 
         $("#open_customer_search").button({text: false, icons: { primary: 'ui-icon-search' }});
         $("#reset_customer").button({text: false, icons: { primary: 'ui-icon-arrowreturn-1-w' }});
-        update_customer(customer, false)
+        update_customer(customer, false);
         close_customer_search();
         $("#new_receipt a").trigger("focus");
     };

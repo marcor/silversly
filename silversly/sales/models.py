@@ -14,7 +14,8 @@ precision = Decimal(".01")
 
 class CartItem(models.Model):
     cart = models.ForeignKey('Cart')
-    product = models.ForeignKey('inventory.Product', verbose_name = _("Prodotto"))
+    product = models.ForeignKey('inventory.Product', verbose_name = _("Prodotto"), null=True, on_delete=models.SET_NULL)
+    desc = models.CharField(_("Descrizione"), max_length = 60)
     quantity = models.DecimalField(_(u"Quantità"), max_digits = 7, decimal_places = 2)
     discount = models.PositiveSmallIntegerField(_("Sconto %"), default = 0)
     update = models.BooleanField(_("Scarica dal magazzino"), default = True)
@@ -54,7 +55,33 @@ class CartItem(models.Model):
         discount = (total * self.discount / 100).quantize(precision)
         value = (total - discount).quantize(precision)
         return (value, discount)
-
+    
+    def update_inventory(self):
+        if self.update and self.product:
+            p = self.product
+            p.quantity -= self.quantity
+            p.save()
+            p.sync_to_others("quantity")
+    
+    def restore_inventory(self):
+        if self.update and self.product:
+            p = self.product
+            p.quantity += self.quantity
+            p.save()
+            p.sync_to_others("quantity")
+    
+    def correct_inventory(self, relative_to):
+        product = self.product
+        old_item = relative_to
+        value = 0
+        if old_item.update:
+            value += old_item.quantity
+        if self.update:
+            value -= self.quantity
+        if value:
+            product.quantity += value
+            product.save()
+    
     def save(self, *args, **kwargs):
         self.update_value()
         super(CartItem, self).save(*args, **kwargs)
@@ -79,6 +106,7 @@ def apply_vat(value):
 
 class Cart(models.Model):
     current = models.BooleanField(default = True)
+    suspended = models.BooleanField(default = False)
     customer = models.ForeignKey("people.Customer", verbose_name = _("Cliente"), null = True)
     discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
     rounded = models.BooleanField(_("Arrotonda il totale"), default = False)
@@ -92,12 +120,25 @@ class Cart(models.Model):
     final_total = FixedDecimalField(_("Totale"), max_digits = 7, decimal_places = 2, null=True)
     final_discount = FixedDecimalField(_("Sconto calcolato"), max_digits = 7, decimal_places = 2, null=True)
 
+
+    def get_suspended(self):
+        if hasattr(self, "suspended_cart"):
+              return self.suspended_cart
+        if self.customer and Cart.objects.filter(customer=self.customer, suspended = True):
+            self.suspended_cart = Cart.objects.get(customer = self.customer, suspended = True)
+        else:
+            self.suspended_cart = None		
+        return self.suspended_cart
+
+    def is_empty(self):
+        return self.cartitem_set.count() == 0
+
     def discounted_total(self):
         return self.final_total - self.final_discount
 
     def discounted_net_total(self):
         return self.final_net_total - self.final_net_discount
-
+    
     def apply_vat(self):
         return apply_vat(self.discounted_net_total())
 
