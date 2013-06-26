@@ -36,6 +36,7 @@
         };
         
 	set_current_cart = function (cart) {
+		chosenCart = cartbox.attr("id").split("_")[1];
 		$(".cartbox.current").removeClass("current");
 		cart.addClass("current");
 		return cart;
@@ -204,7 +205,6 @@
         $(".cartbox a").button().live('click', function(event) {
 		var cartbox = $(this).parent();
 		if (!cartbox.hasClass("current")) {
-			chosenCart = cartbox.attr("id").split("_")[1];
 			set_current_cart(cartbox);
 			event.preventDefault();
 		};			
