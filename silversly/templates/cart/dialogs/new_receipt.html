@@ -1,10 +1,10 @@
 <div>
     <script type="text/javascript">
         $(function() {
-            $("#id_payedz").trigger('focus');
+            $("#id_payed").trigger('focus');
         });
     </script>
-    <form id="new_receipt_form" action="{% url new_receipt %}" method="post">
+    <form id="new_receipt_form" action="{% url new_receipt cart.id %}" method="post">
         {{ form.as_p }}
 	    <input id="save_new_receipt" type="submit" value="Accetta" />
     </form>

@@ -23,7 +23,7 @@ def edit_cart(request, cart_id=None):
         cart = get_object_or_404(Cart, pk=cart_id)
     else:               
         try:
-            cart = get_object_or_404(Cart, current=True)
+            cart = Cart.objects.filter(current=True)[0]
         except:
             cart = Cart()
             cart.update_value()
@@ -139,9 +139,9 @@ def merge_suspended(request, cart_id):
      cart.suspended_cart = None
      return redirect(edit_cart, cart.id) 
 
-def new_receipt(request):
+def new_receipt(request, cart_id):
     bad_request = False
-    cart = get_object_or_404(Cart, current = True)
+    cart = get_object_or_404(Cart, current = True, pk=cart_id)
     scontrino = Scontrino(cart = cart, cf = (cart.customer and cart.customer.cf or ""))
 
     if request.method == "POST":
@@ -179,7 +179,7 @@ def pay_due_receipt(request, id):
 
 def new_invoice_from_cart(request, cart_id):
     bad_request = False
-    cart = get_object_or_404(Cart, current = True)
+    cart = get_object_or_404(Cart, current = True, pk=cart_id)
     customer = cart.customer.child()
     now = datetime.datetime.now()
     year = now.year - 2000
@@ -293,9 +293,9 @@ def pay_due_invoice(request, invoice_id):
     return HttpResponse(status = 200)
 
 
-def new_ddt(request):
+def new_ddt(request, cart_id):
     bad_request = False
-    cart = get_object_or_404(Cart, current = True)
+    cart = get_object_or_404(Cart, current = True, pk=cart_id)
     customer = cart.customer.child()
     now = datetime.datetime.now()
     year = now.year - 2000

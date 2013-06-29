@@ -4,7 +4,7 @@
             $("#id_number").trigger('focus');
         });
     </script>
-    <form id="new_ddt_form" action="{% url new_ddt %}" method="post">
+    <form id="new_ddt_form" action="{% url new_ddt cart.id %}" method="post">
         {{ form.as_p }}
 	    <input id="save_new_ddt" type="submit" value="Accetta" />
     </form>

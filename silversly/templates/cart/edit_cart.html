@@ -334,8 +334,8 @@
         });
     }
 
-    prepare_dialog_for("ddt", "{% url new_ddt %}");
-    prepare_dialog_for("receipt", "{% url new_receipt %}");
+    prepare_dialog_for("ddt", "{% url new_ddt cart.id %}");
+    prepare_dialog_for("receipt", "{% url new_receipt cart.id %}");
     prepare_dialog_for("invoice", "{% url new_invoice_from_cart cart.id %}");
 
     $("#discount_button").live('click', function() {
