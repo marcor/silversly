@@ -327,7 +327,7 @@ a:hover {
 
 .cartbox {
 	width: 230px;
-	
+	display: none;
 	float: left;
 }
 

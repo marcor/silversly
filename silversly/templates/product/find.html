@@ -9,6 +9,7 @@
 
 
 {% block globalvars %}
+	var carts;
 	var chosenCart;
         var chosenProduct;
         var cache = {};
@@ -49,30 +50,18 @@
 		}
 	}
 	
-        update_cart_info = function (cartbox) {
-		var carts = $(".cartbox");
+        update_cart_info = function (cartbox, callback) {
 		var cart_pk = cartbox.attr("id").split("_")[1];
                 $.ajax({
                         url: "{% url get_current_cart_json_summary %}",
 			data: {'cart_pk': cart_pk},
                         success: function(data) { 
                                 var items = data[0].number_of_items;
-                                if (items > 0) {
-                                        $(".cart_items", cartbox).text(items);
-                                        $(".cart_total", cartbox).html(data[0].fields.final_total + " &euro;");
-                                        cartbox.slideDown();
-                                } else {
-					/*cartbox.slideUp();
-					if (carts.length > 1) {
-						if (cartbox.hasClass("current")) {
-							cartbox.remove();
-							set_current_cart($(".cartbox").first());
-						}
-						else {
-							cartbox.remove();
-						}
-					}*/
-					/*check_add_cart_button();*/
+				$(".cart_items", cartbox).text(items);
+				$(".cart_total", cartbox).html(data[0].fields.final_total + " &euro;");
+                                        
+                                if (items > 0 || carts.length > 1) {
+                                        cartbox.slideDown(400, callback);
                                 }
                         },
                         error: function() {
@@ -83,10 +72,14 @@
                 return cartbox;
         };
 
+	refresh_infobox = function () {
+		delete cache[chosenProduct.pk];
+		$("#main").trigger("showResult", chosenProduct);
+	}
 
         $("#main").bind("showResult", function(e, product, confirmed) {
             chosenProduct = product;
-            var box = $("#infobox").hide();
+            var box = $("#infobox");
 	
             var show_box = function (content) {
                 box.html(content).show();
@@ -94,6 +87,9 @@
 		if (confirmed) {
                     /* product focused and selected, or perfect match */		
 		    $( "#sell", box).trigger("focus");
+		}
+		if (carts.length == 1 && !carts.is(":visible")) {
+			$("#sell_in_new_cart", box).hide();
 		}
 		
 		$("#qty_value").editable(
@@ -184,7 +180,7 @@
                 "data": $(this).serialize(),
                 "complete": function(xhr, status) {
                     if (status == "success") {
-                        update_cart_info($(".cartbox.current")).animate({ backgroundColor:'#ffffcc'}, 
+                        update_cart_info($(".cartbox.current"), refresh_infobox).animate({ backgroundColor:'#ffffcc'}, 
                                 200, 'linear', function(){
                                         $(this).animate({ backgroundColor: 'white' });
                         });
@@ -208,7 +204,8 @@
 		};			
 	});
 	chosenCart = {{ carts.0.pk }};
-	$(".cartbox").each(function (index, cart) { return update_cart_info($(cart)) });
+	carts = $(".cartbox");
+	carts.each(function (index, cart) { return update_cart_info($(cart)) });
 	/*check_add_cart_button();*/
 	
 {% endblock %}

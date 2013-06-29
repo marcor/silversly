@@ -7,6 +7,7 @@
 	    
 	      var cart = $('{% filter escapejs %}{% include "product/snippets/cartbox.html" %}{% endfilter %}').appendTo($("#carts"));
 	      $("a", cart).button();
+	      carts = $(".cartbox");
 	      set_current_cart(cart);
 	    {% endif %}
         });

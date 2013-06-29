@@ -371,23 +371,19 @@ def print_invoice(request, id, reference_ddts=True):
 def add_product_to_cart(request, cart_id=None):
     bad_request = False
     new_cart = False
+    cart_id = cart_id or request.GET.get("cart_pk", None)
     if not cart_id:
-        try:
-            cart = Cart.objects.get(pk = request.GET["cart_pk"])
-        except:
-            cart = Cart()
-            cart.update_value()
-            cart.save()
-            new_cart = True
+        cart = Cart()
+        cart.update_value()
+        cart.save()
+        new_cart = True
     else:
         cart = Cart.objects.get(pk=cart_id)
-        
+    
+    product_id = request.GET.get("product_pk", None) or request.POST.get("product_pk", None)
+    product = Product.objects.get(pk=product_id)
     try:
-        product = Product.objects.get(pk=request.GET["product_pk"])
-    except:
-        product = Product.objects.get(pk=request.POST["product_pk"])
-
-    try:
+        # bug: with suspended carts, multiple items for the same product can exist
         cart_item = CartItem.objects.get(product=product, cart=cart)
     except:
         cart_item = CartItem(product=product, desc=product.name, cart=cart, quantity=0)
