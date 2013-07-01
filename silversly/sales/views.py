@@ -112,7 +112,10 @@ def reload_cart(request, cart_id):
 def merge_carts(source, dest):
 	for item in source.cartitem_set.all():
 		item.cart = dest
-		item.save()
+		if source.pricelist == dest.pricelist:
+			item.save(update_value=False)
+		else:
+			item.save()
 	dest.update_value()
 	return dest
 

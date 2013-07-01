@@ -26,6 +26,9 @@ class CartItem(models.Model):
     final_price = FixedDecimalField(_("Prezzo di vendita al netto di sconti"), max_digits = 7, decimal_places = 2, null=True)
 
     def update_value(self, precision=Decimal(".01")):
+        # in case the product does not exist anymore do nothing
+        if not self.product:
+            return
         pricelist = self.cart.pricelist
         try:
             price = Price.objects.get(pricelist = pricelist, product = self.product)
@@ -82,8 +85,9 @@ class CartItem(models.Model):
             product.quantity += value
             product.save()
     
-    def save(self, *args, **kwargs):
-        self.update_value()
+    def save(self, update_value=True, *args, **kwargs):
+        if update_value:
+            self.update_value()
         super(CartItem, self).save(*args, **kwargs)
 
     def __unicode__(self):
