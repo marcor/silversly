@@ -291,12 +291,8 @@ def delete_invoice(request):
             if not invoice.payed:
                 invoice.finally_paid()
             if invoice.immediate:
-                carts = [invoice.cart]
-            else:
-                carts = [ddt.cart for ddt in invoice.ddt_set.all()]
-            for cart in carts:
-                cart.current = True
-                cart.save()
+                invoice.cart.current = True
+                invoice.cart.save()
             invoice.delete()
             return HttpResponse(status=200)
         else:
@@ -347,6 +343,22 @@ def show_ddt(request, id):
     cart = ddt.cart
     customer = cart.customer.child()
     return render_to_response('documents/show_ddt.html',  {'cart': cart, 'customer': customer, 'ddt': ddt})
+
+def delete_ddt(request):
+    try:
+        ddt = Ddt.objects.order_by('pk')[0]
+    except:
+        return HttpResponse(404)
+    if request.is_ajax():
+        if request.method == "POST" and request.POST["confirm"]:
+            ddt.cart.current = True
+            ddt.cart.save()
+            ddt.delete()
+            return HttpResponse(status=200)
+        else:
+            return render_to_response("documents/dialogs/delete_ddt.html", {'ddt': ddt})
+    else:
+        return redirect(homepage)
 
 def print_ddt(request, id, size="a4"):
     from common.views import write_pdf

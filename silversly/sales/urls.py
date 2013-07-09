@@ -39,5 +39,6 @@ urlpatterns = patterns('sales.views',
     url(r'archivio/fattura/(\d+)/stampa/no-ddt/$', 'print_invoice', name='print_unreferenced_invoice', kwargs={'reference_ddts': False }),
     url(r'archivio/ddt/(\d+)/$', 'show_ddt', name='show_ddt'),
     url(r'archivio/fattura/(\d+)/$', 'show_invoice', name='show_invoice'),
+    url(r'archivio/ddt/annulla_ultimo/$', 'delete_ddt', name='delete_last_ddt'),
     url(r'archivio/fattura/annulla_ultima/$', 'delete_invoice', name='delete_last_invoice'),
 )

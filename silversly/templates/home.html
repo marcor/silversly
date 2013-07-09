@@ -157,7 +157,12 @@
             <tr>
                 <td>
                 <a title="{{ d.cart.customer }}"
-                   href="{% url show_ddt d.id %}">{{ d }}</a></td>
+                   href="{% url show_ddt d.id %}">{{ d }}</a>
+		{% if forloop.first %}
+		<a id="delete_last_ddt" title="cancella l'ultimo ddt emesso"
+                   href="{% url delete_last_ddt %}"><img src="/media/img/cancel.png" width="16"/></a>
+		{% endif %}
+		</td>
             </tr>
             {% endfor %}
             </table>
@@ -191,6 +196,7 @@
 
     <div id="new_invoice_dialog" title="Prepara una fattura" class="dialog" style="display: none"></div>
     <div id="delete_invoice_dialog" title="Annulla fattura" class="dialog" style="display: none"></div>
+    <div id="delete_ddt_dialog" title="Annulla Ddt" class="dialog" style="display: none"></div>
     
 </div>
 {% endblock %}
@@ -226,10 +232,22 @@
     }
 
     prepare_dialog_for("invoice");
+    prepare_dialog_for("ddt");
     
     $( "#delete_last_invoice" ).live('click', function() {
         var delete_anchor = $(this);
         $( "#delete_invoice_dialog" ).dialog({
+                        'draggable': false,
+                        'resizable': false,
+                        'modal': true,
+                        'open': function() { $(this).load(delete_anchor.attr('href'))}
+        });
+        return false;
+    });
+    
+    $( "#delete_last_ddt" ).live('click', function() {
+        var delete_anchor = $(this);
+        $( "#delete_ddt_dialog" ).dialog({
                         'draggable': false,
                         'resizable': false,
                         'modal': true,
