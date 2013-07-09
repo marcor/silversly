@@ -11,7 +11,7 @@ from sales.models import *
 
 import simplejson
 import decimal
-from datetime import date
+from datetime import date, datetime
 
 from django import http
 from django.template.loader import get_template
@@ -47,10 +47,12 @@ def write_pdf(template_src, context_dict):
 # actual views
 
 def homepage(request):
+    now = datetime.now()
+    year = now.year - 2000
     outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")
     #open_batchloads = BatchLoad.objects.filter(loaded = False)
     last_receipts = Scontrino.objects.order_by("-date")[:5]
-    last_ddts = Ddt.objects.all()[:3]
+    last_ddts = Ddt.objects.filter(year=year)[:5]
     open_ddts = Ddt.objects.filter(invoice__isnull = True).select_related("cart", "cart__customer")
     suspended_carts = Cart.objects.select_related("customer").filter(suspended=True)
     customers = {}
@@ -61,7 +63,7 @@ def homepage(request):
         else:
             customers[customer] = ddt.cart.discounted_total()
 
-    last_invoices = Invoice.objects.all()[:3]
+    last_invoices = Invoice.objects.filter(year=year)[:5]
     debtors = Customer.objects.raw("select * from people_customer where due > 0 collate nocase")
 
     return render_to_response("home.html",
