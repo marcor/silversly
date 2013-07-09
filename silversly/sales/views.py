@@ -132,6 +132,14 @@ def suspend_cart(request, cart_id):
         cart.current = False
         cart.save()
         return redirect(edit_cart, cart_id)
+
+def resume_cart(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
+    if cart.suspended ==True:
+        cart.suspended = False
+        cart.current = True
+        cart.save()
+    return redirect(edit_cart, cart.id)
     
 def merge_suspended(request, cart_id):
      cart = get_object_or_404(Cart, pk=cart_id)
@@ -282,6 +290,13 @@ def delete_invoice(request):
         if request.method == "POST" and request.POST["confirm"]:
             if not invoice.payed:
                 invoice.finally_paid()
+            if invoice.immediate:
+                carts = [invoice.cart]
+            else:
+                carts = [ddt.cart for ddt in invoice.ddt_set.all()]
+            for cart in carts:
+                cart.current = True
+                cart.save()
             invoice.delete()
             return HttpResponse(status=200)
         else:

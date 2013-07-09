@@ -33,7 +33,7 @@
         {% include "cart/product_list_static.html" %}
     </div>
     {% else %}
-    <div id="carts">
+    <div id="ddts">
         {% for ddt in ddts %}
             {% with cart=ddt.cart %}
              <h3><a href="#">{{ ddt }}</a></h3>
@@ -73,7 +73,7 @@
 
 {% endif %}
 {% if ddts %}
-$( "#carts" ).accordion({
+$( "#ddts" ).accordion({
 			autoHeight: false,
 		});
 {% endif %}

@@ -58,7 +58,7 @@
                         success: function(data) { 
                                 var items = data[0].number_of_items;
 				$(".cart_items", cartbox).text(items);
-				$(".cart_total", cartbox).html(data[0].fields.final_total + " &euro;");
+				$(".cart_total", cartbox).html((items ? data[0].fields.final_total : "0") + " &euro;");
                                         
                                 if (items > 0 || carts.length > 1) {
                                         cartbox.slideDown(400, callback);

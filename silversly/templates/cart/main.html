@@ -37,7 +37,7 @@
 {% endif %}
 {% if cart.suspended %}
             <li id="put_suspended_in_cart">
-                <a href="#" title="Aggiungi tutto al carrello">
+                <a href="{% url resume_cart cart.id %}" title="Metti tutto in un nuovo carrello">
                 <img src="/media/img/cart_insert.png" />
                 </a>
             </li>

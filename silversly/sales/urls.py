@@ -30,6 +30,7 @@ urlpatterns = patterns('sales.views',
     
     url(r'carrello/(\d+)/ricalcola', 'reload_cart', name='reload_cart'),
     url(r'carrello/(\d+)/sospendi', 'suspend_cart', name='suspend_cart'),
+    url(r'carrello/(\d+)/riprendi', 'resume_cart', name='resume_cart'),
     url(r'carrello/(\d+)/aggiungi_sospesi', 'merge_suspended', name='merge_suspended'),
 
     url(r'carrello/(\d+)/nuovo_ddt$', 'new_ddt', name='new_ddt'),
