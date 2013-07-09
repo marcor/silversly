@@ -1,0 +1,27 @@
+<div>
+    <script type="text/javascript">
+    $(function() {
+        $( "#confirm_delete" ).live('click', function() {
+            $.ajax({
+                "url": "{% url delete_last_ddt %}",
+                "type": "POST",
+                "data": {'confirm': true},
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#delete_ddt_dialog").dialog('close');
+			document.location.reload();
+                    };
+                }
+            });
+            return false;
+        });
+	$( "#cancel_delete" ).live('click', function() {
+	    $("#delete_ddt_dialog").dialog('close');
+	    return false;
+        });
+    });
+    </script>
+    <p>Vuoi davvero annullare il <b>{{ ddt }}</b>?</p>
+    <a id="confirm_delete" href="#" title="S&igrave;'"><img src="/media/img/okay.png" /></a>
+    <a id="cancel_delete" href="#" title="No, ho cambiato idea" style="float:right"><img src="/media/img/cancel.png" /></a>
+<div>
