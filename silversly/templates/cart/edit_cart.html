@@ -277,7 +277,30 @@
             });
             return false;
         });
+	
+    $( ".delete_product" ).live('click', function() {
+            var delete_anchor = $(this);
+            $( "#delete_product_dialog" ).modal({url: delete_anchor.attr('href')});
+            event.preventDefault();
+        });
 
+     $( "#confirm_delete" ).live('click', function() {
+            $.ajax({
+                "url": $(this).attr("href"),
+                "type": "POST",
+                "data": {'confirm': true},
+                "success": function(redirect_url) {
+                    window.location.href = redirect_url;
+                }
+            });
+            event.preventDefault();
+        });
+    
+    $( "#cancel_delete" ).live('click', function() {
+	    $("#delete_product_dialog").dialog('close');
+	    event.preventDefault();
+     });
+	
      $( "#new_retail" ).live('click', function() {
             $( "#new_customer_dialog" ).modal({url: "{% url add_customer %}"});
             return false;
@@ -428,6 +451,7 @@
 </div>
 
     <div id="add_product_dialog" title="Vendi un prodotto" class="dialog"></div>
+    <div id="delete_product_dialog" title="Rimuovi un prodotto" class="dialog"></div>
     <div id="new_receipt_dialog" title="Emetti lo scontrino" class="dialog"></div>
     <div id="new_ddt_dialog" title="Prepara un DDT" class="dialog"></div>
     <div id="new_invoice_dialog" title="Prepara una fattura" class="dialog"></div>

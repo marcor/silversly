@@ -441,14 +441,22 @@ def remove_product_from_cart(request, item_id):
     try:
         item = CartItem.objects.get(pk = item_id)
         cart = item.cart
-        item.restore_inventory()
-        item.delete()
-        open_carts = Cart.objects.filter(current = True)
-        if (cart.suspended or open_carts.count() > 1) and cart.is_empty():
-            cart.delete()
-            return redirect(find_product)
-        cart.update_value()
-        cart.save()
-        return redirect(edit_cart, cart.id)
     except:
         return HttpResponse(status=400)
+
+    if request.is_ajax():
+        if request.method == "POST" and request.POST["confirm"]:
+            item.restore_inventory()
+            item.delete()
+            print "ciao"
+            open_carts = Cart.objects.filter(current = True)
+            if (cart.suspended or open_carts.count() > 1) and cart.is_empty():
+                cart.delete()
+                return HttpResponse(content=reverse('find_product'), content_type="text/plain")
+            cart.update_value()
+            cart.save()
+            return HttpResponse(content=reverse('revise_cart', args=(cart.id,)), content_type="text/plain")
+        else:
+            return render_to_response("cart/dialogs/delete_product.html", {'item': item})
+    else:
+        return redirect(edit_cart, cart.id)
