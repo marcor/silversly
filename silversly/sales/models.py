@@ -103,8 +103,8 @@ def rounded(value):
         remainder = value.remainder_near(Decimal(".5"))
     return remainder
 
-def apply_vat(value):
-    total = (value * Decimal(str(100 + settings.TAX)) / 100).quantize(precision)
+def apply_vat(value, vat_rate=settings.TAX):
+    total = (value * Decimal(str(100 + vat_rate)) / 100).quantize(precision)
     # valore ivato e iva
     return (total, total - value)
 
@@ -314,6 +314,7 @@ class Invoice(Receipt):
     costs = FixedDecimalField(_("Spese incasso"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
 
     total_net = FixedDecimalField(_("Imponibile"), max_digits = 8, decimal_places = 2, null = True)
+    vat_rate = models.PositiveSmallIntegerField(_("Aliquota IVA"), default=settings.TAX)
     payed = models.BooleanField(_("Pagata"), default = False)
 
     def __unicode__(self):
@@ -335,7 +336,7 @@ class Invoice(Receipt):
         return('sales.views.show_invoice', [str(self.id)])
 
     def apply_vat(self):
-        return apply_vat(self.total_net)
+        return apply_vat(self.total_net, self.vat_rate)
 
     class Meta:
         ordering = ['-year', '-date', '-number']

@@ -395,8 +395,7 @@ def print_invoice(request, id, reference_ddts=True):
         'reference_ddts': reference_ddts,
         'invoice': invoice,
         'customer': customer,
-        'lines': lines,
-        'tax': settings.TAX})
+        'lines': lines})
 
 def add_product_to_cart(request, cart_id=None):
     bad_request = False
