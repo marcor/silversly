@@ -20,8 +20,9 @@ class Migration(DataMigration):
                         pricelist = orm.Pricelist.objects.get(name = pricelist_name)
                         price = orm.Price(product = product,
                         pricelist = pricelist,
-                        method = pricelist.default_method,
-                        markup = pricelist.default_markup)
+                        method = "%~",
+                        markup = 60)
+                        update(price,21) # custom __init__ is ignored
                 return price
                 
         def update(price, taxes):
@@ -42,7 +43,7 @@ class Migration(DataMigration):
                         price.gross = (corrected_price - corrected_price.remainder_near(module))
 
                 price.net = price.gross / (100 + taxes) * 100
-        
+                
         for product in orm.Product.objects.all():
                 price = get_retail_price(product,"Pubblico")
                 target_gross = price.gross
@@ -52,8 +53,10 @@ class Migration(DataMigration):
                                 price.markup -= 1
                                 if price.markup == 0:
                                         price.markup = None
+                                        print product.pk
                                         price.method = "=="
                                         price.gross = target_gross
+                                        update(price,22)
                                         break
                                 update(price,22)
                         price.save()
