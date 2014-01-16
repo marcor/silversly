@@ -208,7 +208,8 @@ def print_discount(discount, markdown):
     return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto %d%%" % markdown, "1", sep)) + "-1" + sep
 
 def print_total_discount(discount, desc="sconto cliente"):
-    return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto cliente", "1", sep)) + "-1" + sep
+    #return sep.join(("1", "1", "1", sep)) + sep.join((prep(discount), "sconto cliente", "1", sep)) + "-1" + sep
+    return sep.join(("7", "1", "1", prep(discount), desc, "1")) + sep * 4
 
 def print_rounding(tot):
     if tot > 0:
