@@ -32,10 +32,11 @@ class Command(BaseCommand):
         while trim_value > 0:
             for p in ps:
                 old_total = p.get_total_value()
-                p.quantity = int(p.quantity) and random.randrange(int(p.quantity)  ) + 1
+                p.quantity = int(p.quantity) and random.randrange(int(p.quantity)  + 1) 
                 new_total = p.get_total_value()
                 trim_value -= old_total - new_total
                 if trim_value > 0:
+                    print trim_value, i
                     i += 1
                 else:
                     break
