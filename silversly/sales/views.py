@@ -121,6 +121,9 @@ def merge_carts(source, dest):
 
 def suspend_cart(request, cart_id):
     cart = get_object_or_404(Cart, pk=cart_id)
+    if cart.suspended:
+        # we can't suspend an already suspended cart
+        return redirect(edit_cart, cart.id)
     suspended_cart = cart.get_suspended()
     if suspended_cart:
         merge_carts(cart, suspended_cart)
