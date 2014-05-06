@@ -43,9 +43,10 @@
         <tbody>
         {% for d in downloads %}
             <tr>
-                {% with doc=d.cart.receipt.child %}
+                {% with doc=d.cart.receipt.child|default:d.cart %}
                 <td><a href="{{ doc.get_absolute_url }}">{{ doc }}</a></td>
-                <td class="decimal">{{ d.quantity }}</td>
+		
+		<td class="decimal">{{ d.quantity }}</td>
                 <td class="decimal">{{ d.gross_total.0 }}</td>
                 {% endwith %}
             </tr>

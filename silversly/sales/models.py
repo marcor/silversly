@@ -124,6 +124,14 @@ class Cart(models.Model):
     final_total = FixedDecimalField(_("Totale"), max_digits = 7, decimal_places = 2, null=True)
     final_discount = FixedDecimalField(_("Sconto calcolato"), max_digits = 7, decimal_places = 2, null=True)
 
+    def __unicode__(self):
+        if self.suspended:
+                return "Lista in sospeso %d" % (self.id,)
+        return u"Carrello %d" % (self.id,)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return('sales.views.edit_cart', [str(self.id)])
 
     def get_suspended(self):
         if hasattr(self, "suspended_cart"):

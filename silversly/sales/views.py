@@ -447,7 +447,6 @@ def remove_product_from_cart(request, item_id):
         if request.method == "POST" and request.POST["confirm"]:
             item.restore_inventory()
             item.delete()
-            print "ciao"
             open_carts = Cart.objects.filter(current = True)
             if (cart.suspended or open_carts.count() > 1) and cart.is_empty():
                 cart.delete()
