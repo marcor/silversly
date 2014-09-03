@@ -104,7 +104,7 @@ class Product(models.Model):
             self.__original_quantity = self.quantity
             super(Product, self).save(*args, **kwargs)
         else:
-             super(Product, self).save(*args, **kwargs)
+             #super(Product, self).save(*args, **kwargs)
              return
 
     def natural_key(self):
