@@ -1,7 +1,7 @@
 <div>
     <script type="text/javascript">
         $(function() {
-            $("#id_price").trigger('focus');
+            $("#id_price").focus(function(){$(this).select()}).focus();
         });
     </script>
     <form id="modify_supply_form" action="{% url modify_supply supply.id %}" method="post">

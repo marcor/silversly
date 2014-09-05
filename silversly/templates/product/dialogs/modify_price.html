@@ -7,12 +7,13 @@
             }
             
             else if (method == '==') {
-                
-                $("#id_gross").attr("disabled", false).show().trigger('focus').prev("label").show();
+                $("#id_gross").focus(function(){$(this).select()});
+                $("#id_gross").attr("disabled", false).show().focus().prev("label").show();
                 $("#id_markup").hide().attr("disabled", true).prev("label").hide();
             }
             else {
-                $("#id_markup").attr("disabled", false).show().trigger('focus').prev("label").show();
+		$("#id_markup").focus(function(){$(this).select()});
+                $("#id_markup").attr("disabled", false).show().focus().prev("label").show();
                 $("#id_gross").hide().attr("disabled", true).prev("label").hide();
             }
             if (method == '%~') {

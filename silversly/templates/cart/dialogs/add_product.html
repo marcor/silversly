@@ -1,7 +1,7 @@
 <div>
     <script type="text/javascript">
         $(function() {
-            $("#id_quantity").trigger('focus');
+            $("#id_quantity").focus(function(){$(this).select()}).focus();
 	    
 	    {% if new_cart %}
 	    

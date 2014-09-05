@@ -1,7 +1,7 @@
 <div>
     <script type="text/javascript">
         $(function() {
-            $("#id_factor").trigger('focus');
+            $("#id_factor").focus(function(){$(this).select()}).focus();
         });
     </script>
 
