@@ -108,6 +108,8 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_DIR, "templates"),
 )
 
+PDF_INVOICE_FORM = os.path.join(TEMPLATE_DIRS[0], 'pdf', 'invoice_form.png')
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',

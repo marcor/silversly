@@ -13,6 +13,7 @@ import simplejson
 import decimal
 from datetime import date, datetime
 
+from django.conf import settings
 from django import http
 from django.template.loader import get_template
 from django.template import Context
@@ -34,6 +35,7 @@ class DecimalEncoder(simplejson.JSONEncoder):
 
 def write_pdf(template_src, context_dict):
     template = get_template(template_src)
+    context_dict['PDF_INVOICE_FORM'] = settings.PDF_INVOICE_FORM
     context = Context(context_dict)
     html  = template.render(context)
     result = StringIO.StringIO()

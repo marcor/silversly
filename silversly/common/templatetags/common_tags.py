@@ -9,7 +9,14 @@ from django.conf import settings
 @register.filter
 def modulo(num, val):
     return num % val
-    
+
+@register.filter(name='roundup_divide')
+def roundup_divide(items, items_per_page):
+	try:
+		return (items - 1) // items_per_page + 1 
+	except:
+		return (len(items) - 1) // items_per_page + 1 
+	
 @register.filter
 def divide(num, val):
     return num // val
@@ -25,7 +32,7 @@ def linepad(total_lines, available_lines_per_page):
         return 0
     else:
         return available_lines_per_page - lines_on_last_page
-    
+
 @register.simple_tag()
 def silversly_version():
     version = settings.VERSION

@@ -383,13 +383,26 @@ def print_invoice(request, id, reference_ddts=True):
     customer = cart and cart.customer.child() or ddts[0].cart.customer.child()
     shop = Shop.objects.get(site = Site.objects.get_current())
     lines = cart and cart.cartitem_set.count() or 0
-    if reference_ddts:
-        for ddt in ddts:
-            lines = lines + 1 + ddt.cart.cartitem_set.count()
+
+    def prepare_lines(c):
+        l = []
+        for item in c.cartitem_set.all():
+            l.append(item)
+            if item.discount:
+                l.append({'type': 'item_discount', 'item': item})
+        if c.discount:
+            l.append({'type': 'cart_discount', 'cart': c})
+        return l       
+        
+    lines = []
+    if cart:
+        lines.extend(prepare_lines(cart))
     else:
         for ddt in ddts:
-            lines += ddt.cart.cartitem_set.count()
-        
+            if reference_ddts:
+                lines.append({'type': 'ddt_ref', 'ddt': ddt})
+            lines.extend(prepare_lines(ddt.cart))
+            
     return write_pdf('pdf/invoice_a4.html',{
         'pagesize' : 'a4',
         'shop': shop,

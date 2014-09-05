@@ -1,6 +1,7 @@
 {% load sales_tags %}
+{% load common_tags %}
 
-{% with linesperpage=22 %}
+{% with linesperpage=22 pages=lines|roundup_divide:22 %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,57 +14,21 @@ body {
 }
 
 @page {
-
+    background-image: url('{{ PDF_INVOICE_FORM }}');
     size: a4;
-    top: 12.7cm;
+    top: 12.6cm;
     margin-left: 1.1cm;
     margin-right: 1.1cm;
-    margin-bottom: 2.7cm;
+    margin-bottom: 1cm;
     @frame top {
-        -pdf-frame-content: intestazione;
+        /*-pdf-frame-border: 1;*/
+	-pdf-frame-content: intestazione;
         margin-left: 1.5cm;
         margin-right: 1.1cm;
         top: 8.3cm;
     }
-    @frame footer {
-        -pdf-frame-content: {% if lines > linesperpage %} emptyFooterblock {% else %} footerblock {% endif %};
-        margin-left: 1.1cm;
-        margin-right: 1.1cm;
-        height: 1.7cm;
-        bottom: 0.9cm;
-    }
     @frame address {
-    /*-pdf-frame-border: 1;*/
-        -pdf-frame-content: address;
-        margin-left: 11.4cm;
-        margin-right: 1cm;
-        height: 3cm;
-        top: 6.5cm;
-    }
-}
-
-@page lastpage {
-
-    size: a4;
-    top: 12.7cm;
-    margin-left: 1.1cm;
-    margin-right: 1.1cm;
-    margin-bottom: 2.7cm;
-    @frame top {
-        -pdf-frame-content: intestazione;
-        margin-left: 1.5cm;
-        margin-right: 1.1cm;
-        top: 8.3cm;
-    }
-    @frame footer {
-        -pdf-frame-content: footerblock;
-        margin-left: 1.1cm;
-        margin-right: 1.1cm;
-        height: 1.7cm;
-        bottom: 0.9cm;
-    }
-    @frame address {
-    /*-pdf-frame-border: 1;*/
+        /*-pdf-frame-border: 1;*/
         -pdf-frame-content: address;
         margin-left: 11.4cm;
         margin-right: 1cm;
@@ -81,14 +46,22 @@ td {
 
 }
 
-#items td {
-    padding-top: .06cm;
-
+#footer_table td {
+      padding-top: .1cm;
+}
+.items td {
+    padding-top: .07cm;
 }
 
-.grande {
+.big {
     font-size: 1.5em;
 }
+
+.medium {
+    padding-top: .15cm;
+}
+
+
 
 .italic  {
     font-style: italic;
@@ -96,7 +69,7 @@ td {
 
 .rif_ddt {
    font-weight: bold;
-   padding-right: 3cm;
+   /*padding-right: 3cm;*/
 }
 
 .right {
@@ -123,22 +96,24 @@ td {
     font-family: sanserif;
 }
 
+.last td {
+    padding-top: .1cm;
+}
+
 </style>
 </head>
 <body>
 
-{% if lines > linesperpage %} <pdf:nexttemplate name="lastpage"> {% endif %}
-
 <div id="intestazione">
     <table class="right">
         <tr>
-            <td class="grande">{{ invoice.number }} / {{invoice.date.year }}</td>
+            <td class="big">{{ invoice.number }} / {{invoice.date.year }}</td>
         </tr>
         <tr>
-            <td class="grande">{{ invoice.date }}</td>
+            <td class="big">{{ invoice.date }}</td>
         </tr>
         <tr>
-            <td colspan="3" style="text-align: left; padding-left: 1cm;">
+            <td colspan="3" class="medium" style="text-align: left; padding-left: 1cm;">
                  {% if reference_ddts %}
 		 {% for ddt in ddts %}
                     {{ ddt.number }}
@@ -151,8 +126,8 @@ td {
         </tr>
         <tr>
             <td></td>
-            <td> {{ customer.piva }} </td>
-            <td> {{ invoice.get_payment_method_display }}</td>
+            <td class="medium"> {{ customer.piva }} </td>
+            <td class="medium"> {{ invoice.get_payment_method_display }}</td>
         </tr>
     </table>
 </div>
@@ -163,58 +138,83 @@ td {
     <pre>{{ customer.main_address }}</pre>
 </div>
 
-<div id="items">
-{% for ddt in ddts %}
-    {% if reference_ddts %}
-    <table class="right">
-        <tr>
-        <td class="rif_ddt">*** Ddt n.{{ ddt.number }} del {{ ddt.date }}</td>
+<table class="items right">
+{% for line in lines %}
+    {% if line.type == 'ddt_ref' %}
+	<tr>
+            <td class="rif_ddt" colspan="2">*** Ddt n.{{ line.ddt.number }} del {{ line.ddt.date }}</td>
+	    <td colspan="2"></td>
+	</tr>
+    {% elif line.type == 'item_discount' %}	
+	<tr>
+            <td class="quantity"></td>
+            <td class="description italic">sconto art. {{ line.item.discount }}%</td>
+             <td class="price"></td>
+            <td class="item_total">-{{ line.item.net_total.1 }}</td>
         </tr>
-    </table>
-    {% endif %}		 
-    {% include "pdf/invoice_cart.html"  with cart=ddt.cart %}
-{% empty %}
-    {% include "pdf/invoice_cart.html"  with cart=invoice.cart %}
-{% endfor %}
-</div>
-
-<div id="footerblock">
-{% with total=invoice.apply_vat %}
-    <table id="footer_table" class="right">
+    {% elif line.type == 'cart_discount' %}
+	<tr>
+            <td class="quantity"></td>
+            <td class="description italic">sconto cliente {{ line.cart.discount }}%</td>
+             <td class="price"></td>
+            <td class="item_total">-{{ line.cart.final_net_discount }}</td>
+        </tr>
+    {% else %}
+	{% with item=line %}
+	<tr>
+            <td class="quantity right">{{ item.quantity }} {{ item.product.unit }}</td>
+            <td class="description">{{ item.desc }}</td>
+            <td class="price">{{ item.final_net_price }}</td>
+            <td class="item_total">{{ item.net_total|sum }}</td>
+        </tr>
+	{% endwith %}
+    {% endif %}
+	
+    {% if forloop.last %}
+        {% for i in forloop.counter|linepad:linesperpage|times %}
+         <tr class="spacer">
+             <td></td>
+             <td colspan="3">&nbsp;</td>
+	 </tr>     
+        {% endfor %}
+	</table>
+       {% with total=invoice.apply_vat %}
+        <table id="footer_table" class="right">
         <tr>
             {% if invoice.costs %}
-            <td style="width: 9.5cm">{{ invoice.total_net|exactSub:invoice.costs}} &euro;</td>
-            <td style="width: 9.5cm">{{ invoice.costs }} &euro;</td>
+            <td style="width: 9.2cm">{{ invoice.total_net|exactSub:invoice.costs}} &euro;</td>
+            <td style="width: 9.2cm">{{ invoice.costs }} &euro;</td>
             {% else %}
-            <td style="width: 9.5cm"></td>
-            <td style="width: 9.5cm"></td>
+            <td style="width: 9.2cm"></td>
+            <td style="width: 9.2cm"></td>
             {% endif %}
-            <td style="width: 15cm; padding-right: 0.5cm">{{ invoice.total_net }} &euro;</td>
+            <td style="width: 15.6cm; padding-right: 0.5cm">{{ invoice.total_net }} &euro;</td>
             <td style="width: 2.2cm">{{ invoice.vat_rate }}</td>
             <td style="width: 5.5cm">{{ total.1 }} &euro;</td>
             <td style="width: 9.5cm"></td>
         </tr>
-        <tr>
-            <td colspan="5" style="text-align: left"><pdf:pagenumber /> </td>
+        <tr class="last">
+            <td colspan="5" style="text-align: left">{{ forloop.counter|roundup_divide:linesperpage }} / {{ pages }}</td>
             <td>{{ total.0 }} &euro;</td>
         </tr>
-    </table>
-{% endwith %}
-</div>
+        {% endwith %}
+    {% else %}
+        {% if forloop.counter|divisibleby:linesperpage %}
+        <tr><td class="center" colspan="4"><pdf:spacer height="1" /> CONTINUA --></td></tr>
+	<tr class="last">
+	    <td colspan="4" style="text-align: left">{{ forloop.counter|divide:linesperpage }} / {{ pages }}</td>
+        </tr>
+</table>
+<table class="items right">
+	<pdf:nextpage />
+        {% else %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+</table>
 
-{% if lines > linesperpage %}
-<div id="emptyFooterblock">
-    <table id="footer_table" class="right">
-        <tr>
-            <td colspan="6"></td>    
-	</tr>
-        <tr>
-            <td colspan="5" style="text-align: left"><pdf:pagenumber /> </td>
-	    <td style="width: 9.5cm">CONTINUA --></td>
-	</tr>
-    </table>
+<div id="footer">
 </div>
-{% endif %}
  
 </body>
 </html>
