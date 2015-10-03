@@ -375,8 +375,7 @@ def print_ddt(request, id, size="a4"):
         'cart' : cart,
         'ddt': ddt})
 
-def print_invoice(request, id, reference_ddts=True):
-    from common.views import write_pdf
+def export_invoice(request, id, format='pdf', reference_ddts=True):
     invoice = get_object_or_404(Invoice, pk=id)
     cart = invoice.cart
     ddts = invoice.ddt_set.all().order_by("number")
@@ -402,17 +401,30 @@ def print_invoice(request, id, reference_ddts=True):
             if reference_ddts:
                 lines.append({'type': 'ddt_ref', 'ddt': ddt})
             lines.extend(prepare_lines(ddt.cart))
-            
-    return write_pdf('pdf/invoice_a4.html',{
-        'pagesize' : 'a4',
-        'shop': shop,
-        'cart' : cart,
-        'ddts': ddts,
-        'reference_ddts': reference_ddts,
-        'invoice': invoice,
-        'customer': customer,
-        'lines': lines})
-
+    
+    if format == 'pdf':
+        from common.views import write_pdf
+        return write_pdf('pdf/invoice_a4.html',{
+            'pagesize' : 'a4',
+            'shop': shop,
+            'cart' : cart,
+            'ddts': ddts,
+            'reference_ddts': reference_ddts,
+            'invoice': invoice,
+            'customer': customer,
+            'lines': lines})
+    
+    if format == 'xml':
+         return render_to_response('export/invoice_pa.xml',  {
+            'shop': shop,
+            'cart' : cart,
+            'ddts': ddts,
+            'invoice': invoice,
+            'customer': customer,
+            'lines': lines},
+            mimetype="text/xml")
+ 
+    
 def add_product_to_cart(request, cart_id=None):
     bad_request = False
     new_cart = False

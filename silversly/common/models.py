@@ -34,6 +34,7 @@ class Shop(models.Model):
 
     name = models.CharField(u"Ragione sociale", max_length = 60)
     piva = models.CharField(_("P. IVA"), max_length=20)
+    cf = models.CharField(_("Codice Fiscale"), max_length=16)
     main_address = models.TextField(verbose_name = _("Indirizzo"))
 
     phone = models.CharField(_("Telefono"), max_length=20)
