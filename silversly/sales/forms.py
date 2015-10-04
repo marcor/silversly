@@ -66,5 +66,8 @@ class InvoiceForm(ModelForm):
                 if not self.open_ddts.exists():
                         raise ValidationError("Nessun DDT fino a questa data")
         return date
-    
- 
+
+class PAInvoiceForm(InvoiceForm):
+    class Meta(InvoiceForm.Meta):
+        model = PAInvoice
+        fields = ("number", "date", "cig", "refdoc", "payment_method", "costs")

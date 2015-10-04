@@ -17,7 +17,7 @@
     <input name="vat_rate" type="text" size="3" id="vat_rate_input" style="display: none" value="{{ cart.vat_rate }}"/>
     <p class="message" id="vat_rate_error" style="display:none">Inserisci un numero positivo senza virgola</p>
 
-    {% if not customer.company %}
+    {% if customer.is_retail %}
         <a id="toggle_rounding" href="{% url toggle_cart_rounding cart.id %}">
         {% if cart.rounded %}
             <img style="float: right" title="non arrotondare il totale" src="/media/img/yinyang.png" />
@@ -29,7 +29,7 @@
 </div>
 
 <div id="total_values">
-{% if customer.company %}
+{% if not customer.is_retail %}
     {% if cart.discount %}
     <p>subtotale: <span id="subtotal">{{ cart.final_net_total }}&euro;</span></p>
     <p>sconto: <span id="discount">{{ cart.final_net_discount|neg }}&euro;</span></p>

@@ -3,13 +3,13 @@
         <tr style="text-align: right">
             <th style="text-align: left">Articolo</th>
             <th>Q.t&agrave;</th>
-            <th>Prezzo {% if customer.company %}netto{% endif %}</th>
+            <th>Prezzo {% if not customer.is_retail %}netto{% endif %}</th>
             <th>Sc.%</th>
             <th>Valore</th>
         </tr>
     </thead>
     <tbody>
-    {% if customer.company %}
+    {% if not customer.is_retail %}
         {% for item in cart.cartitem_set.all %}
         <tr id="p{{ item.id }}">
             <td>
@@ -48,7 +48,7 @@
 </table>
 
 <div class="cart_summary">
-    {% if not customer.company %}
+    {% if customer.is_retail %}
     <div class="due" style="float: left; font-size: 2.8em">
         {% if receipt.due %}
             <p style="color:red"> DEBITO: {{receipt.due}}&euro;</p>

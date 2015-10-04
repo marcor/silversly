@@ -13,6 +13,7 @@ urlpatterns = patterns('people.views',
     url(r'cliente/(\d+)/$', 'show_customer', name='show_customer'),
     url(r'privato/aggiungi/', 'add_customer', name='add_customer'),
     url(r'azienda/aggiungi/', 'add_company', name='add_company'),
+    url(r'pa/aggiungi/', 'add_company', name='add_pa', kwargs={'pa': True }),
 
     url(r'cliente/(\d+)/tab/principale', 'customer_info_tab', name='customer_info_tab'),
     url(r'cliente/(\d+)/tab/commerciale', 'customer_commercial_tab', name='customer_commercial_tab'),

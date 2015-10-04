@@ -53,6 +53,7 @@
             Nuovo cliente:
             <button id="new_retail" type="button" >Privato</button>
             <button id="new_company" type="button" >Azienda</button>
+	    <button id="new_pa" type="button" >Ente pubblico</button>
         </span>
     </span>
     </h1>
@@ -70,17 +71,18 @@
             Nuovo cliente:
             <button id="new_retail" type="button" >Privato</button>
             <button id="new_company" type="button" >Azienda</button>
+	    <button id="new_pa" type="button" >Ente pubblico</button>
         </span>
     </span>
     </h1>
         
-	{% if cart.receipt.child.type == "ddt" %}
-          {% with cart.receipt.child as ddt %}
-	      <h1>Carrello di {{ cart.customer.name }} relativo al <a href="{% url show_ddt ddt.id %}"> DdT n. {{ ddt.number }}</a></h1>
-	  {% endwith %}
+	{% with cart.receipt.child as receipt %}
+	{% if receipt.typename == "Ddt" %}
+              <h1>Carrello di {{ cart.customer.name }} relativo al <a href="{% url show_ddt receipt.id %}"> DdT n. {{ receipt.number }}</a></h1>
 	{% elif cart.suspended %}
 	      <h1>Lista in sospeso di <a href="{% url show_customer cart.customer.id %}">{{ cart.customer.name }}</a></h1>
 	{% endif %}
+	{% endwith %}
     {% endif %}
 
 {% endblock %}
@@ -308,6 +310,11 @@
 
     $( "#new_company" ).live('click', function() {
         $( "#new_customer_dialog" ).modal({url: "{% url add_company %}"});
+        return false;
+    });
+    
+    $( "#new_pa" ).live('click', function() {
+        $( "#new_customer_dialog" ).modal({url: "{% url add_pa %}"});
         return false;
     });
 

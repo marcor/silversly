@@ -122,12 +122,12 @@ def add_customer(request):
     else:
         return render_to_response('customers/add.html', {'form': form})
 
-def add_company(request):
+def add_company(request, pa=False):
     status = 200
     if request.is_ajax():
-        Form = CompanyQuickForm
+        Form = pa and PAQuickForm or CompanyQuickForm
     else:
-        Form = CompanyForm
+        Form = pa and PAForm or CompanyForm
     if request.method == 'POST':
         form = Form(request.POST)
         if form.is_valid():
@@ -141,7 +141,7 @@ def add_company(request):
         form = Form()
 
     if request.is_ajax():
-        response  = render_to_response('customers/ajax_add_company.html', {'form': form})
+        response  = render_to_response('customers/ajax_add_company.html', {'form': form, 'pa': pa})
         response.status_code = status
         return response
     else:
@@ -164,12 +164,10 @@ def show_customer(request, id):
 def customer_info_tab(request, id):
     customer = get_object_or_404(Customer, pk=id)
     bad_request = False
-    try:
-        customer = customer.companycustomer
-        company = True
-    except:
-        company = False
-    if company:
+    customer = customer.child()
+    if customer.__class__ == PACustomer:
+        Form = PAInfoForm
+    elif customer.__class__ == CompanyCustomer:
         Form = CompanyInfoForm
     else:
         Form = CustomerInfoForm

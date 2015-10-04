@@ -6,17 +6,17 @@
         <thead>
             <th>Documento di vendita</th>
             <th>Totale</th>
-            {% if customer.company %}<th>Fattura</th>{% else %}<th>Ancora dovuto</th>{% endif %}
+            {% if not customer.is_retail %}<th>Fattura</th>{% else %}<th>Ancora dovuto</th>{% endif %}
         </thead>
         <tbody>
         {% for receipt in receipts %}
             <tr>
-            {% if receipt.type == "scontrino" %}
+            {% if receipt.typename == "Scontrino" %}
                 <td style="background-color: #ffe"><a href="{% url show_receipt receipt.id %}">{{ receipt }}</a></td>
                 <td class="decimal">{{ receipt.cart.discounted_total }}</td>
                 <td class="decimal">{{ receipt.due }}</td>
             {% else %}
-                {% if receipt.type == "ddt" %}
+                {% if receipt.typename == "Ddt" %}
                     <td style="background-color: #fee"><a href="{% url show_ddt receipt.id %}">{{ receipt }}</a></td>
                     <td class="decimal">{{ receipt.cart.discounted_total }}&euro;</td>
                     <td class="decimal">

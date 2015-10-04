@@ -190,16 +190,20 @@ class Receipt(models.Model):
     def child(self):
         try:
             r = self.scontrino
-            r.type = "scontrino"
-        except:
+        except Scontrino.DoesNotExist:
             try:
                 r = self.ddt
-                r.type = "ddt"
-            except:
+            except Ddt.DoesNotExist:
                 r = self.invoice
-                r.type = "invoice"
+                try:
+                    r = r.painvoice
+                except PAInvoice.DoesNotExist:
+                    pass
         return r
 
+    def typename(self):
+        return self.__class__.__name__
+        
     class Meta:
         ordering = ["-id"]
 
@@ -315,8 +319,6 @@ class Invoice(Receipt):
     number = models.PositiveSmallIntegerField(_("Numero"))
     date = models.DateField(_("Data fattura"), default = lambda: datetime.datetime.now())
     immediate = models.BooleanField(_("Fattura immediata"))
-    # used for fatture immediate (cart -> invoice)
-    # cart = models.OneToOneField(Cart, null = True)
 
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES)
     costs = FixedDecimalField(_("Spese incasso"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
@@ -348,3 +350,11 @@ class Invoice(Receipt):
 
     class Meta:
         ordering = ['-year', '-date', '-number']
+
+class PAInvoice(Invoice):
+    cig = models.CharField(_("CIG"), max_length=10)
+    refdoc = models.CharField(_("Rif. determina"), max_length=6)
+    
+    def __unicode__(self):
+        return u"Fattura elettronica %02d del %s" % (self.number, self.date.strftime("%d-%m"))
+    

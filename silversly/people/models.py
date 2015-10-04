@@ -59,11 +59,19 @@ class Customer(models.Model):
     def child(self):
         try:
             r = self.companycustomer
-            r.company = True
-        except:
+            try:
+                r = r.pacustomer
+            except PACustomer.DoesNotExist:
+                pass
+        except CompanyCustomer.DoesNotExist:
             r = self
-            r.company = False
         return r
+        
+    def typename(self):
+        return self.__class__.__name__
+        
+    def is_retail(self):
+        return self.__class__ == Customer
 
     def json(self):
         from common.views import DecimalEncoder
@@ -77,9 +85,9 @@ class Customer(models.Model):
                 'cf': self.cf or False,
                 'due': self.due,
                 'url': self.get_absolute_url(),
-                'is_company': self.company
+                'is_company': not self.is_retail()
             }
-            if self.company:
+            if not self.is_retail:
                 data.update(piva = self.piva)
         except:
             data = self.child().to_dict()
@@ -109,3 +117,14 @@ class CompanyCustomer(Customer):
     class Meta:
         verbose_name = _("Cliente con P.IVA")
         verbose_name_plural = _("Clienti con P.IVA")
+
+class PACustomer(CompanyCustomer):
+    cu = models.CharField(_("Codice Univoco"), max_length=6, unique=True)
+    
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Ente pubblico")
+        verbose_name_plural = _("Enti pubblici")
+
