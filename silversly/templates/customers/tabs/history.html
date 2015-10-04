@@ -19,19 +19,19 @@
                 {% if receipt.type == "ddt" %}
                     <td style="background-color: #fee"><a href="{% url show_ddt receipt.id %}">{{ receipt }}</a></td>
                     <td class="decimal">{{ receipt.cart.discounted_total }}&euro;</td>
-                    <td class="decimal">{% if receipt.invoice %}
+                    <td class="decimal">
+                    {% if receipt.invoice %}
                     <a href="{% url show_invoice receipt.invoice.id %}" title="{{ receipt.invoice }}">
-                    {% if receipt.invoice.payed %}
-                        Pagata
-                    {% else %}
-                        <span class="important">Da pagare</span>
-                    {% endif %}
+                        {% if receipt.invoice.payed %}
+                                Pagata
+                        {% else %}
+                                <span class="important">Da pagare</span>
+                        {% endif %}
                     </a>
-
                     {% else %}Da emettere{% endif %}</td>
-                    {% else %}
+                {% else %}
                     <td style="background-color: #eef"><a href="{% url show_invoice receipt.id %}">{{ receipt }}</a></td>
-                    <td class="decimal">{{ receipt.cart.discounted_total }}</td>
+                    <td class="decimal">{{ receipt.apply_vat.0 }}</td>
                     <td class="decimal"><a href="{% url show_invoice receipt.id %}">
                     {% if receipt.payed %}
                         Pagata
