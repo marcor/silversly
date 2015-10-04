@@ -251,7 +251,7 @@ def save_batch_load(request, batch_id):
                     method = new_price.method,
                     gross = new_price.gross,
                     markup = new_price.markup)
-                price.save() # to fix: this triggers update() for the second time!
+                price.save()
 
         supply.product.quantity += item.quantity
         if supply.price != item.new_supplier_price:
@@ -344,6 +344,7 @@ def modify_price(request, product_id, pricelist_id):
         product = Product.objects.get(pk=product_id)
         pricelist = Pricelist.objects.get(pk=pricelist_id)
         price = Price(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup)
+        price.recalculate()
     bad_request = False
     if request.method == "POST":
         form = ModifyPriceForm(request.POST, instance = price)
@@ -365,6 +366,7 @@ def modify_temp_price(request, product_id, pricelist_id):
         product = IncomingProduct.objects.get(pk=product_id)
         pricelist = Pricelist.objects.get(pk=pricelist_id)
         price = NewPrice(product = product, pricelist = pricelist, method = pricelist.default_method, markup = pricelist.default_markup)
+        price.recalculate()
     bad_request = False
     if request.method == "POST":
         price.reset_pricelist_default = False
@@ -396,6 +398,7 @@ def list_prices(request, product_id):
         else:
             price = Price(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
             # this does not save anything to the db!
+            price.recalculate()
             pricelist.price = price
         if pricelist.price.method == '==':
             pricelist.desc = "Prezzo fisso"
@@ -424,6 +427,7 @@ def list_temp_prices(request):
         else:
             price = NewPrice(product=product, pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
             # this does not save anything to the db!
+            price.recalculate()
             pricelist.price = price
         if pricelist.price.method == '==':
             pricelist.desc = "Prezzo fisso"
@@ -441,6 +445,7 @@ def ajax_get_prices(request, product_id, pricelist):
             price = Price.objects.get(product = product_id, pricelist = pricelist)
         except:
             price = Price(product=Product.objects.get(pk=product_id), pricelist=pricelist, markup=pricelist.default_markup, method=pricelist.default_method)
+            price.recalculate()
         data = simplejson.dumps({'net': str(price.net), 'gross': str(price.gross), 'tax': str(price.gross - price.net)})
         return HttpResponse(data, 'application/javascript')
     return HttpResponse(status=400)

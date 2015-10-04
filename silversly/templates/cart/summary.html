@@ -9,9 +9,13 @@
             {% endfor %}
         </select>
 
-    <span>Sconto:</span><button id="discount_button" type="submit">{{ cart.discount }}%</button>
+    <span>Sconto:&nbsp;</span><button id="discount_button" type="submit">{{ cart.discount }}%</button>
     <input name="discount" type="text" size="3" id="discount_input" style="display: none" value="{{ cart.discount }}"/>
     <p class="message" id="discount_error" style="display:none">Inserisci un numero positivo senza virgola</p>
+
+    <span>IVA:&nbsp;</span><button id="vat_rate_button" type="submit">{{ cart.vat_rate }}%</button>
+    <input name="vat_rate" type="text" size="3" id="vat_rate_input" style="display: none" value="{{ cart.vat_rate }}"/>
+    <p class="message" id="vat_rate_error" style="display:none">Inserisci un numero positivo senza virgola</p>
 
     {% if not customer.company %}
         <a id="toggle_rounding" href="{% url toggle_cart_rounding cart.id %}">
@@ -32,7 +36,7 @@
     {% endif %}
     <p>imponibile: <span id="taxable">{{ cart.discounted_net_total }}&euro;</span></p>
     {% with fiscal=cart.apply_vat %}
-    <p>iva: <span id="vat">{{ fiscal.1 }}&euro;</span></p>
+    <p>iva {{ fiscal.2 }}%: <span id="vat">{{ fiscal.1 }}&euro;</span></p>
     <p id="total">{{ fiscal.0 }}&euro;</p>
     {% endwith %}
     <p>Totale (IVA inclusa)</p>
@@ -48,6 +52,7 @@
 
 <script type="text/javascript">
     var discount = {{ cart.discount }};
+    var vat_rate = {{ cart.vat_rate }};
     setupButtons = function(c) {
         {% if cart.suspended %}
         $("#suspend").hide();

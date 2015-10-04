@@ -114,11 +114,12 @@ class Product(models.Model):
         try:
             price = Price.objects.get(product = self, pricelist__name = pricelist_name) # todo: avoid hard-coded value
         except:
-             pricelist = Pricelist.objects.get(name = pricelist_name)
-             price = Price(product = self,
-             pricelist = pricelist,
-             method = pricelist.default_method,
-             markup = pricelist.default_markup)
+            pricelist = Pricelist.objects.get(name = pricelist_name)
+            price = Price(product = self,
+                pricelist = pricelist,
+                method = pricelist.default_method,
+                markup = pricelist.default_markup)
+            price.recalculate()
         return price
 
     def get_total_retail_value(self):
@@ -158,7 +159,6 @@ class Product(models.Model):
         self.save()
         prices = Price.objects.filter(product = self).exclude(method = "==")
         for price in prices:
-            price.update()
             price.save()
 
     def sync_to_multiples(self, dests, *what):
@@ -256,18 +256,13 @@ class AbstractPrice(models.Model):
     markup = models.PositiveSmallIntegerField(_("Percentuale ricarico"), null = True)
     pricelist = models.ForeignKey(Pricelist, verbose_name = _("Listino"))
 
-    def __init__(self, *args, **kwargs):
-        super(AbstractPrice, self).__init__(*args, **kwargs)
-        if self.pk is None:
-            self.update()
-
     def __unicode__(self):
         if self.method == '==':
             return unicode(self.gross)
         else:
             return u"+%s%%" % self.markup
 
-    def update(self, taxes=settings.TAX, default_precision=Decimal(".01")):
+    def recalculate(self, taxes=settings.TAX, default_precision=Decimal(".01")):
         if self.method == "%=":
             self.gross = (self.product.base_price * Decimal(str((100 + self.markup) * (100 + taxes))) / 10000)
         elif self.method == "%~":
@@ -289,7 +284,7 @@ class AbstractPrice(models.Model):
         self.net = self.gross / (100 + taxes) * 100
 
     def save(self, *args, **kwargs):
-        self.update()
+        self.recalculate()
         super(AbstractPrice, self).save(*args, **kwargs)
 
     class Meta:

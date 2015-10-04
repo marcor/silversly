@@ -20,6 +20,7 @@ urlpatterns = patterns('sales.views',
     url(r'carrello/(\d+)/cambia_arrotondamento', 'toggle_cart_rounding', name = 'toggle_cart_rounding'),
     url(r'carrello/(\d+)/cambia_cliente', 'edit_cart_customer', name='edit_cart_customer'),
     url(r'carrello/(\d+)/cambia_sconto', 'edit_cart_discount', name='edit_cart_discount'),
+    url(r'carrello/(\d+)/cambia_aliquota', 'edit_cart_vat_rate', name='edit_cart_vat_rate'),
     url(r'carrello/(\d+)/cambia_listino', 'edit_cart_pricelist', name='edit_cart_pricelist'),
     
     url(r'carrello/totali$', 'get_cart_summary', name='get_current_cart_summary'),

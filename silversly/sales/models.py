@@ -37,9 +37,7 @@ class CartItem(models.Model):
                 product = self.product,
                 method = pricelist.default_method,
                 markup = pricelist.default_markup)
-            # is this ok?
-            price.update()
-
+        price.recalculate(taxes=self.cart.vat_rate)
         self.final_net_price = price.net
         self.final_price = price.gross
 
@@ -103,16 +101,17 @@ def rounded(value):
         remainder = value.remainder_near(Decimal(".5"))
     return remainder
 
-def apply_vat(value, vat_rate=settings.TAX):
+def apply_vat(value, vat_rate):
     total = (value * Decimal(str(100 + vat_rate)) / 100).quantize(precision)
-    # valore ivato e iva
-    return (total, total - value)
+    # valore ivato, iva e aliquota
+    return (total, total - value, vat_rate)
 
 class Cart(models.Model):
     current = models.BooleanField(default = True)
     suspended = models.BooleanField(default = False)
     customer = models.ForeignKey("people.Customer", verbose_name = _("Cliente"), null = True)
     discount = models.PositiveSmallIntegerField(_("Sconto"), default = 0)
+    vat_rate = models.PositiveSmallIntegerField(_("Aliquota IVA"), default=settings.TAX)
     rounded = models.BooleanField(_("Arrotonda il totale"), default = False)
     pricelist = models.ForeignKey("inventory.Pricelist", default = "Pubblico")
 
@@ -152,7 +151,7 @@ class Cart(models.Model):
         return self.final_net_total - self.final_net_discount
     
     def apply_vat(self):
-        return apply_vat(self.discounted_net_total())
+        return apply_vat(self.discounted_net_total(), self.vat_rate)
 
     def apply_rounding(self):
             # works only to scontrini for the time being
@@ -163,7 +162,7 @@ class Cart(models.Model):
         items = self.cartitem_set.all()
         if deep:
             for item in items:
-                item.update_value()
+                #item.update_value() # this is called in save(), below
                 item.save()
 
         gross_value = Decimal()

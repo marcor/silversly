@@ -67,17 +67,28 @@ def edit_cart_discount(request, cart_id):
     else:
         return HttpResponse(status=400)
 
+def edit_cart_vat_rate(request, cart_id):
+    cart = get_object_or_404(Cart, pk=cart_id)
+    form = EditVatForm(request.POST, instance=cart)
+    if form.is_valid():
+        form.save()
+        cart.update_value(deep=True)
+        cart.save()
+        return render_to_response('cart/product_list.html',  {'products': cart.cartitem_set.all(), 'cart': cart, 'customer': cart.customer and cart.customer.child()})
+    else:
+        return HttpResponse(status=400)
+
 def edit_cart_pricelist(request, cart_id):
     cart = get_object_or_404(Cart, pk=cart_id)
     form = EditPricelistForm(request.POST, instance=cart)
     if form.is_valid():
         form.save()
-        items = cart.cartitem_set.all()
-        for item in items:
-            item.save()
-        cart.update_value()
+        #items = cart.cartitem_set.all()
+        #for item in items:
+        #    item.save()
+        cart.update_value(deep=True)
         cart.save()
-        return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
+        return render_to_response('cart/product_list.html',  {'products': cart.cartitem_set.all(), 'cart': cart, 'customer': cart.customer and cart.customer.child()})
     else:
         return HttpResponse(status=400)
 
@@ -214,6 +225,7 @@ def new_invoice_from_cart(request, cart_id):
             cart.save()
             invoice.cart = cart
             invoice.total_net = cart.discounted_net_total() + invoice.costs
+            invoice.vat_rate = cart.vat_rate
             if invoice.payment_method == "ok":
                 invoice.payed = True
             else:
@@ -257,6 +269,9 @@ def new_invoice(request, customer_id):
             for ddt in form.open_ddts:
                 invoice.ddt_set.add(ddt)
             invoice.total_net = sum(ddt.cart.discounted_net_total() for ddt in form.open_ddts) + invoice.costs
+            # todo: ddts (carts) could have different vat_rates, link view to a specific ddt in order to generate
+            # an invoice only for the set of carts with the same vat_rate. Invoices with mixed vat will not be supported.
+            invoice.vat_rate = form.open_ddts[0].cart.vat_rate
             if invoice.payment_method == "ok":
                 invoice.payed = True
             else:
@@ -444,7 +459,6 @@ def add_product_to_cart(request, cart_id=None):
         cart_item = CartItem.objects.get(product=product, cart=cart)
     except:
         cart_item = CartItem(product=product, desc=product.name, cart=cart, quantity=0)
-        #cart_item.update_value()
     old_cart_item = deepcopy(cart_item)
     
     if request.method == "POST":
@@ -454,7 +468,9 @@ def add_product_to_cart(request, cart_id=None):
             cart.update_value()
             cart.save()
             cart_item.correct_inventory(relative_to=old_cart_item)
-            return render_to_response('cart/product_row.html',  {'cart': cart, 'item':  cart_item})
+            customer = cart.customer and cart.customer.child()
+            template = customer.company and 'cart/product_row_net.html' or 'cart/product_row.html'
+            return render_to_response(template,  {'cart': cart, 'item':  cart_item})
         else:
             bad_request = True
     else:

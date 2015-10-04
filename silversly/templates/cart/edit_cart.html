@@ -361,11 +361,49 @@
     prepare_dialog_for("receipt", "{% url new_receipt cart.id %}");
     prepare_dialog_for("invoice", "{% url new_invoice_from_cart cart.id %}");
 
-    $("#discount_button").live('click', function() {
-        $(this).hide();
-        $("#discount_input").show().trigger('focus');
-    });
+    prepare_edit_field_for = function(name, post_url, on_success) {
+        var button_id = "#" + name + "_button";
+        var input_id = "#" + name + "_input";
+        $(button_id).live('click', function() {
+            $(this).hide();
+            $(input_id).show().trigger('focus');
+        });
 
+        $(input_id).live('keyup', function(e){
+            $("#" + name + "_error").hide();
+            if(e.keyCode==27){
+                $(this).hide().val(eval(name));
+                $(button_id).show();
+            }
+            else if (e.keyCode==13) {
+                var dataObject = {};
+                dataObject[name] = $(this).val().trim(); 
+                $.ajax({
+                    "url": post_url,
+                    "type": "POST",
+                    "data": dataObject,
+                    "complete": function(xhr, status) {
+                        if (status == "success") {
+                            on_success(xhr);
+                        } else {
+                            $(input_id).val(eval(name));
+                            $("#" + name + "_error").show();
+                        }
+                    }
+                });
+            }
+        });
+
+
+    }
+
+    prepare_edit_field_for("discount", 
+                           "{% url edit_cart_discount cart.id %}", 
+                           function(xhr){$("#cart_summary").html(xhr.responseText)} );
+    prepare_edit_field_for("vat_rate", 
+                           "{% url edit_cart_vat_rate cart.id %}",
+                           function(xhr){$("#cart_display").html(xhr.responseText)} );
+    
     $("#id_pricelist").live('change', function(e){
             $.ajax({
                 "url": "{% url edit_cart_pricelist cart.id %}",
@@ -378,30 +416,6 @@
                 }
             });
 
-    });
-
-
-    $("#discount_input").live('keyup', function(e){
-        $("#discount_error").hide();
-        if(e.keyCode==27){
-            $(this).hide().val(discount);
-            $("#discount_button").show();
-        }
-        else if (e.keyCode==13) {
-            $.ajax({
-                "url": "{% url edit_cart_discount cart.id %}",
-                "type": "POST",
-                "data": {'discount': $(this).val().trim()},
-                "complete": function(xhr, status) {
-                    if (status == "success") {
-                        $("#cart_summary").html(xhr.responseText);
-                    } else {
-                        $("#discount_input").val(discount);
-                        $("#discount_error").show();
-                    }
-                }
-            });
-        }
     });
 
     $("#toggle_rounding").live('click', function(e) {
