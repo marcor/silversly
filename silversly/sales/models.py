@@ -56,21 +56,21 @@ class CartItem(models.Model):
         discount = (total * self.discount / 100).quantize(precision)
         value = (total - discount).quantize(precision)
         return (value, discount)
-    
+
     def update_inventory(self):
         if self.update and self.product:
             p = self.product
             p.quantity -= self.quantity
             p.save()
             p.sync_to_others("quantity")
-    
+
     def restore_inventory(self):
         if self.update and self.product:
             p = self.product
             p.quantity += self.quantity
             p.save()
             p.sync_to_others("quantity")
-    
+
     def correct_inventory(self, relative_to):
         product = self.product
         old_item = relative_to
@@ -82,7 +82,7 @@ class CartItem(models.Model):
         if value:
             product.quantity += value
             product.save()
-    
+
     def save(self, update_value=True, *args, **kwargs):
         if update_value:
             self.update_value()
@@ -138,7 +138,7 @@ class Cart(models.Model):
         if self.customer and Cart.objects.filter(customer=self.customer, suspended = True):
             self.suspended_cart = Cart.objects.get(customer = self.customer, suspended = True)
         else:
-            self.suspended_cart = None		
+            self.suspended_cart = None
         return self.suspended_cart
 
     def is_empty(self):
@@ -149,7 +149,7 @@ class Cart(models.Model):
 
     def discounted_net_total(self):
         return self.final_net_total - self.final_net_discount
-    
+
     def apply_vat(self):
         return apply_vat(self.discounted_net_total(), self.vat_rate)
 
@@ -203,7 +203,7 @@ class Receipt(models.Model):
 
     def typename(self):
         return self.__class__.__name__
-        
+
     class Meta:
         ordering = ["-id"]
 
@@ -348,13 +348,26 @@ class Invoice(Receipt):
     def apply_vat(self):
         return apply_vat(self.total_net, self.vat_rate)
 
+    @classmethod
+    def last_invoice(cls, year):
+        try:
+            return cls.objects.filter(year=year-2000, painvoice=None).order_by('pk')[0]
+        except:
+            return None
+
     class Meta:
         ordering = ['-year', '-date', '-number']
 
 class PAInvoice(Invoice):
     cig = models.CharField(_("CIG"), max_length=10)
     refdoc = models.CharField(_("Rif. determina"), max_length=6)
-    
+
     def __unicode__(self):
         return u"Fattura elettronica %02d del %s" % (self.number, self.date.strftime("%d-%m"))
-    
+
+    @classmethod
+    def last_invoice(cls, year):
+        try:
+            return cls.objects.filter(year=year-2000).order_by('pk')[0]
+        except:
+            return None

@@ -21,7 +21,7 @@ from inventory.views import find_product
 def edit_cart(request, cart_id=None):
     if cart_id:
         cart = get_object_or_404(Cart, pk=cart_id)
-    else:               
+    else:
         try:
             cart = Cart.objects.filter(current=True)[0]
         except:
@@ -54,7 +54,7 @@ def edit_cart_customer(request, cart_id):
             cart.rounded = False
     cart.update_value()
     cart.save()
-    
+
     return render_to_response('cart/product_list.html',  {'products': items, 'cart': cart, 'customer': cart.customer and cart.customer.child()})
 
 def edit_cart_discount(request, cart_id):
@@ -138,7 +138,7 @@ def suspend_cart(request, cart_id):
     suspended_cart = cart.get_suspended()
     if suspended_cart:
         merge_carts(cart, suspended_cart)
-        suspended_cart.save() 
+        suspended_cart.save()
         cart.delete()
         return redirect(edit_cart, suspended_cart.id)
     else:
@@ -154,7 +154,7 @@ def resume_cart(request, cart_id):
         cart.current = True
         cart.save()
     return redirect(edit_cart, cart.id)
-    
+
 def merge_suspended(request, cart_id):
      cart = get_object_or_404(Cart, pk=cart_id)
      suspended_cart = get_object_or_404(Cart, customer=cart.customer, suspended = True)
@@ -162,7 +162,7 @@ def merge_suspended(request, cart_id):
      cart.save()
      suspended_cart.delete()
      cart.suspended_cart = None
-     return redirect(edit_cart, cart.id) 
+     return redirect(edit_cart, cart.id)
 
 def new_receipt(request, cart_id):
     bad_request = False
@@ -208,13 +208,8 @@ def new_invoice_from_cart(request, cart_id):
     customer = cart.customer.child()
     (invoiceClass, formClass) = customer.__class__ == PACustomer and (PAInvoice, PAInvoiceForm) or (Invoice, InvoiceForm)
     now = datetime.datetime.now()
-    year = now.year - 2000
-    try:
-        last_invoice = invoiceClass.objects.order_by('pk')[0]
-        number = (last_invoice.year == year) and last_invoice.number + 1 or 1
-    except:
-        last_invoice = None
-        number = 1
+    last_invoice = invoiceClass.last_invoice(now.year)
+    number = last_invoice and last_invoice.number + 1 or 1
     invoice = invoiceClass(number = number, immediate=True, payment_method=customer.payment_method)
 
     if request.method == "POST":
@@ -249,20 +244,15 @@ def new_invoice(request, customer_id):
     #open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
     #if not open_ddts.exists():
      #   return HttpResponse(status=404)
-
+    (invoiceClass, formClass) = customer.__class__ == PACustomer and (PAInvoice, PAInvoiceForm) or (Invoice, InvoiceForm)
     bad_request = False
     now = datetime.datetime.now()
-    year = now.year - 2000
-    try:
-        last_invoice = Invoice.objects.order_by('pk')[0]
-        number = (last_invoice.year == year) and last_invoice.number + 1 or 1
-    except:
-        last_invoice = None
-        number = 1
-    invoice = Invoice(number = number, immediate=False, payment_method=customer.payment_method)
-    
+    last_invoice = invoiceClass.last_invoice(now.year)
+    number = last_invoice and last_invoice.number + 1 or 1
+    invoice = invoiceClass(number = number, immediate=False, payment_method=customer.payment_method)
+
     if request.method == "POST":
-        form = InvoiceForm(request.POST, instance=invoice)
+        form = formClass(request.POST, instance=invoice)
         form.prev_invoice = last_invoice
         form.open_ddts = Ddt.objects.filter(cart__customer = customer, invoice__isnull = True)
         if form.is_valid():
@@ -283,7 +273,7 @@ def new_invoice(request, customer_id):
         else:
             bad_request = True
     else:
-        form = InvoiceForm(instance=invoice)
+        form = formClass(instance=invoice)
 
     response = render_to_response('customers/dialogs/new_invoice.html',  {'form': form, 'customer': customer.child()})
     if bad_request:
@@ -407,8 +397,8 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
                 l.append({'type': 'item_discount', 'item': item})
         if c.discount:
             l.append({'type': 'cart_discount', 'cart': c})
-        return l       
-        
+        return l
+
     lines = []
     if cart:
         lines.extend(prepare_lines(cart))
@@ -417,7 +407,7 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             if reference_ddts:
                 lines.append({'type': 'ddt_ref', 'ddt': ddt})
             lines.extend(prepare_lines(ddt.cart))
-    
+
     if format == 'pdf':
         from common.views import write_pdf
         return write_pdf('pdf/invoice_a4.html',{
@@ -429,7 +419,7 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'invoice': invoice,
             'customer': customer,
             'lines': lines})
-    
+
     if format == 'xml':
          return render_to_response('export/invoice_pa.xml',  {
             'shop': shop,
@@ -439,8 +429,8 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'customer': customer,
             'lines': lines},
             mimetype="text/xml")
- 
-    
+
+
 def add_product_to_cart(request, cart_id=None):
     bad_request = False
     new_cart = False
@@ -452,7 +442,7 @@ def add_product_to_cart(request, cart_id=None):
         new_cart = True
     else:
         cart = Cart.objects.get(pk=cart_id)
-    
+
     product_id = request.GET.get("product_pk", None) or request.POST.get("product_pk", None)
     product = Product.objects.get(pk=product_id)
     try:
@@ -461,7 +451,7 @@ def add_product_to_cart(request, cart_id=None):
     except:
         cart_item = CartItem(product=product, desc=product.name, cart=cart, quantity=0)
     old_cart_item = deepcopy(cart_item)
-    
+
     if request.method == "POST":
         form = SellProductForm(request.POST, instance=cart_item)
         if form.is_valid():
