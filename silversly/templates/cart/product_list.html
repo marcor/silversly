@@ -4,13 +4,13 @@
             <th></th>
             <th style="text-align: left">Articolo</th>
             <th>Q.t&agrave;</th>
-            <th>Prezzo{% if not customer.is_retail %} netto{% endif %}</th>
+            <th>Prezzo{% if customer and not customer.is_retail %} netto{% endif %}</th>
             <th>Sc.%</th>
             <th>Valore</th>
         </tr>
     </thead>
     <tbody>
-        {% if not customer.is_retail %}
+        {% if customer and not customer.is_retail %}
             {% for item in products %}
                 {% include  "cart/product_row_net.html" %}
             {% endfor %}
