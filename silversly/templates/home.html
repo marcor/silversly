@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load sales_tags %}
 
 {% block title %}Silversly - Benvenuta!{% endblock %}
 
@@ -7,12 +8,18 @@
 <style type="text/css">
     #sidebar { display: none }
     #main { margin-left: 20px}
-    .columns > div {
+    #suspended { width: 40%; }
+    #need_invoice, #debtors { width: 25% }
+    .column {
         float: left;
-        width: 24%;
+        padding: 0 0.5em;
+        margin: 1em 0.8em 1em 0.2em;
         border: 1px solid #ccc;
-        padding: 1em;
-        margin: 1em}
+    }
+    #archivio .column { width: 22% }
+    .clear {
+        clear: both;
+    }
     h2 {
         margin: 2px;
         padding: 3px;
@@ -24,13 +31,9 @@
         border: 0;
         margin-bottom: 10px;
     }
-    #vendite h2 { background-color: #fee   }
-    #magazzino h2 { background-color: #eef   }
-    #acquisti h2 { background-color: #efe   }
     .pane {
         overflow-y: auto;
-        width: 100%;
-        max-height: 300px;
+        max-height: 200px;
     }
     .pane table {
         margin-top: 0;
@@ -50,51 +53,13 @@
 {% block header %}{% endblock %}
 
 {% block content %}
-<div class="columns">
-    <div id="magazzino">
-        <h2>Magazzino <a href="{% url print_catalogue %}" target="_blank">(stampa catalogo)</a></h2>
-        <h3>Articoli sottoscorta ({{ outstock|length }})</h3>
-        {% if outstock %}
-        <div class="pane">
-        <table >
-            {% for product in outstock %}
-            <tr>
-                <td><a href="{% url show_product product.id %}">{{product.name}}</a></td>
-            </tr>
-            {% endfor %}
-        </table>
-        </div>
-        {% else %}
-        <p>Tutto a posto!</p>
-        {% endif %}
-    </div>
-    <!--
-    <div id="acquisti">
-        <h2>Acquisti</h2>
-        <h3>Ordini in corso</h3>
-    </div>
-    -->
+<div>
     <div id="vendite">
-        <h2>Vendite</h2>
-        <h3>Debitori</h3>
-        <div class="pane">
-            {% if debtors %}
-                <table >
+        <h2 style="background-color: #fee" >Vendite in corso</h2>
 
-                {% for debtor in debtors %}
-                <tr>
-                    <td><a href="{% url show_customer debtor.id %}">{{debtor}}</a></td>
-                    <td class="decimal">{{debtor.due}}&euro;</td>
-                </tr>
-                {% endfor %}
-                </table>
-            {% else %}
-                <p>Tutti i clienti sono in regola. Che bravi!</p>
-            {% endif %}
-        </div>
-    
-        <h3>Acquisti in sospeso</h3>
-        <div class="pane">
+        <div class="column" id="suspended">
+            <h3>Acquisti in sospeso {% if suspended_carts %}({{ suspended_carts|sum:'discounted_total'}} &euro;){% endif %}</h3>
+            <div class="pane">
             {% if suspended_carts %}
                 <table >
 
@@ -108,11 +73,12 @@
             {% else %}
                 <p>Nessuno.</p>
             {% endif %}
-        
-	</div>
-	
-        <h3>Fatture da emettere</h3>
-        <div class="pane">
+            </div>
+        </div>
+
+        <div class="column" id="need_invoice">
+            <h3>Da fatturare {% if need_invoice %}({{ need_invoice.values|sum}} &euro;){% endif %}</h3>
+            <div class="pane">
             {% if need_invoice %}
             <table >
             {% for customer, total in need_invoice.items %}
@@ -126,12 +92,37 @@
                 <p>Nessuna.</p>
             {% endif %}
          </div>
+        </div>
+
+        <div class="column" id="debtors">
+            <h3>Da incassare {% if debtors %}({{ debtors|sum:'due'}} &euro;){% endif %}</h3>
+            <div class="pane">
+            {% if debtors %}
+                <table >
+                {% for debtor in debtors %}
+                <tr>
+                    <td><a href="{% url show_customer debtor.id %}">{{debtor}}</a></td>
+                    <td class="decimal">{{debtor.due}}&euro;</td>
+                </tr>
+                {% endfor %}
+                </table>
+            {% else %}
+                <p>Tutti i clienti sono in regola. Che bravi!</p>
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="clear"></div>
+
     </div>
-    
+
+
     <div id="archivio">
-        <h2>Archivio</h2>
-        <h3>Ultimi scontrini</h3>
-         <div class="pane">
+        <h2 style="background-color: #efe" >Archivio</h2>
+
+        <div class="column" >
+            <h3>Ultimi scontrini</h3>
+            <div class="pane">
             {% if last_receipts %}
             <table >
             {% for scontrino in last_receipts %}
@@ -147,10 +138,12 @@
             {% else %}
                 <p>Nessuno scontrino emesso.</p>
             {% endif %}
-         </div>
+            </div>
+        </div>
 
-         <h3>Ultimi Ddt</h3>
-         <div class="pane">
+        <div class="column">
+            <h3>Ultimi Ddt</h3>
+            <div class="pane">
             {% if last_ddts %}
             <table >
             {% for d in last_ddts %}
@@ -169,10 +162,12 @@
             {% else %}
                 <p>Nessun Ddt emesso.</p>
             {% endif %}
-         </div>
-	 
-	 <h3>Ultime fatture</h3>
-         <div class="pane">
+            </div>
+        </div>
+
+        <div class="column">
+            <h3>Ultime fatture</h3>
+            <div class="pane">
             {% if last_invoices %}
             <table >
             {% for i in last_invoices %}
@@ -192,12 +187,39 @@
                 <p>Nessuna fattura emessa.</p>
             {% endif %}
          </div>
+        </div>
+
+        <div class="column">
+            <h3>Ultime fatture PA</h3>
+            <div class="pane">
+            {% if last_painvoices %}
+            <table >
+            {% for i in last_painvoices %}
+            <tr>
+                <td>
+                <a title="{{ i.cart.customer }}"
+                   href="{% url show_invoice i.id %}">{{ i }}</a>
+		{% if forloop.first %}
+		<a id="delete_last_invoice" title="cancella l'ultima fattura emessa"
+                   href="{% url delete_last_painvoice %}"><img src="/media/img/cancel.png" width="16"/></a>
+		{% endif %}
+		</td>
+            </tr>
+            {% endfor %}
+            </table>
+            {% else %}
+                <p>Nessuna fattura emessa.</p>
+            {% endif %}
+         </div>
+        </div>
+
+        <div class="clear"></div>
     </div>
 
     <div id="new_invoice_dialog" title="Prepara una fattura" class="dialog" style="display: none"></div>
     <div id="delete_invoice_dialog" title="Annulla fattura" class="dialog" style="display: none"></div>
     <div id="delete_ddt_dialog" title="Annulla Ddt" class="dialog" style="display: none"></div>
-    
+
 </div>
 {% endblock %}
 
@@ -233,7 +255,7 @@
 
     prepare_dialog_for("invoice");
     prepare_dialog_for("ddt");
-    
+
     $( "#delete_last_invoice" ).live('click', function() {
         var delete_anchor = $(this);
         $( "#delete_invoice_dialog" ).dialog({
@@ -244,7 +266,7 @@
         });
         return false;
     });
-    
+
     $( "#delete_last_ddt" ).live('click', function() {
         var delete_anchor = $(this);
         $( "#delete_ddt_dialog" ).dialog({

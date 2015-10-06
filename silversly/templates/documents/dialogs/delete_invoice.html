@@ -3,7 +3,11 @@
     $(function() {
         $( "#confirm_delete" ).live('click', function() {
             $.ajax({
+                {% if invoice.typename = 'PAInvoice' %}
+                "url": "{% url delete_last_painvoice %}",
+                {% else %}
                 "url": "{% url delete_last_invoice %}",
+                {% endif %}
                 "type": "POST",
                 "data": {'confirm': true},
                 "complete": function(xhr, status) {

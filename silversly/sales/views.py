@@ -121,14 +121,15 @@ def reload_cart(request, cart_id):
     return redirect(edit_cart, cart_id)
 
 def merge_carts(source, dest):
-	for item in source.cartitem_set.all():
-		item.cart = dest
-		if source.pricelist == dest.pricelist:
-			item.save(update_value=False)
-		else:
-			item.save()
-	dest.update_value()
-	return dest
+    for item in source.cartitem_set.all():
+        item.cart = dest
+        if source.pricelist == dest.pricelist and source.vat_rate == dest.vat_rate:
+            # we want to leave the dest cart items alone, so we can't call dest.update_value(deep=True)
+            item.save(update_value=False)
+        else:
+            item.save()
+    dest.update_value()
+    return dest
 
 def suspend_cart(request, cart_id):
     cart = get_object_or_404(Cart, pk=cart_id)
@@ -281,7 +282,7 @@ def new_invoice(request, customer_id):
     return response
 
 def show_invoice(request, id):
-    invoice = get_object_or_404(Invoice, pk=id)
+    invoice = get_object_or_404(Invoice, pk=id).child()
     cart = invoice.cart
     ddts = invoice.ddt_set.all()
     if cart:
@@ -290,9 +291,9 @@ def show_invoice(request, id):
         customer = ddts[0].cart.customer.child()
     return render_to_response('documents/show_invoice.html',  {'cart': cart, 'customer': customer, 'ddts': ddts, 'invoice': invoice})
 
-def delete_invoice(request):
+def delete_invoice(request, pa=False):
     try:
-        invoice = Invoice.objects.order_by('pk')[0]
+        invoice = pa and PAInvoice.last_invoice() or Invoice.last_invoice()
     except:
         return HttpResponse(404)
     if request.is_ajax():

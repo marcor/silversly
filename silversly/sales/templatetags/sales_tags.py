@@ -6,7 +6,12 @@ register = template.Library()
 def sum_objects(objects, field=None):
     try:
         if field:
-            return sum(getattr(o, field) for o in objects)
+            attr = getattr(objects[0], field)
+            print attr
+            if callable(attr):
+                return sum(getattr(o, field)() for o in objects)
+            else:
+                return sum(getattr(o, field) for o in objects)
         else:
             return sum(objects)
     except:

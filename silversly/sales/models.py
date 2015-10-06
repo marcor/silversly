@@ -281,6 +281,10 @@ class Scontrino(Receipt):
     def get_absolute_url(self):
         return('sales.views.show_receipt', [str(self.id)])
 
+    class Meta:
+        verbose_name = _("Scontrino")
+        verbose_name_plural = _("Scontrini")
+
 
 
 class Ddt(Receipt):
@@ -349,25 +353,37 @@ class Invoice(Receipt):
         return apply_vat(self.total_net, self.vat_rate)
 
     @classmethod
-    def last_invoice(cls, year):
+    def last_invoice(cls, year=None):
         try:
-            return cls.objects.filter(year=year-2000, painvoice=None).order_by('pk')[0]
+            if year is None:
+                return cls.objects.filter(painvoice=None).order_by('pk')[0]
+            else:
+                return cls.objects.filter(year=year-2000, painvoice=None).order_by('pk')[0]
         except:
             return None
 
     class Meta:
         ordering = ['-year', '-date', '-number']
+        verbose_name = _("Fattura")
+        verbose_name_plural = _("Fatture")
 
 class PAInvoice(Invoice):
     cig = models.CharField(_("CIG"), max_length=10)
     refdoc = models.CharField(_("Rif. determina"), max_length=6)
 
     def __unicode__(self):
-        return u"Fattura elettronica %02d del %s" % (self.number, self.date.strftime("%d-%m"))
+        return u"Fattura PA %02d del %s" % (self.number, self.date.strftime("%d-%m"))
 
     @classmethod
-    def last_invoice(cls, year):
+    def last_invoice(cls, year=None):
         try:
-            return cls.objects.filter(year=year-2000).order_by('pk')[0]
+            if year is None:
+                return cls.objects.order_by('pk')[0]
+            else:
+                return cls.objects.filter(year=year-2000).order_by('pk')[0]
         except:
             return None
+
+    class Meta:
+        verbose_name = _("Fattura PA")
+        verbose_name_plural = _("Fatture PA")

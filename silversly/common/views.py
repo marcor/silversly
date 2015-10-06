@@ -51,12 +51,12 @@ def write_pdf(template_src, context_dict):
 def homepage(request):
     now = datetime.now()
     year = now.year - 2000
-    outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")
+    #outstock = Product.objects.raw("select * from inventory_product where quantity < min_quantity order by name collate nocase")
     #open_batchloads = BatchLoad.objects.filter(loaded = False)
-    last_receipts = Scontrino.objects.order_by("-date")[:5]
-    last_ddts = Ddt.objects.filter(year=year)[:5]
+    last_receipts = Scontrino.objects.order_by("-date")[:6]
+    last_ddts = Ddt.objects.filter(year=year)[:6]
     open_ddts = Ddt.objects.filter(invoice__isnull = True).select_related("cart", "cart__customer")
-    suspended_carts = Cart.objects.select_related("customer").filter(suspended=True)
+    suspended_carts = Cart.objects.select_related("customer").filter(suspended=True).order_by('customer__name')
     customers = {}
     for ddt in open_ddts:
         customer = ddt.cart.customer
@@ -65,16 +65,18 @@ def homepage(request):
         else:
             customers[customer] = ddt.cart.discounted_total()
 
-    last_invoices = Invoice.objects.filter(year=year)[:5]
+    last_invoices = Invoice.objects.filter(painvoice=None, year=year)[:6]
+    last_painvoices = PAInvoice.objects.filter(year = year)[:6]
     debtors = Customer.objects.raw("select * from people_customer where due > 0 collate nocase")
 
     return render_to_response("home.html",
-        {'outstock': list(outstock),
+        {#'outstock': list(outstock),
         #'open_batchloads': open_batchloads,
         'last_receipts': last_receipts,
         'last_ddts': last_ddts,
         'need_invoice': customers,
         'last_invoices': last_invoices,
+        'last_painvoices': last_painvoices,
         'suspended_carts': suspended_carts,
         'debtors': list(debtors)})
 

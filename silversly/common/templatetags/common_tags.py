@@ -13,19 +13,19 @@ def modulo(num, val):
 @register.filter(name='roundup_divide')
 def roundup_divide(items, items_per_page):
 	try:
-		return (items - 1) // items_per_page + 1 
+		return (items - 1) // items_per_page + 1
 	except:
-		return (len(items) - 1) // items_per_page + 1 
-	
+		return (len(items) - 1) // items_per_page + 1
+
 @register.filter
 def divide(num, val):
     return num // val
 
-@register.filter(name='times') 
+@register.filter(name='times')
 def times(number):
     return range(number)
 
-@register.filter(name='linepad') 
+@register.filter(name='linepad')
 def linepad(total_lines, available_lines_per_page):
     lines_on_last_page = total_lines % available_lines_per_page
     if  lines_on_last_page == 0:
@@ -41,7 +41,7 @@ def silversly_version():
 @register.simple_tag()
 def debug():
     return settings.DEBUG
-    
+
 # thanks to pklaus:
 
 # I found some tricks in URLNode and url from defaulttags.py:

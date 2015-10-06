@@ -49,14 +49,16 @@
     <button id="pay_all" style="display:none">Segna come pagata</button>
     <a id="print" target="_blank" href="{% url print_invoice invoice.id %}">Stampa</a>
     <a style="display:none" id="print_no_ddt" target="_blank" href="{% url print_unreferenced_invoice invoice.id %}">Stampa (no rif. DDT)</a>
-    <a id="export" target="_blank" href="{% url xml_export invoice.id %}">Esporta XML</a>
+    <a style="display:none" id="export" target="_blank" href="{% url xml_export invoice.id %}">Esporta XML</a>
 </div>
 
 
 
 <script type="text/javascript">
-    $("#print").button().show();
+$("#print").button().show();
+{% if invoice.typename == 'PAInvoice' %}
     $("#export").button().show();
+{% endif %}
 {% if ddts %}
     $("#print_no_ddt").button().show();
 {% endif %}
