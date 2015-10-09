@@ -1,0 +1,173 @@
+[
+    {
+        "pk": 17731,
+        "model": "sales.cart",
+        "fields": {
+            "customer": 24,
+            "final_net_total": "48.54",
+            "rounded": false,
+            "vat_rate": 22,
+            "final_net_discount": "0.00",
+            "current": false,
+            "discount": 0,
+            "final_discount": "0.00",
+            "suspended": true,
+            "final_total": "59.25",
+            "pricelist": "Pubblico"
+        }
+    },
+    {
+        "pk": 33599,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 214,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "6.56",
+            "final_price": "8.00",
+            "quantity": "1",
+            "desc": "idropittura only lt1"
+        }
+    },
+    {
+        "pk": 33600,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 212,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "2.46",
+            "final_price": "3.00",
+            "quantity": "2",
+            "desc": "tintamano 40ml"
+        }
+    },
+    {
+        "pk": 33601,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 752,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "8.61",
+            "final_price": "10.50",
+            "quantity": "1",
+            "desc": "tintasol blue lw21"
+        }
+    },
+    {
+        "pk": 33602,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 753,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "8.20",
+            "final_price": "10.00",
+            "quantity": "1",
+            "desc": "tintasol rosso ossido lw31"
+        }
+    },
+    {
+        "pk": 33651,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 1341,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "1.49",
+            "final_price": "1.80",
+            "quantity": "1",
+            "desc": "barra filettata zinc 8"
+        }
+    },
+    {
+        "pk": 33652,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 9175,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "2.62",
+            "final_price": "3.20",
+            "quantity": "1",
+            "desc": "super attak original 3gr"
+        }
+    },
+    {
+        "pk": 33774,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 872,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "9.02",
+            "final_price": "11.00",
+            "quantity": "1",
+            "desc": "resina T-BOND"
+        }
+    },
+    {
+        "pk": 33775,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 1938,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "1.64",
+            "final_price": "2.00",
+            "quantity": "1",
+            "desc": "barra filettata zinc 10"
+        }
+    },
+    {
+        "pk": 33776,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 3540,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "0.12",
+            "final_price": "0.15",
+            "quantity": "15",
+            "desc": "dado esagonale zincato 10"
+        }
+    },
+    {
+        "pk": 33777,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 1539,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "0.08",
+            "final_price": "0.10",
+            "quantity": "15",
+            "desc": "dado esagonale zincato 8"
+        }
+    },
+    {
+        "pk": 33883,
+        "model": "sales.cartitem",
+        "fields": {
+            "product": 2429,
+            "discount": 0,
+            "update": true,
+            "cart": 17731,
+            "final_net_price": "1.24",
+            "final_price": "1.50",
+            "quantity": "2",
+            "desc": "duplicato chiave"
+        }
+    }
+]
