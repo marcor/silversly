@@ -63,11 +63,13 @@
 	else {
 	     $("#suspend").hide();
         }
-	{% if cart.get_suspended %}
-	   $("#import_suspended").html("C'&egrave; una <a href=\"{% url revise_cart cart.suspended_cart.id %}\">lista in sospeso</a> per questo cliente. <a href=\"{% url merge_suspended cart.id %}\">Aggiungila al carrello.</a>").show();
+    {% with sus_cart=customer.get_suspended_cart %}
+	{% if sus_cart %}
+	   $("#import_suspended").html("C'&egrave; una <a href=\"{% url revise_cart sus_cart.id %}\">lista in sospeso</a> per questo cliente. <a href=\"{% url merge_suspended cart.id %}\">Aggiungila al carrello.</a>").show();
 	{% else %}
            $("#import_suspended").hide();
 	{% endif %}
+    {% endwith %}
      {% endif %}
 
 

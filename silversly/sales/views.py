@@ -133,24 +133,24 @@ def merge_carts(source, dest):
 
 def suspend_cart(request, cart_id):
     cart = get_object_or_404(Cart, pk=cart_id)
-    if cart.suspended:
-        # we can't suspend an already suspended cart
-        return redirect(edit_cart, cart.id)
-    suspended_cart = cart.get_suspended()
-    if suspended_cart:
-        merge_carts(cart, suspended_cart)
-        suspended_cart.save()
-        cart.delete()
-        return redirect(edit_cart, suspended_cart.id)
-    else:
-        cart.suspended = True
-        cart.current = False
-        cart.save()
-        return redirect(edit_cart, cart_id)
+    if cart.customer and not cart.suspended:
+        suspended_cart = cart.customer.get_suspended_cart()
+        if suspended_cart:
+            # double check against a possible race condition:
+            if cart.id != suspended_cart.id:
+                merge_carts(cart, suspended_cart)
+                suspended_cart.save()
+                cart.delete()
+            return redirect(edit_cart, suspended_cart.id)
+        else:
+            cart.suspended = True
+            cart.current = False
+            cart.save()
+    return redirect(edit_cart, cart_id)
 
 def resume_cart(request, cart_id):
     cart = get_object_or_404(Cart, pk=cart_id)
-    if cart.suspended ==True:
+    if cart.suspended == True:
         cart.suspended = False
         cart.current = True
         cart.save()
@@ -158,11 +158,12 @@ def resume_cart(request, cart_id):
 
 def merge_suspended(request, cart_id):
      cart = get_object_or_404(Cart, pk=cart_id)
-     suspended_cart = get_object_or_404(Cart, customer=cart.customer, suspended = True)
-     merge_carts(suspended_cart, cart)
-     cart.save()
-     suspended_cart.delete()
-     cart.suspended_cart = None
+     if cart.customer:
+        suspended_cart = cart.customer.get_suspended_cart()
+        if cart.id != suspended_cart.id:
+            merge_carts(suspended_cart, cart)
+            cart.save()
+            suspended_cart.delete()
      return redirect(edit_cart, cart.id)
 
 def new_receipt(request, cart_id):

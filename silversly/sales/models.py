@@ -132,15 +132,6 @@ class Cart(models.Model):
     def get_absolute_url(self):
         return('sales.views.edit_cart', [str(self.id)])
 
-    def get_suspended(self):
-        if hasattr(self, "suspended_cart"):
-              return self.suspended_cart
-        if self.customer and Cart.objects.filter(customer=self.customer, suspended = True):
-            self.suspended_cart = Cart.objects.get(customer = self.customer, suspended = True)
-        else:
-            self.suspended_cart = None
-        return self.suspended_cart
-
     def is_empty(self):
         return self.cartitem_set.count() == 0
 

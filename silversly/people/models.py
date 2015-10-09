@@ -5,6 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
+from sales.models import Cart
+
 import simplejson
 
 PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
@@ -66,12 +68,18 @@ class Customer(models.Model):
         except CompanyCustomer.DoesNotExist:
             r = self
         return r
-        
+
     def typename(self):
         return self.__class__.__name__
-        
+
     def is_retail(self):
         return self.__class__ == Customer
+
+    def get_suspended_cart(self):
+        sus_cart = Cart.objects.filter(customer=self, suspended = True)
+        if sus_cart:
+            return sus_cart[0]
+        return None
 
     def json(self):
         from common.views import DecimalEncoder
@@ -120,7 +128,7 @@ class CompanyCustomer(Customer):
 
 class PACustomer(CompanyCustomer):
     cu = models.CharField(_("Codice Univoco"), max_length=6, unique=True)
-    
+
     def __unicode__(self):
         return self.name
 
