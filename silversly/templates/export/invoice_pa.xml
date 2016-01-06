@@ -87,12 +87,12 @@
 				<RiferimentoNormativo>IVA {{invoice.vat_rate}}% SPLIT PAYMENT PA</RiferimentoNormativo>
 			</DatiRiepilogo>
 
-	</DatiBeniServizi>
+		</DatiBeniServizi>
 	<DatiPagamento>
 	<CondizioniPagamento>TP02</CondizioniPagamento>
 	<DettaglioPagamento><Beneficiario>{{ shop.name }}</Beneficiario>
-	<ModalitaPagamento>MP05</ModalitaPagamento>
-	<DataScadenzaPagamento>2015-10-31</DataScadenzaPagamento>
+	<ModalitaPagamento>{{ payment_type }}</ModalitaPagamento>
+	<DataScadenzaPagamento>{{ invoice.due_on|date:"Y-m-d" }}</DataScadenzaPagamento>
 	<ImportoPagamento>{{ invoice.total_net|stringformat:".2f" }}</ImportoPagamento>
 	<IBAN>{{ shop.iban }}</IBAN>
 	</DettaglioPagamento>

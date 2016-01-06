@@ -428,6 +428,7 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'cart' : cart,
             'ddts': ddts,
             'invoice': invoice.child(),
+            'payment_type': getattr(settings, 'PAYMENT_METHODS')[invoice.payment_method][0], 
             'customer': customer,
             'lines': lines},
             mimetype="text/xml")

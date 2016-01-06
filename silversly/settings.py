@@ -5,16 +5,18 @@ VERSION = "1.15"
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_DIR)
 
-PAYMENT_CHOICES = [
-    ('rmd', u'Rimessa diretta ric. fat.'),
-    ('rd30', u'Rimessa diretta 30gg f.m.'),
-    ('rd60', u'Rimessa diretta 60gg f.m.'),
-    ('30rb', u'Ri.Ba. 30gg f.m.'),
-    ('60rb', u'Ri.Ba. 60gg f.m.'),
-    ('30fm', u'Bonifico 30gg f.m.'),
-    ('60fm', u'Bonifico 60gg f.m.'),
-    ('ok', u'Pagato')
-]
+PAYMENT_METHODS = {
+    'rmd':  ('MP01', u'Rimessa diretta ric. fat.', None),
+    'rd30': ('MP01', u'Rimessa diretta 30gg f.m.', 1),
+    'rd60': ('MP01', u'Rimessa diretta 60gg f.m.', 2),
+    '30rb': ('MP12', u'Ri.Ba. 30gg f.m.',          1),
+    '60rb': ('MP12', u'Ri.Ba. 60gg f.m.',          2),
+    '30fm': ('MP05', u'Bonifico 30gg f.m.',        1),
+    '60fm': ('MP05', u'Bonifico 60gg f.m.',        2),
+    'ok': ('MP01', u'Pagato',                      None)
+}
+
+PAYMENT_CHOICES = [ (key, value[1]) for key, value in PAYMENT_METHODS.items() ]  
 
 TAX = 22
 BANK_COST = 0

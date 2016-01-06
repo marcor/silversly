@@ -3,12 +3,13 @@ from django.db import models
 from inventory.models import Price
 from common.models import *
 from decimal import Decimal
-import datetime, os
+import datetime, calendar, os
 from django.utils.translation import ugettext_lazy as _
 from inventory.models import Pricelist
 from django.conf import settings
 from django.contrib.sites.models import Site
 
+PAYMENT_METHODS = getattr(settings, 'PAYMENT_METHODS')
 PAYMENT_CHOICES = getattr(settings, 'PAYMENT_CHOICES')
 precision = Decimal(".01")
 
@@ -343,6 +344,21 @@ class Invoice(Receipt):
     def apply_vat(self):
         return apply_vat(self.total_net, self.vat_rate)
 
+    def due_on(self):
+        after = PAYMENT_METHODS[self.payment_method][2]
+        if not after:
+            return self.date
+        if after > 6:
+            # assume exact days
+            return self.date + datetime.timedelta(after)
+        else:
+            # assume months (end of)
+            due_month = (self.date.month - 1 + after) % 12 + 1
+            # remember 0 < after < 7 
+            due_year = self.date.month <= due_month and self.date.year or self.date.year + 1
+            due_day = calendar.monthrange(due_year, due_month)[1]
+            return datetime.date(due_year, due_month, due_day)
+            
     @classmethod
     def last_invoice(cls, year=None):
         try:
