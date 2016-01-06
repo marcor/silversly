@@ -1,5 +1,8 @@
-from django.forms import ModelForm
+from django.forms import *
 from models import *
+import re
+
+ADDRESS_FORMAT = getattr(settings, 'ADDRESS_FORMAT')
 
 class SupplierForm(ModelForm):
     class Meta:
@@ -25,6 +28,12 @@ class CompanyForm(ModelForm):
         model = CompanyCustomer
         fields = ("name", "piva", "main_address", "phone", "email")
 
+    def clean_main_address(self):
+        address = self.cleaned_data['main_address']
+        if not re.match(ADDRESS_FORMAT, address):
+            raise ValidationError("L'indirizzo e' incompleto o non rispetta il formato corretto.")
+        return address
+        
 class PAForm(CompanyForm):
     class Meta(CompanyForm.Meta):
         model = PACustomer
@@ -35,6 +44,12 @@ class CompanyInfoForm(ModelForm):
         model = CompanyCustomer
         fields = ("name", "cf", "piva", "phone", "email", "main_address")
 
+    def clean_main_address(self):
+        address = self.cleaned_data['main_address']
+        if not re.match(ADDRESS_FORMAT, address):
+            raise ValidationError("L'indirizzo e' incompleto o non rispetta il formato corretto.")
+        return address
+    
 class PAInfoForm(CompanyInfoForm):
     class Meta:
         model = PACustomer
@@ -50,11 +65,23 @@ class CompanyQuickForm(ModelForm):
         model = CompanyCustomer
         fields = ("name", "piva", "pricelist", "discount", "main_address")
 
+    def clean_main_address(self):
+        address = self.cleaned_data['main_address']
+        if not re.match(ADDRESS_FORMAT, address):
+            raise ValidationError("L'indirizzo e' incompleto o non rispetta il formato corretto.")
+        return address
+    
 class PAQuickForm(CompanyQuickForm):
     class Meta:
         model = PACustomer
         fields = ("name", "piva", "cu", "pricelist", "discount", "main_address")
 
+    def clean_main_address(self):
+        address = self.cleaned_data['main_address']
+        if not re.match(ADDRESS_FORMAT, address):
+            raise ValidationError("L'indirizzo e' incompleto o non rispetta il formato corretto.")
+        return address
+    
 class CustomerCommercialForm(ModelForm):
     class Meta:
         model = Customer

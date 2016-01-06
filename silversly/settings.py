@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, re
 
 VERSION = "1.15"
 
@@ -20,6 +20,7 @@ TAX = 22
 BANK_COST = 0
 RECEIPT_SEPARATOR = "\x7f"
 
+ADDRESS_FORMAT = re.compile("\s*(.+)\s+(\d{5})\s+(.+)\s+\(?([A-Z]{2})\)?")
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
