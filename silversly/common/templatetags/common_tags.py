@@ -2,9 +2,21 @@ from django import template
 from django.template import TemplateSyntaxError, Variable, Node, Variable, Library
 from django.conf import settings
 
+import re
+
 register = template.Library()
 
 from django.conf import settings
+
+@register.filter
+def split_addr(s):
+    m = re.match(getattr(settings, "ADDRESS_FORMAT"), s)
+    return {
+        'street': m.group(1),
+        'pcode': m.group(2),
+        'city': m.group(3),
+        'prov': m.group(4)
+    }
 
 @register.filter
 def modulo(num, val):
