@@ -82,6 +82,7 @@
 {% with total=invoice.apply_vat %}
 			<DatiRiepilogo>
 				<AliquotaIVA>{{ invoice.vat_rate|stringformat:".2f" }}</AliquotaIVA>
+				{% if invoice.costs %}<SpeseAccessorie>{{ invoice.costs|stringformat:".2f" }}</SpeseAccessorie>{% endif %}
 				<ImponibileImporto>{{ invoice.total_net|stringformat:".2f" }}</ImponibileImporto>
 				<Imposta>{{ total.1|stringformat:".2f" }}</Imposta>
 				<RiferimentoNormativo>IVA {{invoice.vat_rate}}% SPLIT PAYMENT PA</RiferimentoNormativo>
