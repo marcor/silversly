@@ -9,7 +9,7 @@
 				<IdPaese>IT</IdPaese>
 				<IdCodice>{{ shop.cf }}</IdCodice>
 			</IdTrasmittente>
-			<ProgressivoInvio>1510000001</ProgressivoInvio>
+			<ProgressivoInvio>{{ invoice.date|date:"y" }}100000{{ invoice.number|stringformat:"02d" }}</ProgressivoInvio>
 			<FormatoTrasmissione>SDI11</FormatoTrasmissione>
 			<CodiceDestinatario>{{ customer.cu }}</CodiceDestinatario>
 		</DatiTrasmissione>

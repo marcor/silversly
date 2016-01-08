@@ -423,7 +423,7 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'lines': lines})
 
     if format == 'xml':
-         return render_to_response('export/invoice_pa.xml',  {
+        response = render_to_response('export/invoice_pa.xml',  {
             'shop': shop,
             'cart' : cart,
             'ddts': ddts,
@@ -432,6 +432,8 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'customer': customer,
             'lines': lines},
             mimetype="text/xml")
+        response['Content-Disposition'] = 'attachment; filename="IT%s_%02d%03d.xml"' % (shop.cf, invoice.date.year - 2000, invoice.number)
+        return response
 
 
 def add_product_to_cart(request, cart_id=None):
