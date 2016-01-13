@@ -19,6 +19,7 @@
 					<IdPaese>IT</IdPaese>
 					<IdCodice>{{ shop.piva }}</IdCodice>
 				</IdFiscaleIVA>
+				<CodiceFiscale>{{ shop.cf }}</CodiceFiscale>
 				<Anagrafica>
 					<Denominazione>{{ shop.name }}</Denominazione>
 				</Anagrafica>
