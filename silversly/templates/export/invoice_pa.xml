@@ -59,11 +59,16 @@
 				<Data>{{ invoice.date|date:"Y-m-d"  }}</Data>
 				<Numero>{{ invoice.number }}</Numero>
 			<ImportoTotaleDocumento>{{ invoice.total_net|stringformat:".2f" }}</ImportoTotaleDocumento></DatiGeneraliDocumento>
-		<DatiOrdineAcquisto><IdDocumento>{{ invoice.refdoc }}</IdDocumento><CodiceCIG>{{ invoice.cig }}</CodiceCIG></DatiOrdineAcquisto></DatiGenerali>
+            <DatiOrdineAcquisto>
+                <IdDocumento>{{ invoice.refdoc }}</IdDocumento>
+                {% if invoice.refdate %}<Data>{{ invoice.refdate|date:"Y-m-d" }}</Data>{% endif %}
+                {% if invoice.cig %}<CodiceCIG>{{ invoice.cig }}</CodiceCIG>{% endif %}
+            </DatiOrdineAcquisto>
+        </DatiGenerali>
 		<DatiBeniServizi>
 
 {% for line in lines %}
-    {% if line.type == 'item_discount' %}	
+    {% if line.type == 'item_discount' %}
     {% elif line.type == 'cart_discount' %}
     {% else %}
 	{% with item=line %}

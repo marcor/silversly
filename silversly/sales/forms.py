@@ -36,25 +36,25 @@ class InvoiceForm(ModelForm):
     class Meta:
         model = Invoice
         fields = ("number", "date", "payment_method", "costs")
-    
+
     def clean(self):
         cleaned_data = super(InvoiceForm, self).clean()
         date = cleaned_data.get("date")
         number = cleaned_data.get("number")
         if date and number and self.prev_invoice:
-            # late invoice (belongs to last year)  
+            # late invoice (belongs to last year)
             if date.year == self.prev_invoice.date.year and number <= self.prev_invoice.number:
-                msg = "Il primo numero disponibile è %d" % (self.prev_invoice.number + 1,)                
+                msg = "Il primo numero disponibile è %d" % (self.prev_invoice.number + 1,)
                 self._errors["number"] = self.error_class([msg])
                 del cleaned_data["number"]
         return cleaned_data
-        
+
     def clean_number(self):
         number = self.cleaned_data['number']
         if number < 1:
                 raise ValidationError("Dai là, ma che numero è?")
         return number
-    
+
     def clean_date(self):
         date = self.cleaned_data['date']
         if self.prev_invoice and date < self.prev_invoice.date:
@@ -70,4 +70,4 @@ class InvoiceForm(ModelForm):
 class PAInvoiceForm(InvoiceForm):
     class Meta(InvoiceForm.Meta):
         model = PAInvoice
-        fields = ("number", "date", "cig", "refdoc", "payment_method", "costs")
+        fields = ("number", "date", "refdoc", "refdate", "cig", "payment_method", "costs")

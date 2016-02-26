@@ -354,11 +354,11 @@ class Invoice(Receipt):
         else:
             # assume months (end of)
             due_month = (self.date.month - 1 + after) % 12 + 1
-            # remember 0 < after < 7 
+            # remember 0 < after < 7
             due_year = self.date.month <= due_month and self.date.year or self.date.year + 1
             due_day = calendar.monthrange(due_year, due_month)[1]
             return datetime.date(due_year, due_month, due_day)
-            
+
     @classmethod
     def last_invoice(cls, year=None):
         try:
@@ -375,8 +375,9 @@ class Invoice(Receipt):
         verbose_name_plural = _("Fatture")
 
 class PAInvoice(Invoice):
-    cig = models.CharField(_("CIG"), max_length=10)
-    refdoc = models.CharField(_("Rif. determina"), max_length=6)
+    cig = models.CharField(_("CIG"), max_length=10, blank=True)
+    refdoc = models.CharField(_("N. ordine"), max_length=6)
+    refdate = models.DateField(_("Data ordine"), null=True, blank=True)
 
     def __unicode__(self):
         return u"Fattura PA %02d del %s" % (self.number, self.date.strftime("%d-%m"))

@@ -1,6 +1,6 @@
 import sys, os, re
 
-VERSION = "1.17"
+VERSION = "1.18"
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PROJECT_DIR)
@@ -16,7 +16,7 @@ PAYMENT_METHODS = {
     'ok': ('MP01', u'Pagato',                      None)
 }
 
-PAYMENT_CHOICES = [ (key, value[1]) for key, value in PAYMENT_METHODS.items() ]  
+PAYMENT_CHOICES = [ (key, value[1]) for key, value in PAYMENT_METHODS.items() ]
 
 TAX = 22
 BANK_COST = 0
