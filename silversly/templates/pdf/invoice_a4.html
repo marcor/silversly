@@ -145,7 +145,7 @@ td {
             <td class="rif_ddt" colspan="2">*** Ddt n.{{ line.ddt.number }} del {{ line.ddt.date }}</td>
 	    <td colspan="2"></td>
 	</tr>
-    {% elif line.type == 'item_discount' %}	
+    {% elif line.type == 'item_discount' %}
 	<tr>
             <td class="quantity"></td>
             <td class="description italic">sconto art. {{ line.item.discount }}%</td>
@@ -162,20 +162,20 @@ td {
     {% else %}
 	{% with item=line %}
 	<tr>
-            <td class="quantity right">{{ item.quantity }} {{ item.product.unit }}</td>
+            <td class="quantity right">{{ item.quantity }} {{ item.product.unit|default:"pz" }}</td>
             <td class="description">{{ item.desc }}</td>
             <td class="price">{{ item.final_net_price }}</td>
             <td class="item_total">{{ item.net_total|sum }}</td>
         </tr>
 	{% endwith %}
     {% endif %}
-	
+
     {% if forloop.last %}
         {% for i in forloop.counter|linepad:linesperpage|times %}
          <tr class="spacer">
              <td></td>
              <td colspan="3">&nbsp;</td>
-	 </tr>     
+	 </tr>
         {% endfor %}
 	</table>
        {% with total=invoice.apply_vat %}
@@ -215,7 +215,7 @@ td {
 
 <div id="footer">
 </div>
- 
+
 </body>
 </html>
 {% endwith %}

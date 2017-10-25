@@ -21,9 +21,9 @@ tr {
   -pdf-keep-with-next: false;
 }
 
-#header tr.desc, #footer_table tr.desc { 
+#header tr.desc, #footer_table tr.desc {
    font-size: 0.5em;
-   border-bottom: 0; 
+   border-bottom: 0;
 }
 
 .items tr.desc {
@@ -74,18 +74,18 @@ td {
 }
 
 td.item_qty {
-  width: 2.5cm; 
+  width: 2.5cm;
   padding-right: .1cm
 }
 
 td.item_desc {
-  border-left: 1px solid #ddd; 
+  border-left: 1px solid #ddd;
   padding-left: 0.2cm;
 }
 
 #ddt_num {}
 
-#aspetto, #colli, #data { 
+#aspetto, #colli, #data {
   border-left: 1px solid #ddd;
 }
 
@@ -108,7 +108,7 @@ p {margin-bottom: 0; padding: 0 }
 <table id="header_table">
     <tr class="desc">
        <td>CEDENTE</td>
-        <td></td>       
+        <td></td>
     </tr>
     <tr class="first">
 	<td id="seller-stamp">
@@ -125,7 +125,7 @@ p {margin-bottom: 0; padding: 0 }
 <table id="address_table">
     <tr class="desc">
        <td>CESSIONARIO</td>
-        <td>LUOGO DI DESTINAZIONE</td>       
+        <td>LUOGO DI DESTINAZIONE</td>
     </tr>
     <tr class="first">
         <td>
@@ -151,7 +151,7 @@ p {margin-bottom: 0; padding: 0 }
     <tr class="desc dark"><td>Quantit&agrave;</td><td>Descrizione</td></tr>
 {% for item in cart.cartitem_set.all %}
     <tr class="tall">
-        <td  class="right item_qty">{{ item.quantity }}{{ item.product.unit }}</td>
+        <td  class="right item_qty">{{ item.quantity }}{{ item.product.unit|default:"pz" }}</td>
         <td class="item_desc">{{ item.desc }}</td>
     </tr>
 
@@ -160,9 +160,9 @@ p {margin-bottom: 0; padding: 0 }
      <tr>
      <td class="item_qty"></td>
      <td class="item_desc">&nbsp;</td>
-      </tr>     
+      </tr>
     {% endfor %}
-     <tr class="last"><td class="right" colspan="2">PAG. {{ forloop.counter0|divide:13|add:1 }}</td></tr>     
+     <tr class="last"><td class="right" colspan="2">PAG. {{ forloop.counter0|divide:13|add:1 }}</td></tr>
   {% else %}
     {% if forloop.counter|divisibleby:13 %}
         <tr class="last"><td class="right" colspan="2">PAG. {{ forloop.counter|divide:13 }} - CONTINUA --></td></tr>
@@ -203,7 +203,7 @@ p {margin-bottom: 0; padding: 0 }
 {% if forloop.first %}
    <pdf:nextpage />
 {% endif %}
-  
+
 {% endfor %}
 
 </body>

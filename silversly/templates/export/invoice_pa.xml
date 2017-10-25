@@ -78,7 +78,7 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 				<NumeroLinea>{{ forloop.counter }}</NumeroLinea>
 				<Descrizione>{{ item.desc }}</Descrizione>
 				<Quantita>{{ item.quantity|stringformat:".2f" }}</Quantita>
-				<UnitaMisura>{{ item.product.unit }}</UnitaMisura>
+				<UnitaMisura>{{ item.product.unit|default:"pz" }}</UnitaMisura>
 				<PrezzoUnitario>{{ item.final_net_price|stringformat:".2f" }}</PrezzoUnitario>
 				<PrezzoTotale>{{ item.net_total|sum|stringformat:".2f" }}</PrezzoTotale>
 				<AliquotaIVA>{{ invoice.vat_rate|stringformat:".2f" }}</AliquotaIVA>
