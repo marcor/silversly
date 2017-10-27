@@ -104,7 +104,8 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 				{% if invoice.costs %}<SpeseAccessorie>{{ invoice.costs|stringformat:".2f" }}</SpeseAccessorie>{% endif %}
 				<ImponibileImporto>{{ invoice.total_net|stringformat:".2f" }}</ImponibileImporto>
 				<Imposta>{{ total.1|stringformat:".2f" }}</Imposta>
-				<RiferimentoNormativo>IVA {{invoice.vat_rate}}% SPLIT PAYMENT PA</RiferimentoNormativo>
+				<EsigibilitaIVA>S</EsigibilitaIVA>
+                <RiferimentoNormativo>IVA {{invoice.vat_rate}}% SPLIT PAYMENT PA</RiferimentoNormativo>
 			</DatiRiepilogo>
 
 		</DatiBeniServizi>
