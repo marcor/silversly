@@ -13,7 +13,7 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 			</IdTrasmittente>
 			<ProgressivoInvio>{{ invoice.date|date:"y" }}100000{{ invoice.number|stringformat:"02d" }}</ProgressivoInvio>
 			<FormatoTrasmissione>FPA12</FormatoTrasmissione>
-			<CodiceDestinatario>{{ customer.cu }}</CodiceDestinatario>
+			<CodiceDestinatario>{{ customer.sdi_code }}</CodiceDestinatario>
 		</DatiTrasmissione>
 		<CedentePrestatore>
 			<DatiAnagrafici>

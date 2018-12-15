@@ -26,7 +26,7 @@ class CustomerQuickForm(ModelForm):
 class CompanyForm(ModelForm):
     class Meta:
         model = CompanyCustomer
-        fields = ("name", "piva", "main_address", "phone", "email")
+        fields = ("name", "piva", "sdi_code", "main_address", "phone", "email")
 
     def clean_main_address(self):
         address = self.cleaned_data['main_address'].strip()
@@ -37,12 +37,12 @@ class CompanyForm(ModelForm):
 class PAForm(CompanyForm):
     class Meta(CompanyForm.Meta):
         model = PACustomer
-        fields = ("name", "piva", "cu", "main_address", "phone", "email")
+        fields = ("name", "piva", "sdi_code", "main_address", "phone", "email")
 
 class CompanyInfoForm(ModelForm):
     class Meta:
         model = CompanyCustomer
-        fields = ("name", "cf", "piva", "phone", "email", "main_address")
+        fields = ("name", "cf", "piva", "sdi_code", "phone", "email", "main_address")
 
     def clean_main_address(self):
         address = self.cleaned_data['main_address'].strip()
@@ -53,7 +53,7 @@ class CompanyInfoForm(ModelForm):
 class PAInfoForm(CompanyInfoForm):
     class Meta:
         model = PACustomer
-        fields = ("name", "cf", "piva", "cu", "phone", "email", "main_address")
+        fields = ("name", "cf", "piva", "sdi_code", "phone", "email", "main_address")
 
 class CompanyCommercialForm(ModelForm):
     class Meta:
@@ -74,7 +74,7 @@ class CompanyQuickForm(ModelForm):
 class PAQuickForm(CompanyQuickForm):
     class Meta:
         model = PACustomer
-        fields = ("name", "piva", "cu", "pricelist", "discount", "main_address")
+        fields = ("name", "piva", "sdi_code", "pricelist", "discount", "main_address")
 
     def clean_main_address(self):
         address = self.cleaned_data['main_address'].strip()

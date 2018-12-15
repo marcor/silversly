@@ -111,6 +111,7 @@ class Customer(models.Model):
 
 class CompanyCustomer(Customer):
     piva = models.CharField(_("P. IVA"), max_length=20, unique=True)
+    sdi_code = models.CharField(_("Codice Univoco SDI"), max_length=7, blank=True)
 
     main_address = models.TextField(verbose_name = _("Indirizzo"))
     shipping_address = models.TextField(verbose_name = _("Indirizzo di spedizione"), blank=True)
@@ -127,7 +128,8 @@ class CompanyCustomer(Customer):
         verbose_name_plural = _("Clienti con P.IVA")
 
 class PACustomer(CompanyCustomer):
-    cu = models.CharField(_("Codice Univoco"), max_length=6, unique=True)
+    # moved to CompanyCustomer.sdi
+    # cu = models.CharField(_("Codice Univoco"), max_length=6, unique=True)
 
     def __unicode__(self):
         return self.name
