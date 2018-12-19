@@ -67,6 +67,15 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
                 {% if invoice.refdate %}<Data>{{ invoice.refdate|date:"Y-m-d" }}</Data>{% endif %}
                 {% if invoice.cig %}<CodiceCIG>{{ invoice.cig }}</CodiceCIG>{% endif %}
             </DatiOrdineAcquisto>
+            {% for ddt in ddts %}
+            <DatiDDT>
+                <NumeroDDT>{{ ddt.number }}</NumeroDDT>
+                <DataDDT>{{ ddt.date|date:"Y-m-d" }}</DataDDT>
+                {% for n in ddt.cart.lines_num|times %}
+                <RiferimentoNumeroLinea>{{ ddt.cart.first_line_num|add:forloop.counter0 }}</RiferimentoNumeroLinea>
+                {% endfor %}
+            </DatiDDT>
+            {% endfor %}
         </DatiGenerali>
 		<DatiBeniServizi>
 

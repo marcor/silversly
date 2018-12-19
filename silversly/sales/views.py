@@ -407,7 +407,10 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
         for ddt in ddts:
             if reference_ddts:
                 lines.append({'type': 'ddt_ref', 'ddt': ddt})
-            lines.extend(prepare_lines(ddt.cart))
+            body = prepare_lines(ddt.cart)
+            ddt.cart.lines_num = len(body)
+            ddt.cart.first_line_num = len(lines) + 1
+            lines.extend(body)
 
     if format == 'pdf':
         from common.views import write_pdf
