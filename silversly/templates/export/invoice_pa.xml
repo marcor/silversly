@@ -60,7 +60,8 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 				<Divisa>EUR</Divisa>
 				<Data>{{ invoice.date|date:"Y-m-d"  }}</Data>
 				<Numero>{{ invoice.number }}</Numero>
-			<ImportoTotaleDocumento>{{ invoice.total_net|stringformat:".2f" }}</ImportoTotaleDocumento></DatiGeneraliDocumento>
+			    <ImportoTotaleDocumento>{{ invoice.total_net|stringformat:".2f" }}</ImportoTotaleDocumento>
+            </DatiGeneraliDocumento>
             <DatiOrdineAcquisto>
                 <IdDocumento>{{ invoice.refdoc }}</IdDocumento>
                 {% if invoice.refdate %}<Data>{{ invoice.refdate|date:"Y-m-d" }}</Data>{% endif %}
@@ -70,8 +71,15 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 		<DatiBeniServizi>
 
 {% for line in lines %}
-    {% if line.type == 'item_discount' %}
-    {% elif line.type == 'cart_discount' %}
+    {% if line.type == 'cart_discount' %}
+     		<DettaglioLinee>
+				<NumeroLinea>{{ forloop.counter }}</NumeroLinea>
+                <TipoCessionePrestazione>SC</TipoCessionePrestazione>
+				<Descrizione>Sconto cliente {{ line.cart.discount }}%</Descrizione>
+				<PrezzoUnitario>-{{ line.cart.final_net_discount|stringformat:".2f" }}</PrezzoUnitario>
+                <PrezzoTotale>-{{ line.cart.final_net_discount|stringformat:".2f" }}</PrezzoTotale>
+				<AliquotaIVA>{{ line.cart.vat_rate|stringformat:".2f" }}</AliquotaIVA>
+			</DettaglioLinee>
     {% else %}
 	{% with item=line %}
 			<DettaglioLinee>
@@ -80,7 +88,13 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 				<Quantita>{{ item.quantity|stringformat:".2f" }}</Quantita>
 				<UnitaMisura>{{ item.product.unit|default:"pz" }}</UnitaMisura>
 				<PrezzoUnitario>{{ item.final_net_price|stringformat:".2f" }}</PrezzoUnitario>
-				<PrezzoTotale>{{ item.net_total|sum|stringformat:".2f" }}</PrezzoTotale>
+                {% if item.discount %}
+                    <ScontoMaggiorazione>
+                       <Tipo>SC</Tipo>
+                       <Percentuale>{{ item.discount|stringformat:".2f" }}</Percentuale>
+                    </ScontoMaggiorazione>
+                {% endif %}
+				<PrezzoTotale>{{ item.net_total.0|stringformat:".2f" }}</PrezzoTotale>
 				<AliquotaIVA>{{ invoice.vat_rate|stringformat:".2f" }}</AliquotaIVA>
 			</DettaglioLinee>
 	{% endwith %}

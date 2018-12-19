@@ -389,13 +389,12 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
     ddts = invoice.ddt_set.all().order_by("number")
     customer = cart and cart.customer.child() or ddts[0].cart.customer.child()
     shop = Shop.objects.get(site = Site.objects.get_current())
-    lines = cart and cart.cartitem_set.count() or 0
 
     def prepare_lines(c):
         l = []
         for item in c.cartitem_set.all():
             l.append(item)
-            if item.discount:
+            if item.discount and format == "pdf":
                 l.append({'type': 'item_discount', 'item': item})
         if c.discount:
             l.append({'type': 'cart_discount', 'cart': c})
@@ -428,7 +427,7 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'cart' : cart,
             'ddts': ddts,
             'invoice': invoice.child(),
-            'payment_type': getattr(settings, 'PAYMENT_METHODS')[invoice.payment_method][0], 
+            'payment_type': getattr(settings, 'PAYMENT_METHODS')[invoice.payment_method][0],
             'customer': customer,
             'lines': lines},
             mimetype="text/xml")
