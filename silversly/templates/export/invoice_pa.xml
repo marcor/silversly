@@ -39,7 +39,12 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 		</CedentePrestatore>
 		<CessionarioCommittente>
 			<DatiAnagrafici>
-				<CodiceFiscale>{{ customer.cf|default:customer.piva }}</CodiceFiscale><Anagrafica>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>{{ customer.piva }}</IdCodice>
+                </IdFiscaleIVA>
+				<CodiceFiscale>{{ customer.cf|default:customer.piva }}</CodiceFiscale>
+                <Anagrafica>
 					<Denominazione>{{ customer.name }}</Denominazione>
 				</Anagrafica>
 			</DatiAnagrafici>
@@ -48,7 +53,8 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 				<Indirizzo>{{ address.street }}</Indirizzo>
 				<CAP>{{ address.pcode }}</CAP>
 				<Comune>{{ address.city }}</Comune>
-				<Provincia>{{ address.prov }}</Provincia><Nazione>IT</Nazione>
+				<Provincia>{{ address.prov }}</Provincia>
+                <Nazione>IT</Nazione>
 			</Sede>
 			{% endwith %}
 		</CessionarioCommittente>
@@ -77,8 +83,8 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
             </DatiDDT>
             {% endfor %}
         </DatiGenerali>
-		<DatiBeniServizi>
 
+		<DatiBeniServizi>
 {% for line in lines %}
     {% if line.type == 'cart_discount' %}
      		<DettaglioLinee>
@@ -132,15 +138,23 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 			</DatiRiepilogo>
 
 		</DatiBeniServizi>
-	<DatiPagamento>
-	<CondizioniPagamento>TP02</CondizioniPagamento>
-	<DettaglioPagamento><Beneficiario>{{ shop.name }}</Beneficiario>
-	<ModalitaPagamento>{{ payment_type }}</ModalitaPagamento>
-	<DataScadenzaPagamento>{{ invoice.due_on|date:"Y-m-d" }}</DataScadenzaPagamento>
-	<ImportoPagamento>{{ invoice.total_net|stringformat:".2f" }}</ImportoPagamento>
-	<IBAN>{{ shop.iban }}</IBAN>
-	</DettaglioPagamento>
-	</DatiPagamento>
+
+        <DatiPagamento>
+            <CondizioniPagamento>TP02</CondizioniPagamento>
+            <DettaglioPagamento>
+                <Beneficiario>{{ shop.name }}</Beneficiario>
+                <ModalitaPagamento>{{ payment.0 }}</ModalitaPagamento>
+                <DataScadenzaPagamento>{{ invoice.due_on|date:"Y-m-d" }}</DataScadenzaPagamento>
+                <ImportoPagamento>{{ invoice.total_net|stringformat:".2f" }}</ImportoPagamento>
+                {% if invoice.bank %}
+                <ABI>{{ invoice.bank.abi }}</ABI>
+                <CAB>{{ invoice.bank.cab }}</CAB>
+                {% else %}
+                <IBAN>{{ shop.iban }}</IBAN>
+                {% endif %}
+            </DettaglioPagamento>
+        </DatiPagamento>
+
 	</FatturaElettronicaBody>
 </p:FatturaElettronica>
 {% endwith %}

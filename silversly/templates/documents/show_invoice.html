@@ -56,9 +56,7 @@
 
 <script type="text/javascript">
 $("#print").button().show();
-{% if invoice.typename == 'PAInvoice' %}
-    $("#export").button().show();
-{% endif %}
+$("#export").button().show();
 {% if ddts %}
     $("#print_no_ddt").button().show();
 {% endif %}

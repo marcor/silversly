@@ -317,6 +317,7 @@ class Invoice(Receipt):
     immediate = models.BooleanField(_("Fattura immediata"))
 
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES)
+    bank = models.ForeignKey("people.Bank",  verbose_name=_("Banca di appoggio"), null=True)
     costs = FixedDecimalField(_("Spese incasso"), max_digits = 7, decimal_places = 2, default = Decimal(settings.BANK_COST))
 
     total_net = FixedDecimalField(_("Imponibile"), max_digits = 8, decimal_places = 2, null = True)

@@ -424,13 +424,14 @@ def export_invoice(request, id, format='pdf', reference_ddts=True):
             'customer': customer,
             'lines': lines})
 
-    if format == 'xml':
-        response = render_to_response('export/invoice_pa.xml',  {
+    if format == 'xml' :
+        response = render_to_response(customer.__class__ == PACustomer and
+            'export/invoice_pa.xml' or 'export/invoice_b2b.xml',  {
             'shop': shop,
             'cart' : cart,
             'ddts': ddts,
             'invoice': invoice.child(),
-            'payment_type': getattr(settings, 'PAYMENT_METHODS')[invoice.payment_method][0],
+            'payment': getattr(settings, 'PAYMENT_METHODS')[invoice.payment_method],
             'customer': customer,
             'lines': lines},
             mimetype="text/xml")
