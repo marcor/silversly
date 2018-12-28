@@ -22,7 +22,7 @@ class BankWidget(MultiWidget):
 
     def format_output(self, rendered_widgets):
         # hack
-        rendered_widgets.insert(2, '<label for="id_bank_1">CAB:</label>')
+        rendered_widgets.insert(1, '\n</p>\n<p><label for="id_bank_1">CAB:</label>')
         return u''.join(rendered_widgets)
 
 class BankSplitField(MultiValueField):
