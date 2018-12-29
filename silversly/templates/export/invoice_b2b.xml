@@ -1,78 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<p:FatturaElettronica versione="FPA12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
 xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
 {% load sales_tags %}
 {% load common_tags %}
-<FatturaElettronicaHeader>
-		<DatiTrasmissione>
-			<IdTrasmittente>
-				<IdPaese>IT</IdPaese>
-				<IdCodice>{{ shop.cf }}</IdCodice>
-			</IdTrasmittente>
-			<ProgressivoInvio>{{ invoice.date|date:"y" }}100000{{ invoice.number|stringformat:"02d" }}</ProgressivoInvio>
-			<FormatoTrasmissione>FPA12</FormatoTrasmissione>
-			<CodiceDestinatario>{{ customer.sdi_code|default:"999999" }}</CodiceDestinatario>
-		</DatiTrasmissione>
-		<CedentePrestatore>
-			<DatiAnagrafici>
-				<IdFiscaleIVA>
-					<IdPaese>IT</IdPaese>
-					<IdCodice>{{ shop.piva }}</IdCodice>
-				</IdFiscaleIVA>
-				<CodiceFiscale>{{ shop.cf }}</CodiceFiscale>
-				<Anagrafica>
-					<Denominazione>{{ shop.name }}</Denominazione>
-				</Anagrafica>
-				<RegimeFiscale>RF01</RegimeFiscale>
-			</DatiAnagrafici>
-			{% with shop.main_address|split_addr as address %}
-			<Sede>
-				<Indirizzo>{{ address.street }}</Indirizzo>
-				<CAP>{{ address.pcode }}</CAP>
-				<Comune>{{ address.city }}</Comune>
-				<Provincia>{{ address.prov }}</Provincia>
-				<Nazione>IT</Nazione>
-			</Sede>
-			{% endwith %}
-		</CedentePrestatore>
-		<CessionarioCommittente>
-			<DatiAnagrafici>
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>{{ shop.cf }}</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>{{ invoice.date|date:"y" }}100000{{ invoice.number|stringformat:"02d" }}</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>{{ customer.sdi_code|default:"0000000" }}</CodiceDestinatario>
+            <PECDestinatario>{% if not customer.sdi_code %}{{ customer.email }}{% endif %}</PECDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>{{ shop.piva }}</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>{{ shop.cf }}</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>{{ shop.name }}</Denominazione>
+                </Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            {% with shop.main_address|split_addr as address %}
+            <Sede>
+                <Indirizzo>{{ address.street }}</Indirizzo>
+                <CAP>{{ address.pcode }}</CAP>
+                <Comune>{{ address.city }}</Comune>
+                <Provincia>{{ address.prov }}</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            {% endwith %}
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
                 <IdFiscaleIVA>
                     <IdPaese>IT</IdPaese>
                     <IdCodice>{{ customer.piva }}</IdCodice>
                 </IdFiscaleIVA>
-				<CodiceFiscale>{{ customer.cf|default:customer.piva }}</CodiceFiscale>
+                <CodiceFiscale>{{ customer.cf|default:customer.piva }}</CodiceFiscale>
                 <Anagrafica>
-					<Denominazione>{{ customer.name }}</Denominazione>
-				</Anagrafica>
-			</DatiAnagrafici>
-			{% with customer.main_address|split_addr as address %}
-			<Sede>
-				<Indirizzo>{{ address.street }}</Indirizzo>
-				<CAP>{{ address.pcode }}</CAP>
-				<Comune>{{ address.city }}</Comune>
-				<Provincia>{{ address.prov }}</Provincia>
+                    <Denominazione>{{ customer.name }}</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+            {% with customer.main_address|split_addr as address %}
+            <Sede>
+                <Indirizzo>{{ address.street }}</Indirizzo>
+                <CAP>{{ address.pcode }}</CAP>
+                <Comune>{{ address.city }}</Comune>
+                <Provincia>{{ address.prov }}</Provincia>
                 <Nazione>IT</Nazione>
-			</Sede>
-			{% endwith %}
-		</CessionarioCommittente>
-	</FatturaElettronicaHeader>
-	<FatturaElettronicaBody>
-		<DatiGenerali>
-			<DatiGeneraliDocumento>
-				<TipoDocumento>TD01</TipoDocumento>
-				<Divisa>EUR</Divisa>
-				<Data>{{ invoice.date|date:"Y-m-d"  }}</Data>
-				<Numero>{{ invoice.number }}</Numero>
-			    <ImportoTotaleDocumento>{{ invoice.total_net|stringformat:".2f" }}</ImportoTotaleDocumento>
+            </Sede>
+            {% endwith %}
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD01</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>{{ invoice.date|date:"Y-m-d"    }}</Data>
+                <Numero>{{ invoice.number }}</Numero>
+                <ImportoTotaleDocumento>{{ invoice.apply_vat.0|stringformat:".2f" }}</ImportoTotaleDocumento>
             </DatiGeneraliDocumento>
-            <DatiOrdineAcquisto>
-                <IdDocumento>{{ invoice.refdoc }}</IdDocumento>
-                {% if invoice.refdate %}<Data>{{ invoice.refdate|date:"Y-m-d" }}</Data>{% endif %}
-                {% if invoice.cig %}<CodiceCIG>{{ invoice.cig }}</CodiceCIG>{% endif %}
-            </DatiOrdineAcquisto>
             {% for ddt in ddts %}
             <DatiDDT>
                 <NumeroDDT>{{ ddt.number }}</NumeroDDT>
@@ -84,7 +80,7 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
             {% endfor %}
         </DatiGenerali>
 
-		<DatiBeniServizi>
+        <DatiBeniServizi>
 {% for line in lines %}
     {% if line.type == 'cart_discount' %}
      		<DettaglioLinee>
@@ -133,19 +129,19 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
 				{% if invoice.costs %}<SpeseAccessorie>{{ invoice.costs|stringformat:".2f" }}</SpeseAccessorie>{% endif %}
 				<ImponibileImporto>{{ invoice.total_net|stringformat:".2f" }}</ImponibileImporto>
 				<Imposta>{{ total.1|stringformat:".2f" }}</Imposta>
-				<EsigibilitaIVA>S</EsigibilitaIVA>
-                <RiferimentoNormativo>IVA {{invoice.vat_rate}}% SPLIT PAYMENT PA</RiferimentoNormativo>
+				<EsigibilitaIVA>I</EsigibilitaIVA>
+                <RiferimentoNormativo>IVA {{invoice.vat_rate}}%</RiferimentoNormativo>
 			</DatiRiepilogo>
 
 		</DatiBeniServizi>
 
-        <DatiPagamento>
+		<DatiPagamento>
             <CondizioniPagamento>TP02</CondizioniPagamento>
             <DettaglioPagamento>
                 <Beneficiario>{{ shop.name }}</Beneficiario>
                 <ModalitaPagamento>{{ payment.0 }}</ModalitaPagamento>
                 <DataScadenzaPagamento>{{ invoice.due_on|date:"Y-m-d" }}</DataScadenzaPagamento>
-                <ImportoPagamento>{{ invoice.total_net|stringformat:".2f" }}</ImportoPagamento>
+                <ImportoPagamento>{{ total.0|stringformat:".2f" }}</ImportoPagamento>
                 {% if payment.0 == 'MP12' %}
                 <ABI>{{ customer.bank.abi }}</ABI>
                 <CAB>{{ customer.bank.cab }}</CAB>
@@ -155,5 +151,5 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
             </DettaglioPagamento>
         </DatiPagamento>
 {% endwith %}
-	</FatturaElettronicaBody>
+    </FatturaElettronicaBody>
 </p:FatturaElettronica>
