@@ -117,7 +117,7 @@ class CompanyCustomer(Customer):
     shipping_address = models.TextField(verbose_name = _("Indirizzo di spedizione"), blank=True)
 
     payment_method = models.CharField(_("Metodo di pagamento"), max_length = 4, choices = PAYMENT_CHOICES, default="30fm")
-    bank = models.OneToOneField('Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
+    bank = models.ForeignKey('Bank', verbose_name=_("Banca d'appoggio"), null=True, blank=True)
     costs = FixedDecimalField(_("Spese bancarie"), max_digits = 7, decimal_places = 2, default = 0)
 
     def __unicode__(self):
