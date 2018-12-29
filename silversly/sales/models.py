@@ -325,7 +325,7 @@ class Invoice(Receipt):
     payed = models.BooleanField(_("Pagata"), default = False)
 
     def __unicode__(self):
-        return u"Fattura %02d del %s" % (self.number, self.date.strftime("%d-%m"))
+        return u"Fattura %02d del %s" % (self.number, self.date.strftime("%d-%m-%Y"))
 
     def finally_paid(self):
         due = self.apply_vat()[0]

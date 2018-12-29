@@ -1,15 +1,22 @@
 {% extends 'ajax_tab.html' %}
 
 {% block content %}
-
-    <table id="receipts" style="width: 70%">
+{% if customer.is_retail %}
+    {% regroup receipts by date.year as year_list %}
+{% else %}
+    {% regroup receipts by year as year_list %}
+{% endif %}
+{% for year in year_list %}
+    <h3>{% if 2000 > year.grouper  %}20{% endif %}{{ year.grouper}}</h3>
+    <table class="receipts" style="width: 70%">
         <thead>
             <th>Documento di vendita</th>
             <th>Totale</th>
             {% if not customer.is_retail %}<th>Fattura</th>{% else %}<th>Ancora dovuto</th>{% endif %}
         </thead>
         <tbody>
-        {% for receipt in receipts %}
+
+        {% for receipt in year.list %}
             <tr>
             {% if receipt.typename == "Scontrino" %}
                 <td style="background-color: #ffe"><a href="{% url show_receipt receipt.id %}">{{ receipt }}</a></td>
@@ -45,5 +52,6 @@
         {% endfor %}
 
         </tbody>
-
+    </table>
+    {% endfor %}
 {% endblock %}
