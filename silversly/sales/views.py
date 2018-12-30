@@ -210,8 +210,9 @@ def new_invoice_from_cart(request, cart_id):
     customer = cart.customer.child()
     (invoiceClass, formClass) = customer.__class__ == PACustomer and (PAInvoice, PAInvoiceForm) or (Invoice, InvoiceForm)
     now = datetime.datetime.now()
-    last_invoice = invoiceClass.last_invoice(now.year)
-    number = last_invoice and last_invoice.number + 1 or 1
+    last_invoice_this_year = invoiceClass.last_invoice(now.year)
+    number = last_invoice_this_year and last_invoice_this_year.number + 1 or 1
+    last_invoice = last_invoice_this_year or invoiceClass.last_invoice()
     invoice = invoiceClass(number = number, immediate=True, payment_method=customer.payment_method)
 
     if request.method == "POST":

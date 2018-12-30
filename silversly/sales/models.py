@@ -364,9 +364,9 @@ class Invoice(Receipt):
     def last_invoice(cls, year=None):
         try:
             if year is None:
-                return cls.objects.filter(painvoice=None).order_by('pk')[0]
+                return cls.objects.all().order_by('pk')[0]
             else:
-                return cls.objects.filter(year=year-2000, painvoice=None).order_by('pk')[0]
+                return cls.objects.filter(year=year-2000).order_by('pk')[0]
         except:
             return None
 
@@ -381,17 +381,17 @@ class PAInvoice(Invoice):
     refdate = models.DateField(_("Data ordine"), null=True, blank=True)
 
     def __unicode__(self):
-        return u"Fattura PA %02d del %s" % (self.number, self.date.strftime("%d-%m"))
+        return u"Fattura PA %02d del %s" % (self.number, self.date.strftime("%d-%m-%Y"))
 
-    @classmethod
-    def last_invoice(cls, year=None):
-        try:
-            if year is None:
-                return cls.objects.order_by('pk')[0]
-            else:
-                return cls.objects.filter(year=year-2000).order_by('pk')[0]
-        except:
-            return None
+    #@classmethod
+    #def last_invoice(cls, year=None):
+     #   try:
+     #       if year is None:
+     #           return cls.objects.order_by('pk')[0]
+     #       else:
+     #           return cls.objects.filter(year=year-2000).order_by('pk')[0]
+     #   except:
+     #       return None
 
     class Meta:
         verbose_name = _("Fattura PA")

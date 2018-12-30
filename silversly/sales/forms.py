@@ -35,18 +35,23 @@ class DdtForm(ModelForm):
 class InvoiceForm(ModelForm):
     class Meta:
         model = Invoice
-        fields = ("number", "date", "payment_method", "costs")
+        fields = ("year", "number", "date", "payment_method", "costs")
+        widgets = {"year": HiddenInput}
 
     def clean(self):
         cleaned_data = super(InvoiceForm, self).clean()
         date = cleaned_data.get("date")
         number = cleaned_data.get("number")
+        if date:
+            # default value of invoice.year may not match date.year
+            cleaned_data["year"] = date.year - 2000
         if date and number and self.prev_invoice:
             # late invoice (belongs to last year)
             if date.year == self.prev_invoice.date.year and number <= self.prev_invoice.number:
                 msg = "Il primo numero disponibile è %d" % (self.prev_invoice.number + 1,)
                 self._errors["number"] = self.error_class([msg])
                 del cleaned_data["number"]
+        print cleaned_data
         return cleaned_data
 
     def clean_number(self):
@@ -70,4 +75,5 @@ class InvoiceForm(ModelForm):
 class PAInvoiceForm(InvoiceForm):
     class Meta(InvoiceForm.Meta):
         model = PAInvoice
-        fields = ("number", "date", "refdoc", "refdate", "cig", "payment_method", "costs")
+        fields = ("year", "number", "date", "refdoc", "refdate", "cig", "payment_method", "costs")
+        widgets = {"year": HiddenInput}
