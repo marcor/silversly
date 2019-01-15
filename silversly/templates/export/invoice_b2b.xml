@@ -14,7 +14,7 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
             <ProgressivoInvio>{{ invoice.date|date:"y" }}100000{{ invoice.number|stringformat:"02d" }}</ProgressivoInvio>
             <FormatoTrasmissione>FPR12</FormatoTrasmissione>
             <CodiceDestinatario>{{ customer.sdi_code|default:"0000000" }}</CodiceDestinatario>
-            <PECDestinatario>{% if not customer.sdi_code %}{{ customer.email }}{% endif %}</PECDestinatario>
+            {% if not customer.sdi_code %}<PECDestinatario>{{ customer.email }}</PECDestinatario>{% endif %}
         </DatiTrasmissione>
         <CedentePrestatore>
             <DatiAnagrafici>

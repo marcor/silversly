@@ -52,7 +52,7 @@ class BankSplitField(MultiValueField):
             try:
                 result = Bank.objects.get(abi=data_list[0], cab=data_list[1])
             except:
-                result = Bank.objects.create(abi=data_list[0], cab=data_list[1]).pk
+                result = Bank.objects.create(abi=data_list[0], cab=data_list[1])
             return result
         return None
 
