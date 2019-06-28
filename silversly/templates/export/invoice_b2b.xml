@@ -146,7 +146,9 @@ xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.
                 <ABI>{{ customer.bank.abi }}</ABI>
                 <CAB>{{ customer.bank.cab }}</CAB>
                 {% else %}
-                <IBAN>{{ shop.iban }}</IBAN>
+                    {% if payment.0 == 'MP05' %}
+                        <IBAN>{{ shop.iban }}</IBAN>
+                    {% endif %}
                 {% endif %}
             </DettaglioPagamento>
         </DatiPagamento>

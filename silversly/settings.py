@@ -11,8 +11,9 @@ PAYMENT_METHODS = {
     'rd60': ('MP01', u'Rimessa diretta 60gg f.m.', 2),
     '30rb': ('MP12', u'Ri.Ba. 30gg f.m.',          1),
     '60rb': ('MP12', u'Ri.Ba. 60gg f.m.',          2),
+    'bon': ('MP05', u'Bonifico ric. fat.',         None),
     '30fm': ('MP05', u'Bonifico 30gg f.m.',        1),
-    '60fm': ('MP05', u'Bonifico 60gg f.m.',        2),
+#   '60fm': ('MP05', u'Bonifico 60gg f.m.',        2),
     'ok': ('MP01', u'Pagato',                      None)
 }
 
