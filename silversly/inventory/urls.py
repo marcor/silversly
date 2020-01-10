@@ -43,8 +43,9 @@ urlpatterns = patterns('inventory.views',
 
     url(r'^categorie/$', 'list_categories', name='list_categories'),
     url(r'^categorie/pdf/', 'products_to_pdf', name='products_to_pdf'),
+    url(r'^categoria/(\d+)/pdf/', 'products_to_pdf', name='category_products_to_pdf', ),
     url(r'^categorie/xls/', 'products_to_xls', name='products_to_xls'),
-    url(r'^categoria/(\d+)', 'list_by_category', name='list_by_category'),
+    url(r'^categoria/(\d+)$', 'list_by_category', name='list_by_category'),
     url(r'^categoria/aggiungi', 'add_category', name='add_category', kwargs={'formclass': CategoryForm}),
     url(r'^categoria/(\d+)/aggiungi', 'add_category', name='add_child_category', kwargs={'formclass': ChildCategoryForm}),
 

@@ -106,6 +106,23 @@
     <h1>{{ category.name }} <span>( {{ category.total_products }} articoli )</span></h1>
 {% endblock %}
 
+{% block sidebar %}
+        <ul>
+            <li>
+                <a href="{% url add_category %}" title="Aggiungi una categoria">
+			<img src="/media/img/add.png" />
+		</a>
+            </li>
+        </ul>
+	<ul>
+            <li>
+                <a href="{% url category_products_to_pdf category.id %}" title="Inventario stampabile di {{ category.name }}">
+			<img src="/media/img/pdf.png" />
+		</a>
+            </li>
+        </ul>
+{% endblock %}
+
 {% block content %}
     {% comment %}
     <h2>Sottocategorie:</h2>

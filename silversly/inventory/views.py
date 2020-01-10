@@ -105,11 +105,13 @@ def add_category(request, parent_id=None, formclass=None):
         template = 'category/add.html'
     return render_to_response(template, {'form': form})
 
-def products_to_pdf(request):
+def products_to_pdf(request, cat=None):
     # works only for top categories for the time being
     #categories = Category.objects.filter(parent = None, name__in=["fumisteria","elettroutensili"])
-    categories = Category.objects.filter(parent = None)
-
+    if cat:
+        categories = Category.objects.filter(parent = None, id = cat)
+    else:
+        categories = Category.objects.filter(parent = None)
     cs = []
     inventory_value = Decimal("0.00")
     inventory_retail_value = Decimal("0.00")
