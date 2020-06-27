@@ -1,0 +1,28 @@
+<div>
+    <script type="text/javascript">
+    $(function() {
+        $( "#confirm_empty" ).live('click', function() {
+            $("#confirm_empty img").attr("src", "/media/img/spin.gif")
+            $.ajax({
+                "url": "{% url empty_category category.id %}",
+                "type": "POST",
+                "data": {'confirm': true},
+                "complete": function(xhr, status) {
+                    if (status == "success") {
+                        $("#empty_category_dialog").dialog('close');
+                        window.location.replace('{% url list_by_category category.id %}');
+                    };
+                }
+            });
+            return false;
+        });
+	$( "#cancel_empty" ).live('click', function() {
+	    $("#empty_category_dialog").dialog('close');
+	    return false;
+        });
+    });
+    </script>
+    <p>Azzero tutti gli articoli della categoria <b>{{category.name}}</b>?</p>
+    <a id="confirm_empty" href="#" title="S&igrave;, cancella"><img src="/media/img/okay.png" /></a>
+    <a id="cancel_empty" href="#" title="No, ho cambiato idea" style="float:right"><img src="/media/img/cancel.png" /></a>
+<div>

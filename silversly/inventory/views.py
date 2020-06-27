@@ -139,6 +139,20 @@ def products_to_pdf(request, cat=None):
 def products_to_xls(request):
     pass
 
+def empty_category(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    if request.is_ajax():
+        if request.method == "POST" and request.POST["confirm"]:
+            products = Product.objects.filter(category = category, quantity__gt = 0)
+            for p in products:
+                p.quantity = 0
+                p.save()
+            return HttpResponse(status=200)
+        else:
+            return render_to_response("category/dialogs/empty.html", {'category': category})
+    else:
+        return redirect(list_by_category, category_id)
+
 #
 # FORNITURE (SUPPLIER+PRODUCT)
 #

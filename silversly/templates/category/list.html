@@ -98,12 +98,25 @@
         link.replaceWith("<i>" + link.text() + "</i>");
         row.css("color", "#ccc");
     };
+    
+    $( "#empty_category" ).live('click', function() {
+        $( "#empty_category_dialog" ).dialog({
+            'draggable': false,
+            'resizable': false,
+            'modal': true,
+            'open': function() { $(this).load("{% url empty_category category.id %}")}
+        });
+        return false;
+    });
+
 
 {% endblock %}
 
 {% block header %}
     <div id="breadcrumbs">{{ category.parent.breadcrumbs|safe }}</div>
-    <h1>{{ category.name }} <span>( {{ category.total_products }} articoli )</span></h1>
+    <h1>{{ category.name }} <span>( {{ category.total_products }} articoli )</span>
+      <a style="" id="empty_category" href="{% url empty_category category.id %}" title="Svuota categoria"><img src="/media/img/delete.png" width="18"/></a>
+    </h1>
 {% endblock %}
 
 {% block sidebar %}
@@ -169,5 +182,6 @@
     {% endif %}
 
     <div id="delete_product_dialog" title="Elimina un articolo" class="dialog"></div>
+    <div id="empty_category_dialog" title="Svuota categoria" class="dialog"></div>
 
 {% endblock %}
